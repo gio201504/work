@@ -1,0 +1,127 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Sitepoint, Thumbnail Example</title>
+  <meta name="description" content="Several video samples to demonstrate HTML5 video features">
+  <meta name="author" content="Armando Emanuel Roggio">
+
+  <style>
+  /* latin-ext */
+  @font-face {
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Source Code Pro'), local('SourceCodePro-Regular'), url(http://fonts.gstatic.com/s/sourcecodepro/v6/mrl8jkM18OlOQN8JLgasDy2Q8seG17bfDXYR_jUsrzg.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Source Code Pro'), local('SourceCodePro-Regular'), url(http://fonts.gstatic.com/s/sourcecodepro/v6/mrl8jkM18OlOQN8JLgasDzKRFmJUU_JfdI4amS9F_UY.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+  }
+  /* latin-ext */
+  @font-face {
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Source Code Pro Bold'), local('SourceCodePro-Bold'), url(http://fonts.gstatic.com/s/sourcecodepro/v6/leqv3v-yTsJNC7nFznSMqVxe-GPfKKFmiXaJ_Q0GFr8.woff2) format('woff2');
+    unicode-range: U+0100-024F, U+1E00-1EFF, U+20A0-20AB, U+20AD-20CF, U+2C60-2C7F, U+A720-A7FF;
+  }
+  /* latin */
+  @font-face {
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 700;
+    src: local('Source Code Pro Bold'), local('SourceCodePro-Bold'), url(http://fonts.gstatic.com/s/sourcecodepro/v6/leqv3v-yTsJNC7nFznSMqaBBe7f1mpvECReg0afxak4.woff2) format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+  }
+
+
+  /* I have style */
+  body { font-family: 'Source Code Pro', sans-serif ; }
+  #main { width: 85%; margin: 1em auto; }
+  section>div { margin: 0 1.5% 1.5% 0; padding: 1.5%; float: left; background-color: #efefef; }
+
+  /* video */
+
+  video { width: 100%; min-height: 460px; }
+  canvas { display: none; }
+  #screenShots { text-align: left; }
+  button { cursor: pointer; }
+  nav>button { margin: 0.27em; }
+  nav>button:first-child { margin-left: 0; }
+  .wrapper { width: 754px; margin: auto; overflow: hidden; text-align: center; }
+  .p {
+    text-align: center;
+    padding-top: 120px;
+  }
+  </style>
+
+  <!--[if lt IE 9]>
+  <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+</head>
+
+<body>
+  <section class="wrapper">
+    <h1>HTML5 Video with Dynamic Thumbnails</h1>
+    <!-- Begin Thumbnail Example -->
+    <div id="thumb-parent">
+      <video id="thumb" controls preload="metadata" width="750px" height="540px">
+        <source src="oceans.mp4" type='video/mp4;codecs="avc1.42E01E, mp4a.40.2"'>
+        <source src="oceans.webm" type='video/webm;codecs="vp8, vorbis"'>
+      </video>
+      <canvas id="canvas" width="750px" height="540px"></canvas>
+      <div id="screenShots"></div>
+    </div>
+    <!-- End Thumbnail Example -->  
+  </section>
+  <p class="p">Demo by Armando Roggio. <a href="http://www.sitepoint.com/html5-video-fragments-captions-dynamic-thumbnails" target="_blank">See article</a>.</p>
+  <script>
+    var video = document.getElementById("thumb");
+    video.addEventListener("loadedmetadata", initScreenshot);
+    video.addEventListener("playing", startScreenshot);
+    video.addEventListener("pause", stopScreenshot);
+    video.addEventListener("ended", stopScreenshot);
+
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    var ssContainer = document.getElementById("screenShots");
+    var videoHeight, videoWidth;
+    var drawTimer = null;
+
+    function initScreenshot() {
+      videoHeight = video.videoHeight; 
+      videoWidth = video.videoWidth;
+    }
+
+    function startScreenshot() {
+      if (drawTimer == null) {
+        drawTimer = setInterval(grabScreenshot, 1000);
+      }
+    }
+
+    function stopScreenshot() {
+      if (drawTimer) {
+        clearInterval(drawTimer);
+        drawTimer = null;
+      }
+    }
+
+    function grabScreenshot() {
+      ctx.drawImage(video, 0, 0, videoWidth, videoHeight);
+      var img = new Image();
+      img.src = canvas.toDataURL("image/png");
+      img.width = 120;
+      ssContainer.appendChild(img);
+      console.log('one');
+    }
+  </script>
+</body>
+</html>
