@@ -6,6 +6,8 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'ZendXml\\' => array($vendorDir . '/zendframework/zendxml/library'),
+    'Prophecy\\' => array($vendorDir . '/phpspec/prophecy/src'),
     'Neutron' => array($vendorDir . '/neutron/temporary-filesystem/src'),
     'FFMpeg' => array($vendorDir . '/php-ffmpeg/php-ffmpeg/src'),
     'Evenement' => array($vendorDir . '/evenement/evenement/src'),
