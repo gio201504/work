@@ -12,9 +12,19 @@
 	$(function() {
 		$("button#generate").on("click", function() {
 			debugger;
+			var template = $('#video_template').html();
+			
 			var files = $('#files').prop("files");
 			for (var i = 0; i < files.length; ++i) {
 			    console.log(files[i]);
+			    //Propriétés de la vidéo
+			    var templateDOM = $.parseHTML(template)[0];
+			    var source = $(templateDOM).find('source');
+			    $(source).attr('src', files[i].name);
+			    $(source).attr('type', files[i].type);
+
+			    //Ajout DOM
+			    $('#fileList').append(templateDOM);
 			}
 		});
 	});
@@ -33,8 +43,6 @@
     
     <video id="video_template" class="video-js vjs-default-skin" controls preload="none" width="640" height="264" poster="img/oceans.png" data-setup="{}">
     	<source src="oceans.mp4" type="video/mp4">
-    	<source src="oceans.webm" type="video/webm">
-    	<source src="oceans.ogv" type="video/ogg">
     	<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
   	</video>
     
