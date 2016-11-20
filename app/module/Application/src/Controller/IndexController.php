@@ -9,8 +9,6 @@ namespace Application\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use Zend\View\Model\JsonModel;
-use Zend\Json\Encoder;
 
 class IndexController extends AbstractActionController
 {
@@ -33,16 +31,17 @@ class IndexController extends AbstractActionController
     		if (is_dir($dir)){
     			if ($dh = opendir($dir)){
     				while(($file = readdir($dh)) !== false){
-    					$fileList[] = "filename:" . $file . "<br>";
+    					$fileList[] = $file;
     				}
     				closedir($dh);
     			}
     		}
     		
-    		$viewmodel = new JsonModel();
+    		$viewmodel = new ViewModel();
+    		$viewmodel->setTerminal(true);
     		    		    		    		
     		$viewmodel->setVariables(array(
-    			'data' => Encoder::encode($fileList),
+    			'data' => $fileList,
     		));
     		
     		return $viewmodel;

@@ -31,8 +31,9 @@
        			url : 'application/getFiles', // La ressource ciblée
        			type : 'GET', // Le type de la requête HTTP.
        			data : { dir: "John" },
-       			done: function(data) {
+       			success: function(data) {
            			debugger;
+           			$("#fileList").html(data);
        			}
     		});
 		});
