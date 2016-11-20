@@ -12,21 +12,29 @@
 	$(function() {
 		$("button#generate").on("click", function() {
 			debugger;
-			var template = $('#video_template').html();
-			$('#fileList').empty();
+// 			var template = $('#video_template').html();
+// 			$('#fileList').empty();
 			
-			var files = $('#files').prop("files");
-			for (var i = 0; i < files.length; ++i) {
-			    console.log(files[i]);
-			    //Propriétés de la vidéo
-			    var templateDOM = $.parseHTML(template)[0];
-			    var source = $(templateDOM).find('source');
-			    $(source).attr('src', files[i].name);
-			    $(source).attr('type', files[i].type);
+// 			var files = $('#files').prop("files");
+// 			for (var i = 0; i < files.length; ++i) {
+// 			    console.log(files[i]);
+// 			    //Propriétés de la vidéo
+// 			    var templateDOM = $.parseHTML(template)[0];
+// 			    var source = $(templateDOM).find('source');
+// 			    $(source).attr('src', files[i].name);
+// 			    $(source).attr('type', files[i].type);
 
-			    //Ajout DOM
-			    $('#fileList').append(templateDOM);
-			}
+// 			    //Ajout DOM
+// 			    $('#fileList').append(templateDOM);
+// 			}
+			$.ajax({
+       			url : 'application/getFiles', // La ressource ciblée
+       			type : 'GET', // Le type de la requête HTTP.
+       			data : { dir: "John" },
+       			done: function(data) {
+           			debugger;
+       			}
+    		});
 		});
 	});
 
@@ -36,13 +44,13 @@
 
     <label class="btn btn-default btn-file">
         Dossier vidéos
-        <input id="files" type="file" directory mozdirectory webkitdirectory>
+        <input id="files" type="file">
         <!-- <input type="file" accept="video/*" > -->
     </label>
     
     <button id='generate' type="button" class="btn btn-primary">Générer thumbnails</button>
     
-    <video id="video_template" class="video-js vjs-default-skin" controls preload="none" width="640" height="264" poster="img/oceans.png" data-setup="{}" style="display:none;">
+    <video id="video_template" class="video-js vjs-default-skin" controls preload="none" width="640" height="264" poster="img/oceans.png" data-setup="{}">
     	<source src="" type="">
     	<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
   	</video>
