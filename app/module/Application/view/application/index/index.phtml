@@ -1,9 +1,21 @@
+<?=
+	$this->headLink()
+    	->prependStylesheet($this->basePath('css/video-js.css'));
+	
+    $this->headScript()
+    	->prependFile($this->basePath('js/videojs-ie8.min.js'))
+    	->prependFile($this->basePath('js/video.js'));    
+?>
+
 <script>
 
-	debugger;
 	$(function() {
 		$("button#generate").on("click", function() {
 			debugger;
+			var files = $('#files').prop("files");
+			for (var i = 0; i < files.length; ++i) {
+			    console.log(files[i]);
+			}
 		});
 	});
 
@@ -13,10 +25,20 @@
 
     <label class="btn btn-default btn-file">
         Dossier vidéos
-        <input type="file" directory mozdirectory webkitdirectory>
+        <input id="files" type="file" directory mozdirectory webkitdirectory>
         <!-- <input type="file" accept="video/*" > -->
     </label>
     
     <button id='generate' type="button" class="btn btn-primary">Générer thumbnails</button>
+    
+    <video id="video_template" class="video-js vjs-default-skin" controls preload="none" width="640" height="264" poster="img/oceans.png" data-setup="{}">
+    	<source src="oceans.mp4" type="video/mp4">
+    	<source src="oceans.webm" type="video/webm">
+    	<source src="oceans.ogv" type="video/ogg">
+    	<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a></p>
+  	</video>
+    
+    <div id="fileList">
+    </div>
 
 </div>
