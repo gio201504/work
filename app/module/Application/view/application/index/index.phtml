@@ -37,6 +37,19 @@
        			}
     		});
 		});
+
+		$("button#scan").on("click", function() {
+			debugger;
+			$.ajax({
+       			url : 'application/scan', // La ressource ciblée
+       			type : 'GET', // Le type de la requête HTTP.
+       			data : { dir: "D:/NewsBin64/download/tmp" },
+       			success: function(data) {
+           			debugger;
+           			$("#fileList").html(data);
+       			}
+    		});
+		});
 	});
 
 </script>
@@ -50,6 +63,7 @@
     </label>
     
     <button id='generate' type="button" class="btn btn-primary">Générer thumbnails</button>
+    <button id='scan' type="button" class="btn btn-primary">Scanner dossier</button>
     
     <video id="video_template" class="video-js vjs-default-skin" controls preload="none" width="640" height="264" poster="img/oceans.png" data-setup="{}">
     	<source src="" type="">
