@@ -14,7 +14,12 @@
 
 	<div class="breadcrumbs"></div>
 
-	<ul class="data"></ul>
+	<ul class="data">
+	    <?php foreach($this->files as $key => $value): ?>
+	    <li><?php echo $value; ?></li>
+	    <?php endforeach; ?>
+	</ul>
+	
 
 	<div class="nothingfound">
 		<div class="nofiles"></div>

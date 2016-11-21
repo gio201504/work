@@ -86,10 +86,13 @@ class IndexController extends AbstractActionController
 			}
 
     		$viewmodel = new ViewModel();
-    		$viewmodel->setTerminal(true);
+    		$viewmodel->setTerminal(false);
     
     		$viewmodel->setVariables(array(
-    				'files' => $files,
+    				"name" => "files",
+    				"type" => "folder",
+    				"path" => $dir,
+    				"items" => $files,
     		));
     
     		return $viewmodel;
