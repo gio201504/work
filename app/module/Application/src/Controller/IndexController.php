@@ -55,44 +55,56 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$dir = $data->dir;
     
-    		$dir = "D:/NewsBin64/download/tmp";
+    		$top_dir = "D:/NewsBin64/download/";
+    		$dir = "files";
 
-			// Is there actually such a folder/file?
-    		$files = array();
-			if(file_exists($dir)){
-				foreach(scandir($dir) as $f) {
-					if(!$f || $f[0] == '.') {
-						continue; // Ignore hidden files
-					}
-		
-					if(is_dir($dir . '/' . $f)) {
-						// The path is a folder
-						$files[] = array(
-							"name" => $f,
-							"type" => "folder",
-							"path" => $dir . '/' . $f,
-							"items" => scan($dir . '/' . $f) // Recursively get the contents of the folder
-						);
-					} else {
-						// It is a file
-						$files[] = array(
-							"name" => $f,
-							"type" => "file",
-							"path" => $dir . '/' . $f,
-							"size" => filesize($dir . '/' . $f) // Gets the size of this file
-						);
+    		function scan($top_dir, $dir){
+    			$fulldir = $top_dir . $dir;
+				// Is there actually such a folder/file?
+	    		$files = array();
+				if(file_exists($fulldir)){
+					foreach(scandir($fulldir) as $f) {
+						if(!$f || $f[0] == '.') {
+							continue; // Ignore hidden files
+						}
+			
+						if(is_dir($fulldir . '/' . $f)) {
+							// The path is a folder
+							$files[] = array(
+								"name" => $f,
+								"type" => "folder",
+								"path" => $dir . '/' . $f,
+								"items" => scan($top_dir, $dir . '/' . $f) // Recursively get the contents of the folder
+							);
+						} else {
+							// It is a file
+							$files[] = array(
+								"name" => $f,
+								"type" => "file",
+								"path" => $dir . '/' . $f,
+								"size" => filesize($fulldir . '/' . $f) // Gets the size of this file
+							);
+						}
 					}
 				}
-			}
+				
+				return $files;
+    		}
+    		
+    		$response = scan($top_dir, $dir);
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
-    
-    		$viewmodel->setVariables(array(
+    		
+    		$data = array(
     				"name" => "files",
     				"type" => "folder",
     				"path" => $dir,
-    				"items" => $files,
+    				"items" => $response,
+    		);
+
+    		$viewmodel->setVariables(array(
+    				"data" => json_encode($data),
     		));
     
     		return $viewmodel;
