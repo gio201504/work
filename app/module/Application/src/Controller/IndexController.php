@@ -117,4 +117,22 @@ class IndexController extends AbstractActionController
     		return $viewmodel;
     	}
     }
+    
+    public function getThumbAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$dir = $data->dir;
+    
+    		$viewmodel = new ViewModel();
+    		$viewmodel->setTerminal(false);
+    
+//     		$viewmodel->setVariables(array(
+//     				'data' => $fileList,
+//     		));
+    
+    		return $viewmodel;
+    	}
+    }
 }

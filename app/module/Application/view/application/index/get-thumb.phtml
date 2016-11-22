@@ -1,0 +1,95 @@
+<?=
+	$this->headLink()
+    	->prependStylesheet($this->basePath('css/video-js.css'));
+	
+    $this->headScript()
+    	->prependFile($this->basePath('js/videojs.thumbnails.js'))
+    	->prependFile($this->basePath('js/videojs-ie8.min.js'))
+    	->prependFile($this->basePath('js/video.js'));   
+?>
+
+<script>
+
+	$(function() {
+		$("button#generate").on("click", function() {
+			debugger;
+			$.ajax({
+       			url : 'application/getFiles', // La ressource ciblée
+       			type : 'GET', // Le type de la requête HTTP.
+       			data : { dir: "John" },
+       			success: function(data) {
+           			debugger;
+           			$("#fileList").html(data);
+       			}
+    		});
+		});
+
+		$("button#scan").on("click", function() {
+			debugger;
+			$.ajax({
+       			url : 'application/scan', // La ressource ciblée
+       			type : 'GET', // Le type de la requête HTTP.
+       			data : { dir: "D:/NewsBin64/download/tmp" },
+       			success: function(data) {
+           			debugger;
+           			$("#fileList").html(data);
+       			}
+    		});
+		});
+
+		// initialize video.js
+		debugger;
+		var video = videojs('video');
+		// here's an example of generating thumbnails from a sprited image:
+		video.thumbnails({
+		  0: {
+		    src: '<?= $this->basePath() . "/thumbnails.png" ?>',
+		    style: {
+		      left: '-60px',
+		      width: '600px',
+		      height: '68px',
+		      clip: 'rect(0, 120px, 68px, 0)'
+		    }
+		  },
+		  10: {
+		    style: {
+		      left: '-180px',
+		      clip: 'rect(0, 240px, 68px, 120px)'
+		    }
+		  },
+		  20: {
+		    style: {
+		      left: '-300px',
+		      clip: 'rect(0, 360px, 68px, 240px)'
+		    }
+		  },
+		  30: {
+		    style: {
+		      left: '-420px',
+		      clip: 'rect(0, 480px, 68px, 360px)'
+		    }
+		  },
+		  40: {
+		    style: {
+		      left: '-540px',
+		      clip: 'rect(0, 600px, 68px, 480px)'
+		    }
+		  }
+		});
+	});
+
+</script>
+
+<div class="content">
+
+	<video id='video'
+	       class='video-js vjs-default-skin'
+	       width='640'
+	       height='264'
+	       poster='<?= $this->basePath() . "/oceans.png" ?>'
+	       controls>
+	  <source src='<?= $this->basePath() . "/oceans.mp4" ?>' type='video/mp4' />
+	</video>
+
+</div>
+
