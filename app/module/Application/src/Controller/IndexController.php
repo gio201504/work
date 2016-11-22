@@ -59,6 +59,7 @@ class IndexController extends AbstractActionController
     		$dir = "files";
 
     		function scan($top_dir, $dir){
+    			$thumbs = "thumbs";
     			$fulldir = $top_dir . $dir;
 				// Is there actually such a folder/file?
 	    		$files = array();
@@ -78,12 +79,18 @@ class IndexController extends AbstractActionController
 							);
 						} else {
 							// It is a file
-							$files[] = array(
+							$array = array(
 								"name" => $f,
 								"type" => "file",
 								"path" => $dir . '/' . $f,
-								"size" => filesize($fulldir . '/' . $f) // Gets the size of this file
+								"size" => filesize($fulldir . '/' . $f), // Gets the size of this file
+								"fullname" => $fulldir . '/' . $f,
 							);
+							
+							if (file_exists($top_dir . $thumbs . '/' . $f . '.png'))
+								$files[] = array_merge($array, array("icon" => true));
+							else
+								$files[] = $array;
 						}
 					}
 				}
