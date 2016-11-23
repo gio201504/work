@@ -84,7 +84,7 @@
 		var progressControl = video.controlBar.progressControl;
 		progressControl.on('mousemove', function(){
 			var time = $("div.vjs-mouse-display").attr("data-current-time");
-			console.log(displayTime() + " mousemove progressControl " + time);
+			//console.log(displayTime() + " mousemove progressControl " + time);
 
 			var video = $("#video").find('video');
 			var file = $(video).attr('src');
@@ -96,9 +96,10 @@
 
 			$.ajax({
 		        type: "GET",
-		        url: "getThumb",
+		        url: "getThumbAjax",
 		        data: { file: file, time: time },
 		        success: function(data) {
+			        console.log(displayTime() + data);
 		        },
 		        complete: function() {
 		            video.data('requestRunning', false);
