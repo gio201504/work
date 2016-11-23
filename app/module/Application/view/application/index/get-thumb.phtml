@@ -85,6 +85,25 @@
 		progressControl.on('mousemove', function(){
 			var time = $("div.vjs-mouse-display").attr("data-current-time");
 			console.log(displayTime() + " mousemove progressControl " + time);
+
+			var video = $("#video").find('video');
+			var file = $(video).attr('src');
+
+		    if (video.data('requestRunning')) {
+		        return;
+		    } else
+			    video.data('requestRunning', true);
+
+			$.ajax({
+		        type: "GET",
+		        url: "getThumb",
+		        data: { file: file, time: time },
+		        success: function(data) {
+		        },
+		        complete: function() {
+		            video.data('requestRunning', false);
+		        }
+		    });
 		});
 	});
 

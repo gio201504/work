@@ -9,6 +9,8 @@ namespace Application\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
+use FFMpeg\FFMpeg;
+use FFMpeg\Coordinate\TimeCode;
 
 class IndexController extends AbstractActionController
 {
@@ -123,16 +125,38 @@ class IndexController extends AbstractActionController
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
-    		$dir = $data->dir;
+    		$uri = $request->getUri();
+    		$basePath = sprintf('%s://%s', $uri->getScheme(), $uri->getHost());
+    		
+    		$file = $data->file;
+    		$time = $data->time;
+    		
+    		$filename = $basePath . $file;
+    		if (isset($file) && !file_exists($filename)) {
+    			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
+    			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+    			
+	    		$ffmpeg = FFMpeg::create();
+	    		$video = $ffmpeg->open($filename);
+	    		$video
+		    		->filters()
+		    		//->resize(new FFMpeg\Coordinate\Dimension(320, 240))
+		    		->synchronize();
+	    		$video
+		    		->frame(TimeCode::fromSeconds($time_seconds))
+		    		->save('frame' . $time_seconds . '.png');
+	
+	    		$viewmodel = new ViewModel();
+	    		$viewmodel->setTerminal(true);
     
-    		$viewmodel = new ViewModel();
-    		$viewmodel->setTerminal(false);
+// 	    		$viewmodel->setVariables(array(
+// 	    				'data' => $fileList,
+// 	    		));
     
-//     		$viewmodel->setVariables(array(
-//     				'data' => $fileList,
-//     		));
-    
-    		return $viewmodel;
+    			return $viewmodel;
+    		}
     	}
+    	
+    	return;
     }
 }
