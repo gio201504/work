@@ -77,8 +77,14 @@
 		  }
 		});
 
-		videojs("video").on('timeupdate', function(){
-			console.log(displayTime() + " timeupdate");
+// 		videojs("video").on('timeupdate', function(){
+// 			console.log(displayTime() + " timeupdate");
+// 		});
+
+		var progressControl = video.controlBar.progressControl;
+		progressControl.on('mousemove', function(){
+			var time = $("div.vjs-mouse-display").attr("data-current-time");
+			console.log(displayTime() + " mousemove progressControl " + time);
 		});
 	});
 
