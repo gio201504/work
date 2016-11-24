@@ -259,6 +259,13 @@ $(function(){
 
 				if (f.icon)
 					$(file).addClass("thumbs");
+
+				if (fileType === "mp4") {
+					debugger;
+					var player = $('<video id="video" class="video-js vjs-default-skin" width="640" height="264" poster="" controls><source src="" type="video/mp4"/></video>');
+					player.find('source').attr('src', f.fullname);
+					$(file).append(player);
+				}
 				
 				file.appendTo(fileList);
 			});
