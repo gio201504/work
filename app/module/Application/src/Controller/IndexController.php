@@ -12,6 +12,8 @@ use Zend\View\Model\ViewModel;
 use FFMpeg\FFMpeg;
 use FFMpeg\Coordinate\TimeCode;
 use Zend\View\Model\JsonModel;
+use FFMpeg\Filters\Video\ResizeFilter;
+use FFMpeg\Coordinate\Dimension;
 
 class IndexController extends AbstractActionController
 {
@@ -136,13 +138,13 @@ class IndexController extends AbstractActionController
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     			
-    			$thumb_file = getcwd() . '/frame' . $time_seconds . '.png';
+    			$thumb_file = getcwd() . '/' . basename($file) . '[' . $time_seconds . '].jpg';
     			if (!file_exists($thumb_file)) {
 		    		$ffmpeg = FFMpeg::create();
 		    		$video = $ffmpeg->open($basePath . '/' . $file);
 		    		$video
 			    		->filters()
-			    		//->resize(new FFMpeg\Coordinate\Dimension(320, 240))
+			    		//->resize(new Dimension(320, 240))
 			    		->synchronize();
 		    		$video
 			    		->frame(TimeCode::fromSeconds($time_seconds))
