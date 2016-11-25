@@ -218,6 +218,13 @@ body {
 	display: inline-block;
 }
 
+.filemanager .data li .name.vid,
+.filemanager .data li .details.vid
+{
+	position: initial;
+	display: inline-table;
+}
+
 .filemanager .nothingfound {
 	background-color: #373743;
 	width: 23em;

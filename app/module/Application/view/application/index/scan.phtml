@@ -2,14 +2,20 @@
 	$this->headLink()
     	->prependStylesheet($this->basePath('css/cute.css'));
 	
-//     $this->headScript()
-//     	->prependFile($this->basePath('js/cute.js'));
+	$this->headLink()
+		->prependStylesheet($this->basePath('css/videojs.thumbnails.css'))
+    	->prependStylesheet($this->basePath('css/video-js.css'));
+	
+    $this->headScript()
+    	->prependFile($this->basePath('js/videojs.thumbnails.js'))
+    	->prependFile($this->basePath('js/videojs-ie8.min.js'))
+    	->prependFile($this->basePath('js/video.js'));
 ?>
 
 <script>
 
 $(function(){
-
+	
 	var filemanager = $('.filemanager'),
 		breadcrumbs = $('.breadcrumbs'),
 		fileList = filemanager.find('.data');
@@ -246,6 +252,7 @@ $(function(){
 		}
 	
 		if(scannedFiles.length) {
+			var idx = 0;
 			scannedFiles.forEach(function(f) {
 				var fileSize = bytesToSize(f.size),
 					name = escapeHTML(f.name),
@@ -259,19 +266,23 @@ $(function(){
 				var sp_details = '<span class="details">' + fileSize + '</span>';
 
 				if (fileType === "mp4") {
-					debugger;
 					var file = $('<li class="files">' + sp_name + sp_details + '</li>');
-					var player = $('<video id="video" class="video-js vjs-default-skin" width="200" poster="" controls><source src="" type="video/mp4"/></video>');
+					$(file).find('span.name').addClass('vid');
+					$(file).find('span.details').addClass('vid');
+					var player = $('<video class="video-js vjs-default-skin" width="200" poster="" controls><source src="" type="video/mp4"/></video>');
 					player.find('source').attr('src', '/' + f.path);
+					var video_id = 'video' + idx++;
+					player.attr('id', video_id);
 					$(file).append(player);
+
+					file.appendTo(fileList);					
 				} else {
 					var file = $('<li class="files"><a href="'+ f.path+'" title="'+ f.path +'" class="files">' + sp_icon + sp_name + sp_details + '</a></li>');
+					file.appendTo(fileList);
 				}
 
 				if (f.icon)
 					$(file).addClass("thumbs");
-				
-				file.appendTo(fileList);
 			});
 		}
 	
@@ -298,6 +309,11 @@ $(function(){
 	
 		// Show the generated elements
 		fileList.css({display:'inline-block'});
+
+		//Initialisation players
+		$('video').each(function(key, elt){
+			videojs(elt);
+		});
 	}
 	
 	// This function escapes special html characters in names
