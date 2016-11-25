@@ -254,18 +254,22 @@ $(function(){
 	
 				fileType = fileType[fileType.length-1];
 	
-				icon = '<span class="icon file f-'+fileType+'">.'+fileType+'</span>';	
-				var file = $('<li class="files"><a href="'+ f.path+'" title="'+ f.path +'" class="files">'+icon+'<span class="name">'+ name +'</span> <span class="details">'+fileSize+'</span></a></li>');
-
-				if (f.icon)
-					$(file).addClass("thumbs");
+				var sp_icon = '<span class="icon file f-'+fileType+'">.'+fileType+'</span>';
+				var sp_name = '<span class="name">' + name + '</span>';
+				var sp_details = '<span class="details">' + fileSize + '</span>';
 
 				if (fileType === "mp4") {
 					debugger;
-					var player = $('<video id="video" class="video-js vjs-default-skin" width="640" height="264" poster="" controls><source src="" type="video/mp4"/></video>');
-					player.find('source').attr('src', f.fullname);
+					var file = $('<li class="files">' + sp_name + sp_details + '</li>');
+					var player = $('<video id="video" class="video-js vjs-default-skin" width="200" poster="" controls><source src="" type="video/mp4"/></video>');
+					player.find('source').attr('src', '/' + f.path);
 					$(file).append(player);
+				} else {
+					var file = $('<li class="files"><a href="'+ f.path+'" title="'+ f.path +'" class="files">' + sp_icon + sp_name + sp_details + '</a></li>');
 				}
+
+				if (f.icon)
+					$(file).addClass("thumbs");
 				
 				file.appendTo(fileList);
 			});
