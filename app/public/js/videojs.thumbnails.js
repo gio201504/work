@@ -157,34 +157,34 @@
       }
       
       console.log('before');
-      player.trigger('thumbupdate', {active: active, settings: settings});
+      player.trigger('thumbupdate', {settings: settings});
       console.log('after');
 
-      settings = player.settings;
-      if (typeof settings !== 'undefined') {
-    	  debugger;
-	      setting = settings[active];
-	      
-	      if (setting.src && img.src != setting.src) {
-	        img.src = setting.src;
-	      }
-	      if (setting.style && img.style != setting.style) {
-	        extend(img.style, setting.style);
-	      }
-	
-	      width = getVisibleWidth(img, setting.width || settings[0].width);
-	      halfWidth = width / 2;
-	
-	      // make sure that the thumbnail doesn't fall off the right side of the left side of the player
-	      if ( (left + halfWidth) > right ) {
-	        left -= (left + halfWidth) - right;
-	      } else if (left < halfWidth) {
-	        left = halfWidth;
-	      }
-	
-	      div.style.left = left + 'px';
+      setting = settings[active];
+      
+      if (setting.src && img.src != setting.src) {
+        img.src = setting.src;
       }
+      if (setting.style && img.style != setting.style) {
+        extend(img.style, setting.style);
+      }
+
+      width = getVisibleWidth(img, setting.width || settings[0].width);
+      halfWidth = width / 2;
+
+      // make sure that the thumbnail doesn't fall off the right side of the left side of the player
+      if ( (left + halfWidth) > right ) {
+        left -= (left + halfWidth) - right;
+      } else if (left < halfWidth) {
+        left = halfWidth;
+      }
+
+      div.style.left = left + 'px';
     };
+    
+    player.addThumb = function(time, setting) {
+      settings[time] = setting;
+    }
 
     // update the thumbnail while hovering
     progressControl.on('mousemove', moveListener);

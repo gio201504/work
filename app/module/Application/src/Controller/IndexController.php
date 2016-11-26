@@ -138,9 +138,10 @@ class IndexController extends AbstractActionController
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     			
-    			$thumb_file = getcwd() . '/' . basename($file) . '[' . $time_seconds . '].jpg';
+    			$thumb_path = getcwd() . '/' . basename($file) . '[' . $time_seconds . '].jpg';
     			//$thumb_file = $basePath . $file . '[' . $time_seconds . '].jpg';
-    			if (!file_exists($thumb_file)) {
+    			$thumb_file = '/videojs/app' . $file . '[' . $time_seconds . '].jpg';
+    			if (!file_exists($thumb_path)) {
 		    		$ffmpeg = FFMpeg::create();
 		    		$video = $ffmpeg->open($basePath . $file);
 		    		$video
@@ -149,14 +150,18 @@ class IndexController extends AbstractActionController
 			    		->synchronize();
 		    		$video
 			    		->frame(TimeCode::fromSeconds($time_seconds))
-			    		->save($thumb_file);
+			    		->save($thumb_path);
 		
-		    		return new JsonModel(array('status' => 'ok', 'file' => $thumb_file));
+		    		return new JsonModel(array(
+		    				'status' => 'ok',
+		    				'time' => $time_seconds,
+		    				'file' => $thumb_file)
+		    		);
     			}
     		}
     	}
     	
-    	return new JsonModel(array('status' => 'ko.'));
+    	return new JsonModel(array('status' => 'ko'));
     }
     
     public function getThumbAction()
