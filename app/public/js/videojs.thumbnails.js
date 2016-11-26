@@ -156,9 +156,7 @@
         }
       }
       
-      console.log('before');
       player.trigger('thumbupdate', {settings: settings});
-      console.log('after');
 
       setting = settings[active];
       

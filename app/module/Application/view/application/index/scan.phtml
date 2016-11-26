@@ -325,7 +325,6 @@ $(function(){
 				var video_id = player.el();
 				var file = $(video_id).find('video').attr('src');
 				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
-				console.log('thumbupdate=' + time);
 
 			    if ($(video_id).data('requestRunning')) {
 			        return;
@@ -337,7 +336,6 @@ $(function(){
 			        url: "getThumbAjax",
 			        data: { file: file, time: time },
 			        success: function(data) {
-			        	console.log('ajax return');
 			        	player.settings = settings;
 		        		player.addThumb(data.time, {
 			        		src: data.file,
@@ -347,7 +345,6 @@ $(function(){
         			   	});
 			        },
 			        complete: function() {
-			        	console.log('ajax complete');
 			        	$(video_id).data('requestRunning', false);
 			        }
 			    });
