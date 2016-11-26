@@ -339,15 +339,12 @@ $(function(){
 			        success: function(data) {
 			        	console.log('ajax return');
 			        	player.settings = settings;
-			        	if (data.status === 'ok') {
-				        	debugger;
-			        		player.addThumb(data.time, {
-				        		src: data.file,
-			        			style: {
-			        			      width: '200px',
-			        			    }
-	        			   	});
-			        	}
+		        		player.addThumb(data.time, {
+			        		src: data.file,
+		        			style: {
+		        			      width: '200px',
+		        			    }
+        			   	});
 			        },
 			        complete: function() {
 			        	console.log('ajax complete');
