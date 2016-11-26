@@ -319,11 +319,11 @@ $(function(){
 			        }
 			      });
 
-			// Capture de la position de la souris sur la barre de contrôle
-			var progressControl = video.controlBar.progressControl;
-			progressControl.on('mousemove', function(){
-				var video_id = '#' + video.id_;
-				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+		    video.on('thumbupdate', function(evt, data){
+				console.log('thumbupdate=' + data.active);
+				var player = this;
+				var video_id = player.el();
+				var time = data.active;
 				var file = $(video_id).find('video').attr('src');
 
 			    if ($(video_id).data('requestRunning')) {
@@ -335,14 +335,45 @@ $(function(){
 			        type: "GET",
 			        url: "getThumbAjax",
 			        data: { file: file, time: time },
-// 			        success: function(data) {
-// 				        console.log(displayTime() + data);
-// 			        },
+			        success: function(data) {
+			        	console.log('ajax return');
+			        	player.settings = data.settings;
+			        	if (data.status === 'ok')
+			        		player.settings[time] = { src: data.file };
+			        },
 			        complete: function() {
+			        	console.log('ajax complete');
 			        	$(video_id).data('requestRunning', false);
 			        }
 			    });
-			});
+		    });
+
+			// Capture de la position de la souris sur la barre de contrôle
+// 			var progressControl = video.controlBar.progressControl;
+// 			progressControl.on('mousemove', function(){
+// 				debugger;
+// 				var video_id = '#' + video.id_;
+// 				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+// 				var file = $(video_id).find('video').attr('src');
+
+// 			    if ($(video_id).data('requestRunning')) {
+// 			        return;
+// 			    } else
+// 			    	$(video_id).data('requestRunning', true);
+
+// 				$.ajax({
+// 			        type: "GET",
+// 			        url: "getThumbAjax",
+// 			        data: { file: file, time: time },
+// 			        success: function(data) {
+// 				        console.log(displayTime() + data);
+// 			        },
+// 			        complete: function() {
+// 			        	$(video_id).data('requestRunning', false);
+// 			        }
+// 			    });
+// 			});
+			
 		});
 	}
 	
