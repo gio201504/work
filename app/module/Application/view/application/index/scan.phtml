@@ -1,8 +1,6 @@
 <?=
 	$this->headLink()
-    	->prependStylesheet($this->basePath('css/cute.css'));
-	
-	$this->headLink()
+    	->prependStylesheet($this->basePath('css/cute.css'))	
 		->prependStylesheet($this->basePath('css/videojs.thumbnails.css'))
     	->prependStylesheet($this->basePath('css/video-js.css'));
 	
@@ -310,9 +308,41 @@ $(function(){
 		// Show the generated elements
 		fileList.css({display:'inline-block'});
 
-		//Initialisation players
+		// Initialisation players
 		$('video').each(function(key, elt){
-			videojs(elt);
+			var video = videojs(elt);
+
+			// Génération des thumbnails
+			video.thumbnails({
+			      0: {
+			          src: ''
+			        }
+			      });
+
+			// Capture de la position de la souris sur la barre de contrôle
+			var progressControl = video.controlBar.progressControl;
+			progressControl.on('mousemove', function(){
+				var video_id = '#' + video.id_;
+				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+				var file = $(video_id).find('video').attr('src');
+
+			    if ($(video_id).data('requestRunning')) {
+			        return;
+			    } else
+			    	$(video_id).data('requestRunning', true);
+
+				$.ajax({
+			        type: "GET",
+			        url: "getThumbAjax",
+			        data: { file: file, time: time },
+// 			        success: function(data) {
+// 				        console.log(displayTime() + data);
+// 			        },
+			        complete: function() {
+			        	$(video_id).data('requestRunning', false);
+			        }
+			    });
+			});
 		});
 	}
 	

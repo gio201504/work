@@ -139,9 +139,10 @@ class IndexController extends AbstractActionController
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     			
     			$thumb_file = getcwd() . '/' . basename($file) . '[' . $time_seconds . '].jpg';
+    			//$thumb_file = $basePath . $file . '[' . $time_seconds . '].jpg';
     			if (!file_exists($thumb_file)) {
 		    		$ffmpeg = FFMpeg::create();
-		    		$video = $ffmpeg->open($basePath . '/' . $file);
+		    		$video = $ffmpeg->open($basePath . $file);
 		    		$video
 			    		->filters()
 			    		//->resize(new Dimension(320, 240))
