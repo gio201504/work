@@ -138,6 +138,8 @@ class IndexController extends AbstractActionController
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     			
+    			$filetmp = dirname($file) . '/' . rawurlencode(basename($file));
+    			$file = $filetmp;
     			$thumb_path = getcwd() . '/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
     			//$thumb_file = $basePath . $file . '[' . $time_seconds . '].jpg';
     			$thumb_file = '/videojs/app/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
@@ -150,7 +152,7 @@ class IndexController extends AbstractActionController
 			    		->synchronize();
 		    		$video
 			    		->frame(TimeCode::fromSeconds($time_seconds))
-			    		->save($thumb_path);
+			    		->save(rawurldecode($thumb_path));
     			}
     		}
     		
