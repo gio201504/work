@@ -9,11 +9,11 @@ namespace Application\Controller;
 
 use Zend\Mvc\Controller\AbstractActionController;
 use Zend\View\Model\ViewModel;
-use FFMpeg\FFMpeg;
-use FFMpeg\Coordinate\TimeCode;
+//use FFMpeg\FFMpeg;
+//use FFMpeg\Coordinate\TimeCode;
 use Zend\View\Model\JsonModel;
-use FFMpeg\Filters\Video\ResizeFilter;
-use FFMpeg\Coordinate\Dimension;
+//use FFMpeg\Filters\Video\ResizeFilter;
+//use FFMpeg\Coordinate\Dimension;
 
 class IndexController extends AbstractActionController
 {
@@ -128,18 +128,19 @@ class IndexController extends AbstractActionController
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
-    		$uri = $request->getUri();
-    		$basePath = sprintf('%s://%s', $uri->getScheme(), $uri->getHost());
+//     		$uri = $request->getUri();
+//     		$basePath = sprintf('%s://%s', $uri->getScheme(), $uri->getHost());
     		
     		$file = $data->file;
     		$time = $data->time;
+    		$top_dir = "D:/NewsBin64/download";
     		
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     			
-    			$filetmp = dirname($file) . '/' . rawurlencode(basename($file));
-    			$file = $filetmp;
+//     			$filetmp = dirname($file) . '/' . rawurlencode(basename($file));
+//     			$file = $filetmp;
     			$thumb_path = getcwd() . '/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
     			//$thumb_file = $basePath . $file . '[' . $time_seconds . '].jpg';
     			$thumb_file = '/videojs/app/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
@@ -154,7 +155,8 @@ class IndexController extends AbstractActionController
 // 			    		->frame(TimeCode::fromSeconds($time_seconds))
 // 			    		->save(rawurldecode($thumb_path));
 					//$time_formatted = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
-					$cmd = "ffmpeg -ss " . $time_seconds . " -i " . $basePath . $file . " -vframes 1 -filter:v scale='200:-1' \"" . rawurldecode($thumb_path) . "\"";
+					//$cmd = "ffmpeg -ss " . $time_seconds . " -i " . $basePath . $file . " -vframes 1 -filter:v scale='200:-1' \"" . rawurldecode($thumb_path) . "\"";
+    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
 		    		//shell_exec("/usr/local/bin/ffmpeg -i test.mp3 -codec:a libmp3lame -b:a 128k out.mp3 2>&1");
 		    		shell_exec($cmd);
     			}
