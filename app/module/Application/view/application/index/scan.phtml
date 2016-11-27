@@ -267,7 +267,7 @@ $(function(){
 					var file = $('<li class="files">' + sp_name + sp_details + '</li>');
 					$(file).find('span.name').addClass('vid');
 					$(file).find('span.details').addClass('vid');
-					var player = $('<video class="video-js vjs-default-skin" width="200" poster="" controls><source src="" type="video/mp4"/></video>');
+					var player = $('<video preload="none" class="video-js vjs-default-skin" width="200" poster="" controls><source src="" type="video/mp4"/></video>');
 					player.find('source').attr('src', '/' + f.path);
 					var video_id = 'video' + idx++;
 					player.attr('id', video_id);
@@ -310,71 +310,40 @@ $(function(){
 
 		// Initialisation players
 		$('video').each(function(key, elt){
-			var video = videojs(elt);
+			var player = videojs(elt);
 
-			// Génération des thumbnails
-			video.thumbnails({
+			var addThumb = function(data) {
+				player.addThumb(data.time, {
+	        		src: data.file,
+	    			style: {
+	    			      width: '200px',
+	    			    }
+			   	});
+		    };
+
+		    var addPoster = function(data) {
+				player.poster(data.file);
+		    };
+
+			//Générer poster image
+			getThumbAjax(player, 0, addPoster);
+
+			//Plugin de génération des thumbnails
+			player.thumbnails({
 			      0: {
 			          src: ''
 			        }
 			      });
 
-		    video.on('thumbupdate', function(evt, data){
+			//Ecoute position souris sur barre de contrôle
+			player.on('thumbupdate', function(evt, data){
 				var player = this;
 				var settings = data.settings;
 				var video_id = player.el();
-				var file = $(video_id).find('video').attr('src');
 				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
 
-			    if ($(video_id).data('requestRunning')) {
-			        return;
-			    } else
-			    	$(video_id).data('requestRunning', true);
-
-				$.ajax({
-			        type: "GET",
-			        url: "getThumbAjax",
-			        data: { file: file, time: time },
-			        success: function(data) {
-			        	player.settings = settings;
-		        		player.addThumb(data.time, {
-			        		src: data.file,
-		        			style: {
-		        			      width: '200px',
-		        			    }
-        			   	});
-			        },
-			        complete: function() {
-			        	$(video_id).data('requestRunning', false);
-			        }
-			    });
+				getThumbAjax(player, time, addThumb);
 		    });
-
-			// Capture de la position de la souris sur la barre de contrôle
-// 			var progressControl = video.controlBar.progressControl;
-// 			progressControl.on('mousemove', function(){
-// 				debugger;
-// 				var video_id = '#' + video.id_;
-// 				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
-// 				var file = $(video_id).find('video').attr('src');
-
-// 			    if ($(video_id).data('requestRunning')) {
-// 			        return;
-// 			    } else
-// 			    	$(video_id).data('requestRunning', true);
-
-// 				$.ajax({
-// 			        type: "GET",
-// 			        url: "getThumbAjax",
-// 			        data: { file: file, time: time },
-// 			        success: function(data) {
-// 				        console.log(displayTime() + data);
-// 			        },
-// 			        complete: function() {
-// 			        	$(video_id).data('requestRunning', false);
-// 			        }
-// 			    });
-// 			});
 			
 		});
 	}
@@ -393,6 +362,30 @@ $(function(){
 	}
 
 });
+
+var getThumbAjax = function(player, time, callback) {
+	var video_id = player.el();
+	var file = $(video_id).find('video').attr('src');
+	
+	if ($(video_id).data('requestRunning')) {
+        return;
+    } else
+    	$(video_id).data('requestRunning', true);
+
+	$.ajax({
+        type: "GET",
+        url: "getThumbAjax",
+        data: { file: file, time: time },
+        success: function(data) {
+    		if (typeof callback === 'function') {
+        		callback(data);
+    		}
+        },
+        complete: function() {
+        	$(video_id).data('requestRunning', false);
+        }
+    });
+}
 
 </script>
 
