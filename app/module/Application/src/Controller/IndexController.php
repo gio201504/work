@@ -144,15 +144,19 @@ class IndexController extends AbstractActionController
     			//$thumb_file = $basePath . $file . '[' . $time_seconds . '].jpg';
     			$thumb_file = '/videojs/app/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
     			if (!file_exists($thumb_path)) {
-		    		$ffmpeg = FFMpeg::create();
-		    		$video = $ffmpeg->open($basePath . $file);
-		    		$video
-			    		->filters()
-			    		//->resize(new Dimension(320, 240))
-			    		->synchronize();
-		    		$video
-			    		->frame(TimeCode::fromSeconds($time_seconds))
-			    		->save(rawurldecode($thumb_path));
+// 		    		$ffmpeg = FFMpeg::create();
+// 		    		$video = $ffmpeg->open($basePath . $file);
+// 		    		$video
+// 			    		->filters()
+// 			    		//->resize(new Dimension(320, 240))
+// 			    		->synchronize();
+// 		    		$video
+// 			    		->frame(TimeCode::fromSeconds($time_seconds))
+// 			    		->save(rawurldecode($thumb_path));
+					//$time_formatted = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
+					$cmd = "ffmpeg -ss " . $time_seconds . " -i " . $basePath . $file . " -vframes 1 -filter:v scale='200:-1' \"" . rawurldecode($thumb_path) . "\"";
+		    		//shell_exec("/usr/local/bin/ffmpeg -i test.mp3 -codec:a libmp3lame -b:a 128k out.mp3 2>&1");
+		    		shell_exec($cmd);
     			}
     		}
     		
