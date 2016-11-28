@@ -84,7 +84,7 @@ class IndexController extends AbstractActionController
 							);
 						} else {
 							// It is a file
-							$array = array(
+							$files[] = array(
 								"name" => $f,
 								"type" => "file",
 								"path" => $dir . '/' . $f,
@@ -92,10 +92,12 @@ class IndexController extends AbstractActionController
 								"fullname" => $fulldir . '/' . $f,
 							);
 							
+							/*
 							if (file_exists($top_dir . $thumbs . '/' . $f . '.png'))
 								$files[] = array_merge($array, array("icon" => true));
 							else
 								$files[] = $array;
+							*/
 						}
 					}
 				}
