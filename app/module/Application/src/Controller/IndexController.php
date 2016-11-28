@@ -70,6 +70,7 @@ class IndexController extends AbstractActionController
 	    		$files = array();
 				if(file_exists($fulldir)){
 					foreach(scandir($fulldir) as $f) {
+						$f_utf8 = utf8_encode($f);
 						if(!$f || $f[0] == '.') {
 							continue; // Ignore hidden files
 						}
@@ -77,19 +78,19 @@ class IndexController extends AbstractActionController
 						if(is_dir($fulldir . '/' . $f)) {
 							// The path is a folder
 							$files[] = array(
-								"name" => $f,
+								"name" => $f_utf8,
 								"type" => "folder",
-								"path" => $dir . '/' . $f,
+								"path" => $dir . '/' . $f_utf8,
 								"items" => scan($top_dir, $dir . '/' . $f) // Recursively get the contents of the folder
 							);
 						} else {
 							// It is a file
 							$files[] = array(
-								"name" => $f,
+								"name" => $f_utf8,
 								"type" => "file",
-								"path" => $dir . '/' . $f,
+								"path" => $dir . '/' . $f_utf8,
 								"size" => filesize($fulldir . '/' . $f), // Gets the size of this file
-								"fullname" => $fulldir . '/' . $f,
+								"fullname" => $fulldir . '/' . $f_utf8,
 							);
 							
 							/*
@@ -160,7 +161,7 @@ class IndexController extends AbstractActionController
 					//$cmd = "ffmpeg -ss " . $time_seconds . " -i " . $basePath . $file . " -vframes 1 -filter:v scale='200:-1' \"" . rawurldecode($thumb_path) . "\"";
     				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
 		    		//shell_exec("/usr/local/bin/ffmpeg -i test.mp3 -codec:a libmp3lame -b:a 128k out.mp3 2>&1");
-		    		shell_exec($cmd);
+		    		shell_exec(utf8_decode($cmd));
     			}
     		}
     		
