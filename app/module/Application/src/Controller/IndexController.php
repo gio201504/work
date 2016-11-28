@@ -112,7 +112,7 @@ class IndexController extends AbstractActionController
     		$viewmodel->setTerminal(false);
     		
     		$data = array(
-    				"name" => "files",
+    				"name" => $dir,
     				"type" => "folder",
     				"path" => $dir,
     				"items" => $response,
