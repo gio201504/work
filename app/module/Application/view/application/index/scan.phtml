@@ -332,10 +332,7 @@ $(function(){
 				return getVideoDuration(player)
 					.then(function(data){
 						var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
-						return getThumbAjax(player, time_seconds);
-					})
-					.then(function(data){
-						addPoster(data);
+						getThumbAjax(player, time_seconds, addPoster);
 					});
 			});
 
