@@ -329,8 +329,15 @@ $(function(){
 
 			//Générer poster image
 			promise = promise.then(function(){
-		        return getThumbAjax(player, "00:00:10", addPoster);
-		    });
+				return getVideoDuration(player)
+					.then(function(data){
+						var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
+						return getThumbAjax(player, time_seconds);
+					})
+					.then(function(data){
+						addPoster(data);
+					});
+			});
 
 			//Plugin de génération des thumbnails
 			player.thumbnails({
@@ -390,6 +397,22 @@ var getThumbAjax = function(player, time, callback) {
         complete: function() {
         	$(video_id).data('requestRunning', false);
         }
+    });
+}
+
+var getVideoDuration = function(player, callback) {
+	var video_id = player.el();
+	var file = $(video_id).find('video').attr('src');
+
+	return $.ajax({
+        type: "GET",
+        url: "getVideoDuration",
+        data: { file: file },
+        success: function(data) {
+    		if (typeof callback === 'function') {
+        		callback(data);
+    		}
+        },
     });
 }
 
