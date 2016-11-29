@@ -309,6 +309,8 @@ $(function(){
 		fileList.css({display:'inline-block'});
 
 		// Initialisation players
+		var deferred = $.Deferred();
+		var promise = deferred.promise();
 		$('video').each(function(key, elt){
 			var player = videojs(elt);
 
@@ -326,7 +328,9 @@ $(function(){
 		    };
 
 			//Générer poster image
-			getThumbAjax(player, 0, addPoster);
+			promise = promise.then(function(){
+		        return getThumbAjax(player, "00:00:10", addPoster);
+		    });
 
 			//Plugin de génération des thumbnails
 			player.thumbnails({
@@ -346,6 +350,8 @@ $(function(){
 		    });
 			
 		});
+
+		deferred.resolve();
 	}
 	
 	// This function escapes special html characters in names
@@ -372,7 +378,7 @@ var getThumbAjax = function(player, time, callback) {
     } else
     	$(video_id).data('requestRunning', true);
 
-	$.ajax({
+	return $.ajax({
         type: "GET",
         url: "getThumbAjax",
         data: { file: file, time: time },
