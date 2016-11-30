@@ -324,17 +324,17 @@ $(function(){
 		    };
 
 		    var addPoster = function(data) {
+			    console.log(player.id() + ' addPoster');
 				player.poster(data.file);
 		    };
 
 			//Générer poster image
-			promise = promise.then(function(){
-				return getVideoDuration(player)
-					.then(function(data){
-						var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
-						getThumbAjax(player, time_seconds, addPoster);
-					});
-			});
+			promise
+				.then(function(){ return getVideoDuration(player) })
+				.then(function(data){
+					var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
+					getThumbAjax(player, time_seconds, addPoster);
+				});
 
 			//Plugin de génération des thumbnails
 			player.thumbnails({
@@ -374,6 +374,7 @@ $(function(){
 });
 
 var getThumbAjax = function(player, time, callback) {
+	console.log(player.id() + ' getThumbAjax');
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
 	
@@ -398,6 +399,7 @@ var getThumbAjax = function(player, time, callback) {
 }
 
 var getVideoDuration = function(player, callback) {
+	console.log(player.id() + ' getVideoDuration');
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
 
