@@ -167,6 +167,8 @@ body {
 	background-color: #373743;
 	/*width: 307px;
 	height: 141px;*/
+	min-width: 200px;
+	min-height: 100px;
 	list-style-type: none;
 	margin: 6px;
 	display: inline-block;
