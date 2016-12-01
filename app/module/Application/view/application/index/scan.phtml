@@ -363,13 +363,16 @@ $(function(){
 					.then(function(data){
 						debugger;
 						var duration = Math.trunc(data.duration);
-						getThumbAjax(player, time_seconds, addPoster);
+						return getVideoPreview(player, duration);
 					})
 					.then(function(data) {
 						debugger;
-						player.src("http://www.example.com/path/to/video.mp4");
+						player.src("/videojs/app/public/thumb/out.mp4");
+						player.loop(true);
 						player.play();
 					});
+
+				deferred.resolve();
 			});
 
 			player.on('mouseout', function(){
@@ -438,28 +441,15 @@ var getVideoDuration = function(player, callback) {
     });
 }
 
-var getVideoPreview = function(player, time, callback) {
-	console.log(player.id() + ' getThumbAjax');
+var getVideoPreview = function(player, duration) {
+	console.log(player.id() + ' getVideoPreview');
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
-	
-	if ($(video_id).data('requestRunning')) {
-        return;
-    } else
-    	$(video_id).data('requestRunning', true);
 
 	return $.ajax({
         type: "GET",
-        url: "getThumbAjax",
-        data: { file: file, time: time },
-        success: function(data) {
-    		if (typeof callback === 'function') {
-        		callback(data);
-    		}
-        },
-        complete: function() {
-        	$(video_id).data('requestRunning', false);
-        }
+        url: "getVideoPreview",
+        data: { file: file, duration: duration},
     });
 }
 
