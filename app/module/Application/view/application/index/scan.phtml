@@ -352,6 +352,29 @@ $(function(){
 
 				getThumbAjax(player, time, addThumb);
 		    });
+
+			player.on('mouseover', function(){
+				debugger;
+				var deferred = $.Deferred();
+				var promise = deferred.promise();
+				//Générer la preview video
+				promise
+					.then(function(){ return getVideoDuration(player) })
+					.then(function(data){
+						debugger;
+						var duration = Math.trunc(data.duration);
+						getThumbAjax(player, time_seconds, addPoster);
+					})
+					.then(function(data) {
+						debugger;
+						player.src("http://www.example.com/path/to/video.mp4");
+						player.play();
+					});
+			});
+
+			player.on('mouseout', function(){
+				player.pause(); 
+			});
 			
 		});
 
@@ -412,6 +435,31 @@ var getVideoDuration = function(player, callback) {
         		callback(data);
     		}
         },
+    });
+}
+
+var getVideoPreview = function(player, time, callback) {
+	console.log(player.id() + ' getThumbAjax');
+	var video_id = player.el();
+	var file = $(video_id).find('video').attr('src');
+	
+	if ($(video_id).data('requestRunning')) {
+        return;
+    } else
+    	$(video_id).data('requestRunning', true);
+
+	return $.ajax({
+        type: "GET",
+        url: "getThumbAjax",
+        data: { file: file, time: time },
+        success: function(data) {
+    		if (typeof callback === 'function') {
+        		callback(data);
+    		}
+        },
+        complete: function() {
+        	$(video_id).data('requestRunning', false);
+        }
     });
 }
 
