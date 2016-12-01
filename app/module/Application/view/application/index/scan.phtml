@@ -367,7 +367,7 @@ $(function(){
 					})
 					.then(function(data) {
 						debugger;
-						player.src("/videojs/app/public/thumb/out.mp4");
+						player.src(data.file);
 						player.loop(true);
 						player.play();
 					});
