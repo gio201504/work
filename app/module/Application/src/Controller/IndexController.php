@@ -196,4 +196,31 @@ class IndexController extends AbstractActionController
     		));
     	}
     }
+    
+    public function getVideoPreviewAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    
+    		$file = $data->file;
+    		$duration = $data->duration;
+    		$top_dir = "D:/NewsBin64/download";
+    
+    		if (isset($file)) {
+    			$cmd = 'ffmpeg -i "' . $top_dir . $file . '" -c:v libx264 -filter_complex "[0:v]scale=w=320:h=ih*320/iw[scale],[scale]split=5[copy0][copy1][copy2][copy3][copy4]';
+    			for ($i = 0; $i < 5; $i++) {
+    				$start = intval($i * $duration / 5);
+    				$end = $start + 1;
+    				$cmd .= ',[copy' . $i . ']trim=' . $start . ':' . $end . ',setpts=PTS-STARTPTS[part' . $i . ']';
+    			}
+    			$cmd .= ',[part0][part1][part2][part3][part4]concat=n=5[out]" -map "[out]" out.mp4';
+    			shell_exec(utf8_decode($cmd));
+    		}
+    
+    		return new JsonModel(array(
+    			'file' => $thumb_file
+    		));
+    	}
+    }
 }
