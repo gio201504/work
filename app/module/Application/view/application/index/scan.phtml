@@ -372,19 +372,19 @@ $(function(){
 							player.src(data.file);
 							player.loop(true);
 							player.play();
+
+							player.on('mouseleave', function(){
+								console.log(player.id() + ' mouseleave');
+								if ($(player).data('src') !== undefined){
+									player.pause();
+									//Restitution chemin vidéo
+									player.src($(player).data('src'));
+									$(player).removeData('src');
+								}
+							});
 						});
 	
 					deferred.resolve();
-				}
-			});
-
-			player.on('mouseleave', function(){
-				console.log(player.id() + ' mouseleave');
-				if ($(player).data('src') !== undefined){
-					player.pause();
-					//Restitution chemin vidéo
-					player.src($(player).data('src'));
-					$(player).removeData('src');
 				}
 			});
 
