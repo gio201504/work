@@ -218,7 +218,8 @@ class IndexController extends AbstractActionController
     			}
     			$cmd .= ',[part0][part1][part2][part3][part4]concat=n=5[out]" -map "[out]" "' . $out_file . '"';
     			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
-    		}
+    		} else
+    			$return_value = 0;
 
     		return new JsonModel(array(
     			'return_value' => $return_value,

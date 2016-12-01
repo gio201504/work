@@ -354,31 +354,40 @@ $(function(){
 		    });
 
 			player.on('mouseover', function(){
-				debugger;
-				var deferred = $.Deferred();
-				var promise = deferred.promise();
-				//Générer la preview video
-				promise
-					.then(function(){ return getVideoDuration(player) })
-					.then(function(data){
-						debugger;
-						var duration = Math.trunc(data.duration);
-						return getVideoPreview(player, duration);
-					})
-					.then(function(data) {
-						debugger;
-						player.src(data.file);
-						player.loop(true);
-						player.play();
-					});
-
-				deferred.resolve();
+				console.log(player.id() + ' mouseover');
+				if ($(player).data('src') === undefined){
+					var deferred = $.Deferred();
+					var promise = deferred.promise();
+					//Générer la preview video
+					promise
+						.then(function(){ return getVideoDuration(player) })
+						.then(function(data){
+							var duration = Math.trunc(data.duration);
+							return getVideoPreview(player, duration);
+						})
+						.then(function(data) {
+							//Sauvegarde chemin vidéo
+							$(player).data('src', player.src());
+							//Chemin de la vidéo preview
+							player.src(data.file);
+							player.loop(true);
+							player.play();
+						});
+	
+					deferred.resolve();
+				}
 			});
 
-			player.on('mouseout', function(){
-				player.pause(); 
+			player.on('mouseleave', function(){
+				console.log(player.id() + ' mouseleave');
+				if ($(player).data('src') !== undefined){
+					player.pause();
+					//Restitution chemin vidéo
+					player.src($(player).data('src'));
+					$(player).removeData('src');
+				}
 			});
-			
+
 		});
 
 		deferred.resolve();
