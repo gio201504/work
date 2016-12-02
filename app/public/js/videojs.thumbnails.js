@@ -193,9 +193,9 @@
     };
 
     // move the placeholder out of the way when not hovering
-    progressControl.on('mouseout', moveCancel);
-    progressControl.on('touchcancel', moveCancel);
-    progressControl.on('touchend', moveCancel);
-    player.on('userinactive', moveCancel);
+//    progressControl.on('mouseout', moveCancel);
+//    progressControl.on('touchcancel', moveCancel);
+//    progressControl.on('touchend', moveCancel);
+//    player.on('userinactive', moveCancel);
   });
 })();
