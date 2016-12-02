@@ -343,6 +343,9 @@ $(function(){
 			        }
 			      });
 
+			//Sauvegarde chemin vidéo
+			$(player).data('src', player.src());
+
 			//Ecoute position souris sur barre de contrôle
 			player.on('thumbupdate', function(evt, data){
 				var player = this;
@@ -355,69 +358,77 @@ $(function(){
 
 			//Affichage preview vidéo lors du passage de la souris sur son emplacement
 			player.on('mouseover', function(){
-				console.log(player.id() + ' mouseover');
-				player.controls(false);
-
-				//Si preview absente la générer
-				if ($(player).data('preview') === undefined) {
-					//Vérifier existence de la preview
-					$.when(checkVideoPreviewExists(player))
-						.then(function(data) {
-							if (data.return_value === true) {
-								//Sauvegarde chemin vidéo
-								$(player).data('src', player.src());
-								//Sauvegarde chemin de la preview vidéo
-								$(player).data('preview', data.file);
-								//Preview déjà créée on l'affiche
-								player.src($(player).data('preview'));
-								player.loop(true);
-								player.play();
-							} else {
-								//Génération preview si une génération n'est pas déjà en cours
-								if ($(document).data('requestRunning')) {
-							        return;
-							    } else
-									$(document).data('requestRunning', true);
-								
-								var deferred = $.Deferred();
-								var promise = deferred.promise();
-								//Générer la preview video
-								promise
-									.then(function(){ return getVideoDuration(player) })
-									.then(function(data){
-										var duration = Math.trunc(data.duration);
-										return getVideoPreview(player, duration);
-									})
-									.then(function(data) {
-										//Sauvegarde chemin vidéo
-										$(player).data('src', player.src());
-										//Chemin de la preview vidéo
-										player.src(data.file);
-										$(player).data('preview', data.file);
-										player.loop(true);
-										player.play();
-
-										$(document).data('requestRunning', false);
-									});
-				
-								deferred.resolve();
-							}
-						});
-				} else {
-					//Preview déjà créée on l'affiche
-					player.src($(player).data('preview'));
-					player.loop(true);
-					player.play();
+				if (!player.isFullscreen()) {
+					console.log(player.id() + ' mouseover');
+					player.controls(false);
+	
+					//Si preview absente la générer
+					if ($(player).data('preview') === undefined) {
+						//Vérifier existence de la preview
+						$.when(checkVideoPreviewExists(player))
+							.then(function(data) {
+								if (data.return_value === true) {
+									//Sauvegarde chemin de la preview vidéo
+									$(player).data('preview', data.file);
+									//Preview déjà créée on l'affiche
+									player.src($(player).data('preview'));
+									player.loop(true);
+									player.play();
+								} else {
+									//Génération preview si une génération n'est pas déjà en cours
+									if ($(document).data('requestRunning')) {
+								        return;
+								    } else
+										$(document).data('requestRunning', true);
+									
+									var deferred = $.Deferred();
+									var promise = deferred.promise();
+									//Générer la preview video
+									promise
+										.then(function(){ return getVideoDuration(player) })
+										.then(function(data){
+											var duration = Math.trunc(data.duration);
+											return getVideoPreview(player, duration);
+										})
+										.then(function(data) {
+											//Chemin de la preview vidéo
+											player.src(data.file);
+											$(player).data('preview', data.file);
+											player.loop(true);
+											player.play();
+	
+											$(document).data('requestRunning', false);
+										});
+					
+									deferred.resolve();
+								}
+							});
+					} else {
+						//Preview déjà créée on l'affiche
+						player.src($(player).data('preview'));
+						player.loop(true);
+						player.play();
+					}
 				}
 			});
 
 			player.on('mouseleave', function(){
 				console.log(player.id() + ' mouseleave');
-				if ($(player).data('preview') !== undefined){
+				if ($(player).data('preview') !== undefined && !player.isFullscreen()){
 					player.pause();
 					//Restitution chemin vidéo
 					player.src($(player).data('src'));
 					player.controls(true);
+				}
+			});
+
+			player.on('click', function(evt){
+				if (!player.isFullscreen()) {
+					player.controls(true);
+					player.src($(player).data('src'));
+					player.play();
+					player.requestFullscreen();
+					evt.preventDefault();
 				}
 			});
 
