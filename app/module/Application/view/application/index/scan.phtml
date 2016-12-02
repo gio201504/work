@@ -453,7 +453,6 @@ $(function(){
 });
 
 var getThumbAjax = function(player, time, callback) {
-	console.log(player.id() + ' getThumbAjax');
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
 	
@@ -461,7 +460,8 @@ var getThumbAjax = function(player, time, callback) {
         return;
     } else
     	$(video_id).data('requestRunning', true);
-
+	
+	console.log(player.id() + ' getThumbAjax');
 	return $.ajax({
         type: "GET",
         url: "getThumbAjax",
