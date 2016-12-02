@@ -361,6 +361,7 @@ $(function(){
 		    	
 				if ($(player).data('src') === undefined){
 					$(document).data('requestRunning', true);
+					player.controls(false);
 					var deferred = $.Deferred();
 					var promise = deferred.promise();
 					//Générer la preview video
@@ -387,6 +388,7 @@ $(function(){
 									//Restitution chemin vidéo
 									player.src($(player).data('src'));
 									$(player).removeData('src');
+									player.controls(true);
 								}
 							});
 						});
