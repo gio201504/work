@@ -227,4 +227,22 @@ class IndexController extends AbstractActionController
     		);
     	}
     }
+    
+    public function checkVideoPreviewExistsAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+
+    		$file = $data->file;
+    		$top_dir = "D:/NewsBin64/download";
+    		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
+    		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
+
+    		return new JsonModel(array(
+    				'return_value'	=> file_exists($out_file),
+    				'file'			=> $preview_file,
+    		));
+    	}
+    }
 }
