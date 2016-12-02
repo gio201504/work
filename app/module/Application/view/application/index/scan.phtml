@@ -355,13 +355,15 @@ $(function(){
 
 			player.on('mouseover', function(){
 				console.log(player.id() + ' mouseover');
-				if ($(document).data('requestRunning')) {
-			        return;
-			    }
-		    	
-				if ($(player).data('src') === undefined){
-					$(document).data('requestRunning', true);
-					player.controls(false);
+				player.controls(false);
+
+				//Si preview absente la générer
+				if ($(player).data('preview') === undefined) {
+					if ($(document).data('requestRunning')) {
+				        return;
+				    } else
+						$(document).data('requestRunning', true);
+					
 					var deferred = $.Deferred();
 					var promise = deferred.promise();
 					//Générer la preview video
@@ -374,26 +376,32 @@ $(function(){
 						.then(function(data) {
 							//Sauvegarde chemin vidéo
 							$(player).data('src', player.src());
-							//Chemin de la vidéo preview
+							//Chemin de la preview vidéo
 							player.src(data.file);
+							$(player).data('preview', data.file);
 							player.loop(true);
 							player.play();
 
 							$(document).data('requestRunning', false);
-
-							player.on('mouseleave', function(){
-								console.log(player.id() + ' mouseleave');
-								if ($(player).data('src') !== undefined){
-									player.pause();
-									//Restitution chemin vidéo
-									player.src($(player).data('src'));
-									$(player).removeData('src');
-									player.controls(true);
-								}
-							});
 						});
 	
 					deferred.resolve();
+				} else {
+					//Preview déjà créée on l'affiche
+					player.src($(player).data('preview'));
+					player.loop(true);
+					player.play();
+				}
+			});
+
+			player.on('mouseleave', function(){
+				console.log(player.id() + ' mouseleave');
+				if ($(player).data('preview') !== undefined){
+					player.pause();
+					//Restitution chemin vidéo
+					player.src($(player).data('src'));
+					//$(player).removeData('src');
+					player.controls(true);
 				}
 			});
 
