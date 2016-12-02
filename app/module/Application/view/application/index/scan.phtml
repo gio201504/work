@@ -344,7 +344,7 @@ $(function(){
 			      });
 
 			//Sauvegarde chemin vidéo
-			$(player).data('src', player.src());
+			$(player).data('src', $(player.el()).find('source').attr('src'));
 
 			//Ecoute position souris sur barre de contrôle
 			player.on('thumbupdate', function(evt, data){
@@ -413,8 +413,8 @@ $(function(){
 			});
 
 			player.on('mouseleave', function(){
-				console.log(player.id() + ' mouseleave');
 				if ($(player).data('preview') !== undefined && !player.isFullscreen()){
+					console.log(player.id() + ' mouseleave');
 					player.pause();
 					//Restitution chemin vidéo
 					player.src($(player).data('src'));
