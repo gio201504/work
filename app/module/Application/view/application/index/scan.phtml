@@ -355,7 +355,12 @@ $(function(){
 
 			player.on('mouseover', function(){
 				console.log(player.id() + ' mouseover');
+				if ($(document).data('requestRunning')) {
+			        return;
+			    }
+		    	
 				if ($(player).data('src') === undefined){
+					$(document).data('requestRunning', true);
 					var deferred = $.Deferred();
 					var promise = deferred.promise();
 					//Générer la preview video
@@ -372,6 +377,8 @@ $(function(){
 							player.src(data.file);
 							player.loop(true);
 							player.play();
+
+							$(document).data('requestRunning', false);
 
 							player.on('mouseleave', function(){
 								console.log(player.id() + ' mouseleave');
