@@ -309,6 +309,7 @@ $(function(){
 		fileList.css({display:'inline-block'});
 
 		// Initialisation players
+		$(document).data('requestRunning', "");
 		var deferred = $.Deferred();
 		var promise = deferred.promise();
 		$('video').each(function(key, elt){
@@ -358,7 +359,8 @@ $(function(){
 
 			//Affichage preview vidéo lors du passage de la souris sur son emplacement
 			player.on('mouseover', function(){
-				if (!player.isFullscreen()) {
+				if (!player.isFullscreen()
+						&& $(document).data('requestRunning') !== player.id()) {
 					console.log(player.id() + ' mouseover');
 					player.controls(false);
 	
@@ -377,7 +379,7 @@ $(function(){
 									if ($(document).data('requestRunning')) {
 								        return;
 								    } else
-										$(document).data('requestRunning', true);
+										$(document).data('requestRunning', player.id());
 
 									//Icone de génération preview
 									var fa_refresh = '<i class="fa fa-refresh fa-spin fa-lg fa-fw margin-bottom"></i>';
@@ -397,9 +399,10 @@ $(function(){
 											//Sauvegarde chemin de la preview vidéo
 											$(player).data('preview', data.file);
 											//Affichage preview
+											removePreviewIcon(player);
 											showVideoPreview(player);
 	
-											$(document).data('requestRunning', false);
+											$(document).data('requestRunning', "");
 										});
 					
 									deferred.resolve();
@@ -523,14 +526,17 @@ var checkVideoPreviewExists = function(player) {
 var showVideoPreview = function(player) {
 	//Afficher la préview si le pointeur est dessus et hors plein écran
 	if (!player.isFullscreen() && $('#' + player.id() + ':hover').length !== 0) {
-		//Supprimer l'icône de chargement
-		var name = $(player.el()).prevAll('span.name');
-		$(name).find('i').remove();
 		//Lancer preview
 		player.src($(player).data('preview'));
 		player.loop(true);
 		player.play();
 	}
+}
+
+var removePreviewIcon = function(player) {
+	//Supprimer l'icône de génération de la preview
+	var name = $(player.el()).prevAll('span.name');
+	$(name).find('i').remove();
 }
 
 </script>
