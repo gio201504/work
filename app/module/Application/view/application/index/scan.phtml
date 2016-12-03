@@ -267,7 +267,7 @@ $(function(){
 					var file = $('<li class="files">' + sp_name + sp_details + '</li>');
 					$(file).find('span.name').addClass('vid');
 					$(file).find('span.details').addClass('vid');
-					var player = $('<video preload="none" class="video-js vjs-default-skin" width="330" height="248" poster="" controls><source src="" type="video/mp4"/></video>');
+					var player = $('<video preload="none" class="video-js vjs-default-skin" width="330" height="186" poster="" controls><source src="" type="video/mp4"/></video>');
 					player.find('source').attr('src', '/' + f.path);
 					var video_id = 'video' + idx++;
 					player.attr('id', video_id);
