@@ -196,6 +196,6 @@
 //    progressControl.on('mouseout', moveCancel);
 //    progressControl.on('touchcancel', moveCancel);
 //    progressControl.on('touchend', moveCancel);
-    player.on('userinactive', moveCancel);
+//    player.on('userinactive', moveCancel);
   });
 })();

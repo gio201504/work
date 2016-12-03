@@ -70,6 +70,7 @@ class IndexController extends AbstractActionController
 	    		$files = array();
 				if(file_exists($fulldir)){
 					foreach(scandir($fulldir) as $f) {
+						$f_utf8 = utf8_encode($f);
 						if(!$f || $f[0] == '.') {
 							continue; // Ignore hidden files
 						}
@@ -77,25 +78,27 @@ class IndexController extends AbstractActionController
 						if(is_dir($fulldir . '/' . $f)) {
 							// The path is a folder
 							$files[] = array(
-								"name" => $f,
+								"name" => $f_utf8,
 								"type" => "folder",
-								"path" => $dir . '/' . $f,
+								"path" => $dir . '/' . $f_utf8,
 								"items" => scan($top_dir, $dir . '/' . $f) // Recursively get the contents of the folder
 							);
 						} else {
 							// It is a file
-							$array = array(
-								"name" => $f,
+							$files[] = array(
+								"name" => $f_utf8,
 								"type" => "file",
-								"path" => $dir . '/' . $f,
+								"path" => $dir . '/' . $f_utf8,
 								"size" => filesize($fulldir . '/' . $f), // Gets the size of this file
-								"fullname" => $fulldir . '/' . $f,
+								"fullname" => $fulldir . '/' . $f_utf8,
 							);
 							
+							/*
 							if (file_exists($top_dir . $thumbs . '/' . $f . '.png'))
 								$files[] = array_merge($array, array("icon" => true));
 							else
 								$files[] = $array;
+							*/
 						}
 					}
 				}
@@ -109,7 +112,7 @@ class IndexController extends AbstractActionController
     		$viewmodel->setTerminal(false);
     		
     		$data = array(
-    				"name" => "files",
+    				"name" => $dir,
     				"type" => "folder",
     				"path" => $dir,
     				"items" => $response,
@@ -158,7 +161,7 @@ class IndexController extends AbstractActionController
 					//$cmd = "ffmpeg -ss " . $time_seconds . " -i " . $basePath . $file . " -vframes 1 -filter:v scale='200:-1' \"" . rawurldecode($thumb_path) . "\"";
     				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
 		    		//shell_exec("/usr/local/bin/ffmpeg -i test.mp3 -codec:a libmp3lame -b:a 128k out.mp3 2>&1");
-		    		shell_exec($cmd);
+		    		shell_exec(utf8_decode($cmd));
     			}
     		}
     		
@@ -172,5 +175,74 @@ class IndexController extends AbstractActionController
     public function getThumbAction()
     {
 		return new ViewModel();
+    }
+    
+    public function getVideoDurationAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();    
+    		$file = $data->file;
+    		$top_dir = "D:/NewsBin64/download";
+    
+    		if (isset($file)) {
+    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
+    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+    			$duration = $outputAndErrors[0];
+    		}
+    
+    		return new JsonModel(array(
+    			'duration' => $duration,
+    		));
+    	}
+    }
+    
+    public function getVideoPreviewAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    
+    		$file = $data->file;
+    		$duration = $data->duration;
+    		$top_dir = "D:/NewsBin64/download";
+    		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
+    		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
+    
+    		if (isset($file) && isset($duration) && !file_exists($out_file)) {
+    			$cmd = 'ffmpeg -i "' . $top_dir . $file . '" -c:v libx264 -filter_complex "[0:v]scale=w=330:h=186[scale],[scale]split=5[copy0][copy1][copy2][copy3][copy4]';
+    			for ($i = 0; $i < 5; $i++) {
+    				$start = intval($i * $duration / 5);
+    				$end = $start + 1;
+    				$cmd .= ',[copy' . $i . ']trim=' . $start . ':' . $end . ',setpts=PTS-STARTPTS[part' . $i . ']';
+    			}
+    			$cmd .= ',[part0][part1][part2][part3][part4]concat=n=5[out]" -map "[out]" "' . $out_file . '"';
+    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+    		} else
+    			$return_value = 0;
+
+    		return new JsonModel(array(
+    			'return_value' => $return_value,
+    			'file' => $preview_file)
+    		);
+    	}
+    }
+    
+    public function checkVideoPreviewExistsAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+
+    		$file = $data->file;
+    		$top_dir = "D:/NewsBin64/download";
+    		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
+    		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
+
+    		return new JsonModel(array(
+    				'return_value'	=> file_exists($out_file),
+    				'file'			=> $preview_file,
+    		));
+    	}
     }
 }
