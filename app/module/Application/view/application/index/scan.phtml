@@ -371,9 +371,11 @@ $(function(){
 									//Sauvegarde chemin de la preview vidéo
 									$(player).data('preview', data.file);
 									//Preview déjà créée on l'affiche
-									player.src($(player).data('preview'));
-									player.loop(true);
-									player.play();
+									if (!player.isFullscreen()) {
+										player.src(data.file);
+										player.loop(true);
+										player.play();
+									}
 								} else {
 									//Génération preview si une génération n'est pas déjà en cours
 									if ($(document).data('requestRunning')) {
@@ -391,11 +393,14 @@ $(function(){
 											return getVideoPreview(player, duration);
 										})
 										.then(function(data) {
-											//Chemin de la preview vidéo
-											player.src(data.file);
+											//Sauvegarde chemin de la preview vidéo
 											$(player).data('preview', data.file);
-											player.loop(true);
-											player.play();
+											//Affichage preview
+											if (!player.isFullscreen()) {
+												player.src(data.file);
+												player.loop(true);
+												player.play();
+											}
 	
 											$(document).data('requestRunning', false);
 										});
@@ -405,9 +410,11 @@ $(function(){
 							});
 					} else {
 						//Preview déjà créée on l'affiche
-						player.src($(player).data('preview'));
-						player.loop(true);
-						player.play();
+						if (!player.isFullscreen()) {
+							player.src($(player).data('preview'));
+							player.loop(true);
+							player.play();
+						}
 					}
 				}
 			});
