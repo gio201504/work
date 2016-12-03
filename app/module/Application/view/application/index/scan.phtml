@@ -371,11 +371,7 @@ $(function(){
 									//Sauvegarde chemin de la preview vidéo
 									$(player).data('preview', data.file);
 									//Preview déjà créée on l'affiche
-									if (!player.isFullscreen()) {
-										player.src(data.file);
-										player.loop(true);
-										player.play();
-									}
+									showVideoPreview(player);
 								} else {
 									//Génération preview si une génération n'est pas déjà en cours
 									if ($(document).data('requestRunning')) {
@@ -396,11 +392,7 @@ $(function(){
 											//Sauvegarde chemin de la preview vidéo
 											$(player).data('preview', data.file);
 											//Affichage preview
-											if (!player.isFullscreen()) {
-												player.src(data.file);
-												player.loop(true);
-												player.play();
-											}
+											showVideoPreview(player);
 	
 											$(document).data('requestRunning', false);
 										});
@@ -410,11 +402,7 @@ $(function(){
 							});
 					} else {
 						//Preview déjà créée on l'affiche
-						if (!player.isFullscreen()) {
-							player.src($(player).data('preview'));
-							player.loop(true);
-							player.play();
-						}
+						showVideoPreview(player);
 					}
 				}
 			});
@@ -525,6 +513,15 @@ var checkVideoPreviewExists = function(player) {
         url: "checkVideoPreviewExists",
         data: { file: file },
     });
+}
+
+var showVideoPreview = function(player) {
+	//Afficher la préview si le pointeur est dessus et hors plein écran
+	if (!player.isFullscreen() && $('#' + player.id() + ':hover').length !== 0) {
+		player.src($(player).data('preview'));
+		player.loop(true);
+		player.play();
+	}
 }
 
 </script>
