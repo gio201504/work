@@ -378,6 +378,11 @@ $(function(){
 								        return;
 								    } else
 										$(document).data('requestRunning', true);
+
+									//Icone de génération preview
+									var fa_refresh = '<i class="fa fa-refresh fa-spin fa-lg fa-fw margin-bottom"></i>';
+									var name = $(player.el()).closest('li').find('span.name');
+									$(name).prepend(fa_refresh);
 									
 									var deferred = $.Deferred();
 									var promise = deferred.promise();
@@ -518,6 +523,10 @@ var checkVideoPreviewExists = function(player) {
 var showVideoPreview = function(player) {
 	//Afficher la préview si le pointeur est dessus et hors plein écran
 	if (!player.isFullscreen() && $('#' + player.id() + ':hover').length !== 0) {
+		//Supprimer l'icône de chargement
+		var name = $(player.el()).prevAll('span.name');
+		$(name).find('i').remove();
+		//Lancer preview
 		player.src($(player).data('preview'));
 		player.loop(true);
 		player.play();
