@@ -715,11 +715,12 @@ var removePreviewIcon = function(player) {
 			foreach ($this->data['items'] as $file):
 				$path = $this->escapeHtml($file['path']);
 				$name = $this->escapeHtml($file['name']);
-				$items = $this->escapeHtml($file['items']);
-				$fileType = $this->escapeHtml($file['type']);
+				$pos = strrpos($name, '.');
+				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
 		?>
 			<?php
 				if ($file['type'] === 'folder'):
+					$items = $this->escapeHtml($file['items']);
 					if ($items === 1) {
 						$items .= ' item';
 					} else if($items > 1) {
@@ -752,7 +753,7 @@ var removePreviewIcon = function(player) {
 					</li>
 				<?php else: ?>
 					<li class="files">
-						<a href="<?= $path ?>" title="<?= path ?>" class="files">
+						<a href="<?= $path ?>" title="<?= $path ?>" class="files">
 							<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
 							<span class="name"><?= $name ?></span>
 							<span class="details"><?= $size ?></span>
