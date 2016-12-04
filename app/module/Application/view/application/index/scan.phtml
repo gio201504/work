@@ -742,14 +742,12 @@ var removePreviewIcon = function(player) {
 			?>
 				<?php if ($fileType === 'mp4'): ?>
 					<li class="files">
-						<a href="<?= $path ?>" title="<?= $path ?>" class="files">
-							<span class="name vid"><?= $name ?></span>
-							<span class="details vid"><?= $size ?></span>
-							<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
-								width="330" height="186" poster="" controls>
-								<source src="<?= '/' . $path ?>" type="video/mp4"/>
-							</video>
-						</a>
+						<span class="name vid"><?= $name ?></span>
+						<span class="details vid"><?= $size ?></span>
+						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
+							width="330" height="186" poster="" controls>
+							<source src="<?= '/' . $path ?>" type="video/mp4"/>
+						</video>
 					</li>
 				<?php else: ?>
 					<li class="files">
