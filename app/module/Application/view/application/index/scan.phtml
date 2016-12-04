@@ -456,6 +456,164 @@ $(function(){
 		return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
 	}
 
+	// Generate the breadcrumbs
+	debugger;
+	var url = '';
+
+	if(filemanager.hasClass('searching')){
+		url = '<span>Search results: </span>';
+		fileList.removeClass('animated');
+	} else {
+		fileList.addClass('animated');
+		breadcrumbsUrls.forEach(function (u, i) {
+			var name = u.split('/');
+
+			if (i !== breadcrumbsUrls.length - 1) {
+				url += '<a href="'+u+'"><span class="folderName">' + name[name.length-1] + '</span></a> <span class="arrow">→</span> ';
+			} else {
+				url += '<span class="folderName">' + name[name.length-1] + '</span>';
+			}
+		});
+	}
+
+	breadcrumbs.text('').append(url);
+
+	// Show the generated elements
+	fileList.css({display:'inline-block'});
+
+	// Initialisation players
+	$(document).data('requestRunning', "");
+	var deferred = $.Deferred();
+	var promise = deferred.promise();
+	$('video').each(function(key, elt) {
+		var player = videojs(elt);
+
+		var addThumb = function(data) {
+			player.addThumb(data.time, {
+        		src: data.file,
+    			style: {
+    			      width: '200px',
+    			    }
+		   	});
+	    };
+
+	    var addPoster = function(data) {
+		    console.log(player.id() + ' addPoster');
+			player.poster(data.file);
+	    };
+
+		//Générer poster image
+		promise
+			.then(function(){ return getVideoDuration(player) })
+			.then(function(data){
+				var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
+				getThumbAjax(player, time_seconds, addPoster);
+			});
+
+		//Plugin de génération des thumbnails
+		player.thumbnails({
+		      0: {
+		          src: ''
+		        }
+		      });
+
+		//Sauvegarde chemin vidéo
+		$(player).data('src', $(player.el()).find('source').attr('src'));
+
+		//Ecoute position souris sur barre de contrôle
+		player.on('thumbupdate', function(evt, data){
+			var player = this;
+			var settings = data.settings;
+			var video_id = player.el();
+			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+
+			getThumbAjax(player, time, addThumb);
+	    });
+
+		//Affichage preview vidéo lors du passage de la souris sur son emplacement
+		player.on('mouseover', function(){
+			if (!player.isFullscreen()
+					&& $(document).data('requestRunning') !== player.id()) {
+				console.log(player.id() + ' mouseover');
+				player.controls(false);
+
+				//Si preview absente la générer
+				if ($(player).data('preview') === undefined) {
+					//Vérifier existence de la preview
+					$.when(checkVideoPreviewExists(player))
+						.then(function(data) {
+							if (data.return_value === true) {
+								//Sauvegarde chemin de la preview vidéo
+								$(player).data('preview', data.file);
+								//Preview déjà créée on l'affiche
+								showVideoPreview(player);
+							} else {
+								//Génération preview si une génération n'est pas déjà en cours
+								if ($(document).data('requestRunning')) {
+							        return;
+							    } else
+									$(document).data('requestRunning', player.id());
+
+								//Icone de génération preview
+								var fa_refresh = '<i class="fa fa-refresh fa-spin fa-lg fa-fw margin-bottom"></i>';
+								var name = $(player.el()).closest('li').find('span.name');
+								$(name).prepend(fa_refresh);
+								
+								var deferred = $.Deferred();
+								var promise = deferred.promise();
+								//Générer la preview video
+								promise
+									.then(function(){ return getVideoDuration(player) })
+									.then(function(data){
+										var duration = Math.trunc(data.duration);
+										return getVideoPreview(player, duration);
+									})
+									.then(function(data) {
+										//Sauvegarde chemin de la preview vidéo
+										$(player).data('preview', data.file);
+										//Affichage preview
+										removePreviewIcon(player);
+										showVideoPreview(player);
+
+										$(document).data('requestRunning', "");
+									});
+				
+								deferred.resolve();
+							}
+						});
+				} else {
+					//Preview déjà créée on l'affiche
+					showVideoPreview(player);
+				}
+			}
+		});
+
+		player.on('mouseleave', function(){
+			if ($(player).data('preview') !== undefined && !player.isFullscreen()){
+				console.log(player.id() + ' mouseleave');
+				player.pause();
+				//Restitution chemin vidéo
+				player.src($(player).data('src'));
+				player.controls(true);
+			}
+		});
+
+		player.on('click', function(evt){
+			if (!player.isFullscreen()) {
+				player.controls(true);
+				player.src($(player).data('src'));
+				player.play();
+				player.requestFullscreen();
+				evt.preventDefault();
+			}
+		});
+
+	});
+
+	deferred.resolve();
+
+	$('.vjs-loading-spinner').hide();
+
 });
 
 var getThumbAjax = function(player, time, callback) {
@@ -559,7 +717,16 @@ var removePreviewIcon = function(player) {
 				$items = $this->escapeHtml($file['items']);
 				$fileType = $this->escapeHtml($file['type']);
 		?>
-			<?php if ($file['type'] === 'folder'): ?>
+			<?php
+				if ($file['type'] === 'folder'):
+					if ($items === 1) {
+						$items .= ' item';
+					} else if($items > 1) {
+						$items .= ' items';
+					} else {
+						$items = 'Empty';
+					}
+			?>
 				<li class="folders">
 					<a href="<?= $path ?>" title="<?= $path ?>" class="folders">
 						<span class="icon folder full"></span>
@@ -585,7 +752,7 @@ var removePreviewIcon = function(player) {
 				<?php else: ?>
 					<li class="files">
 						<a href="<?= $path ?>" title="<?= path ?>" class="files">
-							<span class="icon file f-<?= $fileType ?>><?= $fileType ?></span>
+							<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
 							<span class="name"><?= $name ?></span>
 							<span class="details"><?= $size ?></span>
 						</a>
