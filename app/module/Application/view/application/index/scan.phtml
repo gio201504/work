@@ -18,21 +18,19 @@ $(function(){
 		breadcrumbs = $('.breadcrumbs'),
 		fileList = filemanager.find('.data');
 
-	var data = <?= $this->data; ?>;
-	var response = [data],
-		currentPath = '',
-		breadcrumbsUrls = [];
+	var currentPath = '';
+	var	breadcrumbsUrls = [];
 
 	var folders = [],
 		files = [];
 
 	// This event listener monitors changes on the URL. We use it to
 	// capture back/forward navigation in the browser.
-	$(window).on('hashchange', function(){
-		goto(window.location.hash);
-		// We are triggering the event. This will execute 
-		// this function on page load, so that we show the correct folder:
-	}).trigger('hashchange');
+// 	$(window).on('hashchange', function(){
+// 		goto(window.location.hash);
+// 		// We are triggering the event. This will execute 
+// 		// this function on page load, so that we show the correct folder:
+// 	}).trigger('hashchange');
 
 	// Hiding and showing the search box
 	filemanager.find('.search').click(function(){
@@ -78,6 +76,7 @@ $(function(){
 	// Clicking on folders
 	fileList.on('click', 'li.folders', function(e){
 		e.preventDefault();
+		debugger;
 
 		var nextDir = $(this).find('a.folders').attr('href');
 		if(filemanager.hasClass('searching')) {
@@ -91,7 +90,9 @@ $(function(){
 			breadcrumbsUrls.push(nextDir);
 		}
 
-		window.location.hash = encodeURIComponent(nextDir);
+		//window.location.hash = encodeURIComponent(nextDir);
+		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
+		window.location = url;
 		currentPath = nextDir;
 	});
 
@@ -228,7 +229,7 @@ $(function(){
 	
 		if(scannedFolders.length) {
 			scannedFolders.forEach(function(f) {
-				var itemsLength = f.items.length,
+				var itemsLength = f.items/*.length*/,
 					name = escapeHTML(f.name),
 					icon = '<span class="icon folder"></span>';
 	

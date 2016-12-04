@@ -61,10 +61,22 @@ class IndexController extends AbstractActionController
     		$dir = $data->dir;
     
     		$top_dir = "D:/NewsBin64/download/";
-    		$dir = "files";
+    		$dir = isset($dir) ? $dir : "files";
+    		
+    		function countFiles($directory) {
+	    		$files = glob($directory . '/*');
+	    		
+	    		if ( $files !== false )
+	    		{
+	    			$filecount = count($files);
+	    			return $filecount;
+	    		}
+	    		else
+	    			return 0;
+    		}
 
     		function scan($top_dir, $dir){
-    			$thumbs = "thumbs";
+//     			$thumbs = "thumbs";
     			$fulldir = $top_dir . $dir;
 				// Is there actually such a folder/file?
 	    		$files = array();
@@ -81,7 +93,7 @@ class IndexController extends AbstractActionController
 								"name" => $f_utf8,
 								"type" => "folder",
 								"path" => $dir . '/' . $f_utf8,
-								"items" => scan($top_dir, $dir . '/' . $f) // Recursively get the contents of the folder
+								"items" => countFiles($top_dir . $dir . '/' . $f),
 							);
 						} else {
 							// It is a file
@@ -119,7 +131,8 @@ class IndexController extends AbstractActionController
     		);
 
     		$viewmodel->setVariables(array(
-    				"data" => json_encode($data),
+    				//"data" => json_encode($data),
+    				"data" => $data,
     		));
     
     		return $viewmodel;
