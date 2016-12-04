@@ -63,6 +63,14 @@ class IndexController extends AbstractActionController
     		$top_dir = "D:/NewsBin64/download/";
     		$dir = isset($dir) ? $dir : "files";
     		
+    		// Convert file sizes from bytes to human readable units
+    		function bytesToSize($bytes) {
+    			$sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB');
+    			if ($bytes === 0) return '0 Bytes';
+    			$i = intval(log($bytes) / log(1024));
+    			return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
+    		}
+    		
     		function countFiles($directory) {
 	    		$files = glob($directory . '/*');
 	    		
@@ -101,7 +109,7 @@ class IndexController extends AbstractActionController
 								"name" => $f_utf8,
 								"type" => "file",
 								"path" => $dir . '/' . $f_utf8,
-								"size" => filesize($fulldir . '/' . $f), // Gets the size of this file
+								"size" => bytesToSize(filesize($fulldir . '/' . $f)),
 								"fullname" => $fulldir . '/' . $f_utf8,
 							);
 							
