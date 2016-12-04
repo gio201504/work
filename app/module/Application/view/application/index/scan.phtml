@@ -558,7 +558,6 @@ var removePreviewIcon = function(player) {
 				$name = $this->escapeHtml($file['name']);
 				$items = $this->escapeHtml($file['items']);
 				$fileType = $this->escapeHtml($file['type']);
-				$size = $this->escapeHtml($file['size']);
 		?>
 			<?php if ($file['type'] === 'folder'): ?>
 				<li class="folders">
@@ -568,7 +567,10 @@ var removePreviewIcon = function(player) {
 						<span class="details"><?= $items ?></span>
 					</a>
 				</li>
-			<?php else: ?>
+			<?php
+				else:
+				$size = $this->escapeHtml($file['size']);
+			?>
 				<?php if ($file['type'] === 'mp4'): ?>
 					<li class="files">
 						<a href="<?= $path ?>" title="<?= path ?>" class="files">
