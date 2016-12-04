@@ -459,6 +459,7 @@ $(function(){
 	// Generate the breadcrumbs
 	debugger;
 	var url = '';
+	breadcrumbsUrls = generateBreadcrumbs("<?= $this->escapeHtml($data['path']) ?>");
 
 	if(filemanager.hasClass('searching')){
 		url = '<span>Search results: </span>';
