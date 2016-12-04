@@ -76,7 +76,6 @@ $(function(){
 	// Clicking on folders
 	fileList.on('click', 'li.folders', function(e){
 		e.preventDefault();
-		debugger;
 
 		var nextDir = $(this).find('a.folders').attr('href');
 		if(filemanager.hasClass('searching')) {
@@ -104,7 +103,9 @@ $(function(){
 			nextDir = breadcrumbsUrls[index];
 
 		breadcrumbsUrls.length = Number(index);
-		window.location.hash = encodeURIComponent(nextDir);
+		//window.location.hash = encodeURIComponent(nextDir);
+		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
+		window.location = url;
 	});
 
 	// Navigates to the given hash (path)
