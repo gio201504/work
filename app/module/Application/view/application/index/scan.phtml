@@ -507,6 +507,7 @@ $(function(){
 			.then(function(){ return getVideoDuration(player) })
 			.then(function(data){
 				var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
+				console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
 				getThumbAjax(player, time_seconds, addPoster);
 			});
 
@@ -659,7 +660,7 @@ var getVideoDuration = function(player, callback) {
 }
 
 var getVideoPreview = function(player, duration) {
-	console.log(player.id() + ' getVideoPreview');
+	console.log(player.id() + ' getVideoPreview duration=' + duration);
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
 

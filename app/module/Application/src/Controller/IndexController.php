@@ -204,7 +204,7 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();    
     		$file = $data->file;
-    		$top_dir = "D:/NewsBin64/download";
+    		$top_dir = "D:/NewsBin64/download/";
     
     		if (isset($file)) {
     			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
