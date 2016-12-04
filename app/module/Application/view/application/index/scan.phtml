@@ -280,8 +280,8 @@ $(function(){
 					file.appendTo(fileList);
 				}
 
-				if (f.icon)
-					$(file).addClass("thumbs");
+// 				if (f.icon)
+// 					$(file).addClass("thumbs");
 			});
 		}
 	
@@ -550,7 +550,48 @@ var removePreviewIcon = function(player) {
 
 	<div class="breadcrumbs"></div>
 
-	<ul class="data"></ul>
+	<ul class="data">
+		<?php
+			$idx = 0;
+			foreach ($this->data['items'] as $file):
+				$path = $this->escapeHtml($file['path']);
+				$name = $this->escapeHtml($file['name']);
+				$items = $this->escapeHtml($file['items']);
+				$fileType = $this->escapeHtml($file['type']);
+				$size = $this->escapeHtml($file['size']);
+		?>
+			<?php if ($file['type'] === 'folder'): ?>
+				<li class="folders">
+					<a href="<?= $path ?>" title="<?= $path ?>" class="folders">
+						<span class="icon folder full"></span>
+						<span class="name"><?= $name ?></span>
+						<span class="details"><?= $items ?></span>
+					</a>
+				</li>
+			<?php else: ?>
+				<?php if ($file['type'] === 'mp4'): ?>
+					<li class="files">
+						<a href="<?= $path ?>" title="<?= path ?>" class="files">
+							<span class="name vid"><?= $name ?></span>
+							<span class="details vid"><?= $size ?></span>
+							<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
+								width="330" height="186" poster="" controls>
+								<source src="<?= path ?>" type="video/mp4"/>
+							</video>
+						</a>
+					</li>
+				<?php else: ?>
+					<li class="files">
+						<a href="<?= $path ?>" title="<?= path ?>" class="files">
+							<span class="icon file f-<?= $fileType ?>><?= $fileType ?></span>
+							<span class="name"><?= $name ?></span>
+							<span class="details"><?= $size ?></span>
+						</a>
+					</li>
+				<?php endif; ?>
+			<?php endif; ?>
+		<?php endforeach; ?>
+	</ul>
 
 	<div class="nothingfound">
 		<div class="nofiles"></div>
