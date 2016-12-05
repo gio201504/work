@@ -51,27 +51,45 @@ $(function(){
 			filemanager.addClass('searching');
 
 			// Update the hash on every key stroke
-			window.location.hash = 'search=' + value.trim();
+			//window.location.hash = 'search=' + value.trim();
+			//var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({search: value.trim()});
+			//window.location = url;
 		} else {
 			filemanager.removeClass('searching');
-			window.location.hash = encodeURIComponent(currentPath);
+			//window.location.hash = encodeURIComponent(currentPath);
 		}
 	}).on('keyup', function(e){
 		// Clicking 'ESC' button triggers focusout and cancels the search
 		var search = $(this);
 
-		if(e.keyCode == 27) {
-			search.trigger('focusout');
+		//ESC
+		if(e.keyCode === 27) {
+			search.hide();
 		}
-	}).focusout(function(e){
+
+		//Enter
+		if(e.keyCode === 13) {
+			var dir = $.urlParam('dir');
+			dir = decodeURIComponent(dir);
+			//search.trigger('focusout');
+			var value = this.value.trim();
+			var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: dir, search: value.trim()});
+			window.location = url;
+		}
+	})/*.focusout(function(e){
+		debugger;
 		// Cancel the search
 		var search = $(this);
 		if(!search.val().trim().length) {
-			window.location.hash = encodeURIComponent(currentPath);
+			//window.location.hash = encodeURIComponent(currentPath);
 			search.hide();
 			search.parent().find('span').show();
+		} else {
+			var value = this.value.trim();
+			var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({search: value.trim()});
+			window.location = url;
 		}
-	});
+	})*/;
 
 	// Clicking on folders
 	fileList.on('click', 'li.folders', function(e){
@@ -698,6 +716,11 @@ var removePreviewIcon = function(player) {
 	//Supprimer l'icône de génération de la preview
 	var name = $(player.el()).prevAll('span.name');
 	$(name).find('i').remove();
+}
+
+$.urlParam = function(name){
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	return 0 || (results && results[1]);
 }
 
 </script>

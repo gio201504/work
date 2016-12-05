@@ -59,9 +59,11 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$dir = $data->dir;
+    		$search = $data->search;
+    		$search = empty($search) ? null : $search;
     
     		$top_dir = "D:/NewsBin64/download/";
-    		$dir = isset($dir) ? $dir : "files";
+    		$dir = (isset($dir) && !empty($dir)) ? $dir : "files";
     		
     		// Convert file sizes from bytes to human readable units
     		function bytesToSize($bytes) {
@@ -71,8 +73,11 @@ class IndexController extends AbstractActionController
     			return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
     		}
     		
-    		function countFiles($directory) {
-	    		$files = glob($directory . '/*');
+    		function countFiles($directory, $search = null) {
+    			if ($search === null)
+	    			$files = glob($directory . '/*');
+    			else
+    				$files = glob($directory . '/*' . $search . '*');
 	    		
 	    		if ( $files !== false )
 	    		{
@@ -83,25 +88,30 @@ class IndexController extends AbstractActionController
 	    			return 0;
     		}
 
-    		function scan($top_dir, $dir){
+    		function scan($top_dir, $dir, $search = null) {
 //     			$thumbs = "thumbs";
     			$fulldir = $top_dir . $dir;
 				// Is there actually such a folder/file?
 	    		$files = array();
 				if(file_exists($fulldir)){
 					foreach(scandir($fulldir) as $f) {
-						$f_utf8 = utf8_encode($f);
 						if(!$f || $f[0] == '.') {
 							continue; // Ignore hidden files
 						}
-			
+						
+						if ($search !== null
+								&& strpos($f, $search) === false
+	    						&& !is_dir($fulldir . '/' . $f))
+							continue;
+						
+						$f_utf8 = utf8_encode($f);
 						if(is_dir($fulldir . '/' . $f)) {
 							// The path is a folder
 							$files[] = array(
 								"name" => $f_utf8,
 								"type" => "folder",
 								"path" => $dir . '/' . $f_utf8,
-								"items" => countFiles($top_dir . $dir . '/' . $f),
+								"items" => countFiles($top_dir . $dir . '/' . $f, $search),
 							);
 						} else {
 							// It is a file
@@ -126,7 +136,7 @@ class IndexController extends AbstractActionController
 				return $files;
     		}
     		
-    		$response = scan($top_dir, $dir);
+    		$response = scan($top_dir, $dir, $search);
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
