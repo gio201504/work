@@ -271,7 +271,7 @@ class IndexController extends AbstractActionController
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
 
     		return new JsonModel(array(
-    				'return_value'	=> file_exists($out_file),
+    				'return_value'	=> file_exists(utf8_decode($out_file)),
     				'file'			=> $preview_file,
     		));
     	}
