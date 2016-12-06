@@ -63,7 +63,7 @@ class IndexController extends AbstractActionController
     		$search = empty($search) ? null : $search;
     
     		$top_dir = apache_getenv('top_dir') . '/';
-    		$dir = (isset($dir) && !empty($dir)) ? $dir : "files";
+    		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
     		
     		// Convert file sizes from bytes to human readable units
     		function bytesToSize($bytes) {
