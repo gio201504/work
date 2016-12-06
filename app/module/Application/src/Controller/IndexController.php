@@ -29,7 +29,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		
-    		$dir = "D:/NewsBin64/download/tmp";
+    		$dir = apache_getenv('top_dir') . "/tmp";
     		
     		// Open a directory, and read its contents
     		$fileList = array();
@@ -62,7 +62,7 @@ class IndexController extends AbstractActionController
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
     
-    		$top_dir = "D:/NewsBin64/download/";
+    		$top_dir = apache_getenv('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : "files";
     		
     		// Convert file sizes from bytes to human readable units
@@ -167,7 +167,7 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = "D:/NewsBin64/download";
+    		$top_dir = apache_getenv('top_dir');
     		
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
@@ -214,7 +214,7 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();    
     		$file = $data->file;
-    		$top_dir = "D:/NewsBin64/download/";
+    		$top_dir = apache_getenv('top_dir') . '/';
     
     		if (isset($file)) {
     			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
@@ -236,7 +236,7 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$duration = $data->duration;
-    		$top_dir = "D:/NewsBin64/download";
+    		$top_dir = apache_getenv('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
     
@@ -266,7 +266,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
 
     		$file = $data->file;
-    		$top_dir = "D:/NewsBin64/download";
+    		$top_dir = apache_getenv('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
 
