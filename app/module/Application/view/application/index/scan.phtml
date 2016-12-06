@@ -530,6 +530,23 @@ $(function(){
 				getThumbAjax(player, time_seconds, addPoster);
 			});
 
+		//Tester présence de la preview
+		$.when(checkVideoPreviewExists(player))
+			.then(function(data) {
+				//Icone de génération preview
+				var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
+				var name = $(player.el()).closest('li').find('span.name');
+				$(name).prepend(fa_refresh);
+				
+				if (data.return_value === true) {
+					//Preview existe
+					$(name).find('> i').css('color', 'green');
+				} else {
+					//Pas de preview
+					$(name).find('> i').css('color', 'red');
+				}
+			});
+
 		//Plugin de génération des thumbnails
 		player.thumbnails({
 		      0: {
@@ -575,9 +592,9 @@ $(function(){
 									$(document).data('requestRunning', player.id());
 
 								//Icone de génération preview
-								var fa_refresh = '<i class="fa fa-refresh fa-spin fa-lg fa-fw margin-bottom"></i>';
 								var name = $(player.el()).closest('li').find('span.name');
-								$(name).prepend(fa_refresh);
+								var fa_refresh = $(name).find('> i');
+								$(fa_refresh).addClass('fa-spin');
 								
 								var deferred = $.Deferred();
 								var promise = deferred.promise();
@@ -592,7 +609,8 @@ $(function(){
 										//Sauvegarde chemin de la preview vidéo
 										$(player).data('preview', data.file);
 										//Affichage preview
-										removePreviewIcon(player);
+										$(fa_refresh).css('color', 'green').removeClass('fa-spin');
+										//removePreviewIcon(player);
 										showVideoPreview(player);
 
 										$(document).data('requestRunning', "");
