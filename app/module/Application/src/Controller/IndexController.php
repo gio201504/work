@@ -69,7 +69,7 @@ class IndexController extends AbstractActionController
     		function bytesToSize($bytes) {
     			$sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB');
     			if ($bytes === 0) return '0 Bytes';
-    			$i = intval(log($bytes) / log(1024));
+    			$i = floor(log($bytes) / log(1024));
     			return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
     		}
     		
