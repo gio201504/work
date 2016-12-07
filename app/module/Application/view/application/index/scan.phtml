@@ -541,9 +541,17 @@ $(function(){
 				if (data.return_value === true) {
 					//Preview existe
 					$(name).find('> i').css('color', 'green');
+					$(player).data('hasPreview', true);
 				} else {
 					//Pas de preview
 					$(name).find('> i').css('color', 'red');
+					$(player).data('hasPreview', false);
+
+					//Génération de la preview par click sur icône refresh rouge
+					$(name).find('> i').one('click', function(evt) {
+						debugger;
+						generatePreview(player);
+					});
 				}
 			});
 
@@ -572,62 +580,16 @@ $(function(){
 			if (!player.isFullscreen()
 					&& $(document).data('requestRunning') !== player.id()) {
 				console.log(player.id() + ' mouseover');
-				player.controls(false);
 
-				//Si preview absente la générer
-				if ($(player).data('preview') === undefined) {
-					//Vérifier existence de la preview
-					$.when(checkVideoPreviewExists(player))
-						.then(function(data) {
-							if (data.return_value === true) {
-								//Sauvegarde chemin de la preview vidéo
-								$(player).data('preview', data.file);
-								//Preview déjà créée on l'affiche
-								showVideoPreview(player);
-							} else {
-								//Génération preview si une génération n'est pas déjà en cours
-								if ($(document).data('requestRunning')) {
-							        return;
-							    } else
-									$(document).data('requestRunning', player.id());
-
-								//Icone de génération preview
-								var name = $(player.el()).closest('li').find('span.name');
-								var fa_refresh = $(name).find('> i');
-								$(fa_refresh).addClass('fa-spin');
-								
-								var deferred = $.Deferred();
-								var promise = deferred.promise();
-								//Générer la preview video
-								promise
-									.then(function(){ return getVideoDuration(player) })
-									.then(function(data){
-										var duration = Math.trunc(data.duration);
-										return getVideoPreview(player, duration);
-									})
-									.then(function(data) {
-										//Sauvegarde chemin de la preview vidéo
-										$(player).data('preview', data.file);
-										//Affichage preview
-										$(fa_refresh).css('color', 'green').removeClass('fa-spin');
-										//removePreviewIcon(player);
-										showVideoPreview(player);
-
-										$(document).data('requestRunning', "");
-									});
-				
-								deferred.resolve();
-							}
-						});
-				} else {
-					//Preview déjà créée on l'affiche
-					showVideoPreview(player);
+				//Si preview déjà créée on l'affiche
+				if ($(player).data('hasPreview') === true) {
+					generatePreview(player);
 				}
 			}
 		});
 
 		player.on('mouseleave', function(){
-			if ($(player).data('preview') !== undefined && !player.isFullscreen()){
+			if ($(player).data('hasPreview') === true && !player.isFullscreen()){
 				console.log(player.id() + ' mouseleave');
 				player.pause();
 				//Restitution chemin vidéo
@@ -739,6 +701,66 @@ var removePreviewIcon = function(player) {
 $.urlParam = function(name){
 	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
 	return 0 || (results && results[1]);
+}
+
+var generatePreview = function(player) {
+	debugger;
+	if (!player.isFullscreen()
+			&& $(document).data('requestRunning') !== player.id()) {
+		console.log(player.id() + ' mouseover');
+		player.controls(false);
+
+		//Si preview absente la générer
+		if ($(player).data('preview') === undefined) {
+			//Vérifier existence de la preview
+			$.when(checkVideoPreviewExists(player))
+				.then(function(data) {
+					if (data.return_value === true) {
+						//Sauvegarde chemin de la preview vidéo
+						$(player).data('preview', data.file);
+						//Preview déjà créée on l'affiche
+						showVideoPreview(player);
+					} else {
+						//Génération preview si une génération n'est pas déjà en cours
+						if ($(document).data('requestRunning')) {
+					        return;
+					    } else
+							$(document).data('requestRunning', player.id());
+
+						//Icone de génération preview
+						var name = $(player.el()).closest('li').find('span.name');
+						var fa_refresh = $(name).find('> i');
+						$(fa_refresh).addClass('fa-spin');
+						
+						var deferred = $.Deferred();
+						var promise = deferred.promise();
+						//Générer la preview video
+						promise
+							.then(function(){ return getVideoDuration(player) })
+							.then(function(data){
+								var duration = Math.trunc(data.duration);
+								return getVideoPreview(player, duration);
+							})
+							.then(function(data) {
+								//Sauvegarde chemin de la preview vidéo
+								$(player).data('preview', data.file);
+								//Affichage preview
+								$(fa_refresh).css('color', 'green').removeClass('fa-spin');
+								//removePreviewIcon(player);
+								$(player).data('hasPreview', true);
+								showVideoPreview(player);
+
+								$(document).data('requestRunning', "");
+							});
+		
+						deferred.resolve();
+					}
+				});
+		} else {
+			//Preview déjà créée on l'affiche
+			showVideoPreview(player);
+		}
+	}
 }
 
 </script>
