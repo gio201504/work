@@ -77,7 +77,6 @@ $(function(){
 			window.location = url;
 		}
 	})/*.focusout(function(e){
-		debugger;
 		// Cancel the search
 		var search = $(this);
 		if(!search.val().trim().length) {
@@ -549,7 +548,6 @@ $(function(){
 
 					//Génération de la preview par click sur icône refresh rouge
 					$(name).find('> i').one('click', function(evt) {
-						debugger;
 						generatePreview(player);
 					});
 				}
@@ -704,7 +702,6 @@ $.urlParam = function(name){
 }
 
 var generatePreview = function(player) {
-	debugger;
 	if (!player.isFullscreen()
 			&& $(document).data('requestRunning') !== player.id()) {
 		console.log(player.id() + ' mouseover');
