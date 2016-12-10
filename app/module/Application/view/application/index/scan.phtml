@@ -310,11 +310,17 @@ $(function(){
 
 		player.on('click', function(evt){
 			if (!player.isFullscreen()) {
-				player.controls(true);
-				player.src($(player).data('src'));
-				player.play();
-				player.requestFullscreen();
-				evt.preventDefault();
+				var videoType = $(player.el()).data('type');
+				var src = $(player).data('src');
+				if (videoType === 'mp4') {
+					evt.preventDefault();
+					player.controls(true);
+					player.src(src);
+					player.play();
+					player.requestFullscreen();
+				} else {
+					window.location = src;
+				}
 			}
 		});
 
@@ -513,18 +519,22 @@ var generatePreview = function(player) {
 				else:
 				$size = $this->escapeHtml($file['size']);
 			?>
-				<?php if ($fileType === 'mp4'): ?>
+				<?php if ($fileType === 'mp4'
+						|| $fileType === 'avi'
+						|| $fileType === 'wmv'
+						|| $fileType === 'mkv'
+						|| $fileType === 'flv'): ?>
 					<li class="files">
 						<span class="name vid"><?= $name ?></span>
 						<span class="details vid"><?= $size ?></span>
 						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
-							width="330" height="186" poster="" controls>
+							width="330" height="186" poster="" controls data-type="<?= $fileType ?>">
 							<source src="<?= '/' . $path ?>" type="video/mp4"/>
 						</video>
 					</li>
 				<?php else: ?>
 					<li class="files">
-						<a href="<?= $path ?>" title="<?= $path ?>" class="files">
+						<a href="<?= '/' . $path ?>" title="<?= $path ?>" class="files">
 							<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
 							<span class="name"><?= $name ?></span>
 							<span class="details"><?= $size ?></span>
