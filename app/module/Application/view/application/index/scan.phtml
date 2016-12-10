@@ -299,13 +299,13 @@ $(function(){
 		});
 
 		player.on('mouseleave', function(){
-			if ($(player).data('hasPreview') === true && !player.isFullscreen()){
+			//if ($(player).data('hasPreview') === true && !player.isFullscreen()){
 				console.log(player.id() + ' mouseleave');
 				player.pause();
 				//Restitution chemin vidéo
 				player.src($(player).data('src'));
 				player.controls(true);
-			}
+			//}
 		});
 
 		player.on('click', function(evt){
