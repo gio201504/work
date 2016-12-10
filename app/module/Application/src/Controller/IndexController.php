@@ -29,7 +29,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		
-    		$dir = "D:/NewsBin64/download/tmp";
+    		$dir = apache_getenv('top_dir') . "/tmp";
     		
     		// Open a directory, and read its contents
     		$fileList = array();
@@ -59,29 +59,59 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$dir = $data->dir;
+    		$search = $data->search;
+    		$search = empty($search) ? null : $search;
     
-    		$top_dir = "D:/NewsBin64/download/";
-    		$dir = "files";
+    		$top_dir = apache_getenv('top_dir') . '/';
+    		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
+    		
+    		// Convert file sizes from bytes to human readable units
+    		function bytesToSize($bytes) {
+    			$sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB');
+    			if ($bytes === 0) return '0 Bytes';
+    			$i = floor(log($bytes) / log(1024));
+    			return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
+    		}
+    		
+    		function countFiles($directory, $search = null) {
+    			if ($search === null)
+	    			$files = glob($directory . '/*');
+    			else
+    				$files = glob($directory . '/*' . $search . '*');
+	    		
+	    		if ( $files !== false )
+	    		{
+	    			$filecount = count($files);
+	    			return $filecount;
+	    		}
+	    		else
+	    			return 0;
+    		}
 
-    		function scan($top_dir, $dir){
-    			$thumbs = "thumbs";
+    		function scan($top_dir, $dir, $search = null) {
+//     			$thumbs = "thumbs";
     			$fulldir = $top_dir . $dir;
 				// Is there actually such a folder/file?
 	    		$files = array();
 				if(file_exists($fulldir)){
 					foreach(scandir($fulldir) as $f) {
-						$f_utf8 = utf8_encode($f);
 						if(!$f || $f[0] == '.') {
 							continue; // Ignore hidden files
 						}
-			
+						
+						if ($search !== null
+								&& strpos($f, $search) === false
+	    						&& !is_dir($fulldir . '/' . $f))
+							continue;
+						
+						$f_utf8 = utf8_encode($f);
 						if(is_dir($fulldir . '/' . $f)) {
 							// The path is a folder
 							$files[] = array(
 								"name" => $f_utf8,
 								"type" => "folder",
 								"path" => $dir . '/' . $f_utf8,
-								"items" => scan($top_dir, $dir . '/' . $f) // Recursively get the contents of the folder
+								"items" => countFiles($top_dir . $dir . '/' . $f, $search),
 							);
 						} else {
 							// It is a file
@@ -89,7 +119,7 @@ class IndexController extends AbstractActionController
 								"name" => $f_utf8,
 								"type" => "file",
 								"path" => $dir . '/' . $f_utf8,
-								"size" => filesize($fulldir . '/' . $f), // Gets the size of this file
+								"size" => bytesToSize(filesize($fulldir . '/' . $f)),
 								"fullname" => $fulldir . '/' . $f_utf8,
 							);
 							
@@ -106,7 +136,7 @@ class IndexController extends AbstractActionController
 				return $files;
     		}
     		
-    		$response = scan($top_dir, $dir);
+    		$response = scan($top_dir, $dir, $search);
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
@@ -119,7 +149,8 @@ class IndexController extends AbstractActionController
     		);
 
     		$viewmodel->setVariables(array(
-    				"data" => json_encode($data),
+    				//"data" => json_encode($data),
+    				"data" => $data,
     		));
     
     		return $viewmodel;
@@ -136,7 +167,7 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = "D:/NewsBin64/download";
+    		$top_dir = apache_getenv('top_dir');
     		
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
@@ -183,7 +214,7 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();    
     		$file = $data->file;
-    		$top_dir = "D:/NewsBin64/download";
+    		$top_dir = apache_getenv('top_dir') . '/';
     
     		if (isset($file)) {
     			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
@@ -205,7 +236,7 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$duration = $data->duration;
-    		$top_dir = "D:/NewsBin64/download";
+    		$top_dir = apache_getenv('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
     
@@ -235,12 +266,12 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
 
     		$file = $data->file;
-    		$top_dir = "D:/NewsBin64/download";
+    		$top_dir = apache_getenv('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
 
     		return new JsonModel(array(
-    				'return_value'	=> file_exists($out_file),
+    				'return_value'	=> file_exists(utf8_decode($out_file)),
     				'file'			=> $preview_file,
     		));
     	}

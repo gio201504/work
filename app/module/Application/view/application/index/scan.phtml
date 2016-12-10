@@ -18,21 +18,19 @@ $(function(){
 		breadcrumbs = $('.breadcrumbs'),
 		fileList = filemanager.find('.data');
 
-	var data = <?= $this->data; ?>;
-	var response = [data],
-		currentPath = '',
-		breadcrumbsUrls = [];
+	var currentPath = '';
+	var	breadcrumbsUrls = [];
 
 	var folders = [],
 		files = [];
 
 	// This event listener monitors changes on the URL. We use it to
 	// capture back/forward navigation in the browser.
-	$(window).on('hashchange', function(){
-		goto(window.location.hash);
-		// We are triggering the event. This will execute 
-		// this function on page load, so that we show the correct folder:
-	}).trigger('hashchange');
+// 	$(window).on('hashchange', function(){
+// 		goto(window.location.hash);
+// 		// We are triggering the event. This will execute 
+// 		// this function on page load, so that we show the correct folder:
+// 	}).trigger('hashchange');
 
 	// Hiding and showing the search box
 	filemanager.find('.search').click(function(){
@@ -53,27 +51,44 @@ $(function(){
 			filemanager.addClass('searching');
 
 			// Update the hash on every key stroke
-			window.location.hash = 'search=' + value.trim();
+			//window.location.hash = 'search=' + value.trim();
+			//var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({search: value.trim()});
+			//window.location = url;
 		} else {
 			filemanager.removeClass('searching');
-			window.location.hash = encodeURIComponent(currentPath);
+			//window.location.hash = encodeURIComponent(currentPath);
 		}
 	}).on('keyup', function(e){
 		// Clicking 'ESC' button triggers focusout and cancels the search
 		var search = $(this);
 
-		if(e.keyCode == 27) {
-			search.trigger('focusout');
+		//ESC
+		if(e.keyCode === 27) {
+			search.hide();
 		}
-	}).focusout(function(e){
+
+		//Enter
+		if(e.keyCode === 13) {
+			var dir = $.urlParam('dir');
+			dir = decodeURIComponent(dir);
+			//search.trigger('focusout');
+			var value = this.value.trim();
+			var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: dir, search: value.trim()});
+			window.location = url;
+		}
+	})/*.focusout(function(e){
 		// Cancel the search
 		var search = $(this);
 		if(!search.val().trim().length) {
-			window.location.hash = encodeURIComponent(currentPath);
+			//window.location.hash = encodeURIComponent(currentPath);
 			search.hide();
 			search.parent().find('span').show();
+		} else {
+			var value = this.value.trim();
+			var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({search: value.trim()});
+			window.location = url;
 		}
-	});
+	})*/;
 
 	// Clicking on folders
 	fileList.on('click', 'li.folders', function(e){
@@ -91,7 +106,9 @@ $(function(){
 			breadcrumbsUrls.push(nextDir);
 		}
 
-		window.location.hash = encodeURIComponent(nextDir);
+		//window.location.hash = encodeURIComponent(nextDir);
+		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
+		window.location = url;
 		currentPath = nextDir;
 	});
 
@@ -103,7 +120,9 @@ $(function(){
 			nextDir = breadcrumbsUrls[index];
 
 		breadcrumbsUrls.length = Number(index);
-		window.location.hash = encodeURIComponent(nextDir);
+		//window.location.hash = encodeURIComponent(nextDir);
+		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
+		window.location = url;
 	});
 
 	// Navigates to the given hash (path)
@@ -228,7 +247,7 @@ $(function(){
 	
 		if(scannedFolders.length) {
 			scannedFolders.forEach(function(f) {
-				var itemsLength = f.items.length,
+				var itemsLength = f.items/*.length*/,
 					name = escapeHTML(f.name),
 					icon = '<span class="icon folder"></span>';
 	
@@ -279,8 +298,8 @@ $(function(){
 					file.appendTo(fileList);
 				}
 
-				if (f.icon)
-					$(file).addClass("thumbs");
+// 				if (f.icon)
+// 					$(file).addClass("thumbs");
 			});
 		}
 	
@@ -455,6 +474,144 @@ $(function(){
 		return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
 	}
 
+	// Generate the breadcrumbs
+	var url = '';
+	breadcrumbsUrls = generateBreadcrumbs("<?= $this->escapeHtml($data['path']) ?>");
+
+	if(filemanager.hasClass('searching')){
+		url = '<span>Search results: </span>';
+		fileList.removeClass('animated');
+	} else {
+		fileList.addClass('animated');
+		breadcrumbsUrls.forEach(function (u, i) {
+			var name = u.split('/');
+
+			if (i !== breadcrumbsUrls.length - 1) {
+				url += '<a href="'+u+'"><span class="folderName">' + name[name.length-1] + '</span></a> <span class="arrow">→</span> ';
+			} else {
+				url += '<span class="folderName">' + name[name.length-1] + '</span>';
+			}
+		});
+	}
+
+	breadcrumbs.text('').append(url);
+
+	// Show the generated elements
+	fileList.css({display:'inline-block'});
+
+	// Initialisation players
+	$(document).data('requestRunning', "");
+	var deferred = $.Deferred();
+	var promise = deferred.promise();
+	$('video').each(function(key, elt) {
+		var player = videojs(elt);
+
+		var addThumb = function(data) {
+			player.addThumb(data.time, {
+        		src: data.file,
+    			style: {
+    			      width: '200px',
+    			    }
+		   	});
+	    };
+
+	    var addPoster = function(data) {
+		    console.log(player.id() + ' addPoster');
+			player.poster(data.file);
+	    };
+
+		//Générer poster image
+		promise
+			.then(function(){ return getVideoDuration(player) })
+			.then(function(data){
+				var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
+				console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
+				getThumbAjax(player, time_seconds, addPoster);
+			});
+
+		//Tester présence de la preview
+		$.when(checkVideoPreviewExists(player))
+			.then(function(data) {
+				//Icone de génération preview
+				var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
+				var name = $(player.el()).closest('li').find('span.name');
+				$(name).prepend(fa_refresh);
+				
+				if (data.return_value === true) {
+					//Preview existe
+					$(name).find('> i').css('color', 'green');
+					$(player).data('hasPreview', true);
+				} else {
+					//Pas de preview
+					$(name).find('> i').css('color', 'red');
+					$(player).data('hasPreview', false);
+
+					//Génération de la preview par click sur icône refresh rouge
+					$(name).find('> i').one('click', function(evt) {
+						generatePreview(player);
+					});
+				}
+			});
+
+		//Plugin de génération des thumbnails
+		player.thumbnails({
+		      0: {
+		          src: ''
+		        }
+		      });
+
+		//Sauvegarde chemin vidéo
+		$(player).data('src', $(player.el()).find('source').attr('src'));
+
+		//Ecoute position souris sur barre de contrôle
+		player.on('thumbupdate', function(evt, data){
+			var player = this;
+			var settings = data.settings;
+			var video_id = player.el();
+			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+
+			getThumbAjax(player, time, addThumb);
+	    });
+
+		//Affichage preview vidéo lors du passage de la souris sur son emplacement
+		player.on('mouseover', function(){
+			if (!player.isFullscreen()
+					&& $(document).data('requestRunning') !== player.id()) {
+				console.log(player.id() + ' mouseover');
+
+				//Si preview déjà créée on l'affiche
+				if ($(player).data('hasPreview') === true) {
+					generatePreview(player);
+				}
+			}
+		});
+
+		player.on('mouseleave', function(){
+			if ($(player).data('hasPreview') === true && !player.isFullscreen()){
+				console.log(player.id() + ' mouseleave');
+				player.pause();
+				//Restitution chemin vidéo
+				player.src($(player).data('src'));
+				player.controls(true);
+			}
+		});
+
+		player.on('click', function(evt){
+			if (!player.isFullscreen()) {
+				player.controls(true);
+				player.src($(player).data('src'));
+				player.play();
+				player.requestFullscreen();
+				evt.preventDefault();
+			}
+		});
+
+	});
+
+	deferred.resolve();
+
+	$('.vjs-loading-spinner').hide();
+
 });
 
 var getThumbAjax = function(player, time, callback) {
@@ -500,7 +657,7 @@ var getVideoDuration = function(player, callback) {
 }
 
 var getVideoPreview = function(player, duration) {
-	console.log(player.id() + ' getVideoPreview');
+	console.log(player.id() + ' getVideoPreview duration=' + duration);
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
 
@@ -539,6 +696,70 @@ var removePreviewIcon = function(player) {
 	$(name).find('i').remove();
 }
 
+$.urlParam = function(name){
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	return 0 || (results && results[1]);
+}
+
+var generatePreview = function(player) {
+	if (!player.isFullscreen()
+			&& $(document).data('requestRunning') !== player.id()) {
+		console.log(player.id() + ' mouseover');
+		player.controls(false);
+
+		//Si preview absente la générer
+		if ($(player).data('preview') === undefined) {
+			//Vérifier existence de la preview
+			$.when(checkVideoPreviewExists(player))
+				.then(function(data) {
+					if (data.return_value === true) {
+						//Sauvegarde chemin de la preview vidéo
+						$(player).data('preview', data.file);
+						//Preview déjà créée on l'affiche
+						showVideoPreview(player);
+					} else {
+						//Génération preview si une génération n'est pas déjà en cours
+						if ($(document).data('requestRunning')) {
+					        return;
+					    } else
+							$(document).data('requestRunning', player.id());
+
+						//Icone de génération preview
+						var name = $(player.el()).closest('li').find('span.name');
+						var fa_refresh = $(name).find('> i');
+						$(fa_refresh).addClass('fa-spin');
+						
+						var deferred = $.Deferred();
+						var promise = deferred.promise();
+						//Générer la preview video
+						promise
+							.then(function(){ return getVideoDuration(player) })
+							.then(function(data){
+								var duration = Math.trunc(data.duration);
+								return getVideoPreview(player, duration);
+							})
+							.then(function(data) {
+								//Sauvegarde chemin de la preview vidéo
+								$(player).data('preview', data.file);
+								//Affichage preview
+								$(fa_refresh).css('color', 'green').removeClass('fa-spin');
+								//removePreviewIcon(player);
+								$(player).data('hasPreview', true);
+								showVideoPreview(player);
+
+								$(document).data('requestRunning', "");
+							});
+		
+						deferred.resolve();
+					}
+				});
+		} else {
+			//Preview déjà créée on l'affiche
+			showVideoPreview(player);
+		}
+	}
+}
+
 </script>
 
 <div class="filemanager">
@@ -549,7 +770,58 @@ var removePreviewIcon = function(player) {
 
 	<div class="breadcrumbs"></div>
 
-	<ul class="data"></ul>
+	<ul class="data">
+		<?php
+			$idx = 0;
+			foreach ($this->data['items'] as $file):
+				$path = $this->escapeHtml($file['path']);
+				$name = $this->escapeHtml($file['name']);
+				$pos = strrpos($name, '.');
+				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
+		?>
+			<?php
+				if ($file['type'] === 'folder'):
+					$items = $this->escapeHtml($file['items']);
+					if ($items === 1) {
+						$items .= ' item';
+					} else if($items > 1) {
+						$items .= ' items';
+					} else {
+						$items = 'Empty';
+					}
+			?>
+				<li class="folders">
+					<a href="<?= $path ?>" title="<?= $path ?>" class="folders">
+						<span class="icon folder full"></span>
+						<span class="name"><?= $name ?></span>
+						<span class="details"><?= $items ?></span>
+					</a>
+				</li>
+			<?php
+				else:
+				$size = $this->escapeHtml($file['size']);
+			?>
+				<?php if ($fileType === 'mp4'): ?>
+					<li class="files">
+						<span class="name vid"><?= $name ?></span>
+						<span class="details vid"><?= $size ?></span>
+						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
+							width="330" height="186" poster="" controls>
+							<source src="<?= '/' . $path ?>" type="video/mp4"/>
+						</video>
+					</li>
+				<?php else: ?>
+					<li class="files">
+						<a href="<?= $path ?>" title="<?= $path ?>" class="files">
+							<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
+							<span class="name"><?= $name ?></span>
+							<span class="details"><?= $size ?></span>
+						</a>
+					</li>
+				<?php endif; ?>
+			<?php endif; ?>
+		<?php endforeach; ?>
+	</ul>
 
 	<div class="nothingfound">
 		<div class="nofiles"></div>
