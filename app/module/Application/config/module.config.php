@@ -34,6 +34,7 @@ return [
                     'defaults' => [
                         'controller' => Controller\IndexController::class,
                         'action'     => 'index',
+                        'cache' => true
                     ],
                 ],
             ],
@@ -69,13 +70,13 @@ return [
     				'Zend\Cache' => 'Zend\Cache\Service\StorageCacheFactory',
     				'CacheListener' => 'Application\Service\Factory\CacheListenerFactory',
     		],
-    		'abstract_factories' => [
-    				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
-    				'Zend\Log\LoggerAbstractServiceFactory',
-    		],
-    		'aliases' => [
-    				'translator' => 'MvcTranslator',
-    		],
+//     		'abstract_factories' => [
+//     				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
+//     				'Zend\Log\LoggerAbstractServiceFactory',
+//     		],
+//     		'aliases' => [
+//     				'translator' => 'MvcTranslator',
+//     		],
     ],
     
     'cache' => [

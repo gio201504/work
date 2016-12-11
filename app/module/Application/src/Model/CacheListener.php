@@ -16,7 +16,7 @@ class CacheListener extends AbstractListenerAggregate {
         $this->cacheService = $cacheService;
     }
  
-    public function attach(EventManagerInterface $events) {
+    public function attach(EventManagerInterface $events, $priotity = 1) {
     // The AbstractListenerAggregate we are extending from allows us to attach our even listeners
         $this->listeners[] = $events->attach(MvcEvent::EVENT_ROUTE, array($this, 'getCache'), -1000);
         $this->listeners[] = $events->attach(MvcEvent::EVENT_RENDER, array($this, 'saveCache'), -10000);
@@ -64,10 +64,8 @@ class CacheListener extends AbstractListenerAggregate {
 			$this->cacheService->setItem($cacheKey, $data);
         }
     }
- 
- 
+
     protected function genCacheName($match) {
-        return 'cache_'
-                . str_replace('/', '-', $match->getMatchedRouteName());
+    	return 'cache_' . str_replace('/', '-', $match->getMatchedRouteName() . '-' . md5(serialize($match->getParams())));
     }
 }
