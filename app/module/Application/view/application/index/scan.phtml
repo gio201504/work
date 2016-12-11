@@ -124,49 +124,6 @@ $(function(){
 		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
 		window.location = url;
 	});
-
-	// Navigates to the given hash (path)
-	function goto(hash) {
-		hash = decodeURIComponent(hash).slice(1).split('=');
-	
-		if (hash.length) {
-			var rendered = '';
-	
-			// if hash has search in it
-			if (hash[0] === 'search') {
-				filemanager.addClass('searching');
-				rendered = searchData(response, hash[1].toLowerCase());
-	
-				if (rendered.length) {
-					currentPath = hash[0];
-					render(rendered);
-				}
-				else {
-					render(rendered);
-				}
-			}
-			// if hash is some path
-			else if (hash[0].trim().length) {
-				rendered = searchByPath(hash[0]);
-	
-				if (rendered.length) {
-					currentPath = hash[0];
-					breadcrumbsUrls = generateBreadcrumbs(hash[0]);
-					render(rendered);
-				} else {
-					currentPath = hash[0];
-					breadcrumbsUrls = generateBreadcrumbs(hash[0]);
-					render(rendered);
-				}
-			}
-			// if there is no hash
-			else {
-				currentPath = data.path;
-				breadcrumbsUrls.push(data.path);
-				render(searchByPath(data.path));
-			}
-		}
-	}
 	
 	// Splits a file path and turns it into clickable breadcrumbs
 	function generateBreadcrumbs(nextDir){
@@ -214,251 +171,6 @@ $(function(){
 		});
 		
 		return {folders: folders, files: files};
-	}
-	
-	
-	// Render the HTML for the file manager
-	function render(data) {
-		var scannedFolders = [],
-			scannedFiles = [];
-	
-		if(Array.isArray(data)) {
-			data.forEach(function (d) {
-	
-				if (d.type === 'folder') {
-					scannedFolders.push(d);
-				} else if (d.type === 'file') {
-					scannedFiles.push(d);
-				}
-			});
-		} else if(typeof data === 'object') {
-			scannedFolders = data.folders;
-			scannedFiles = data.files;
-		}
-	
-		// Empty the old result and make the new one
-		fileList.empty().hide();
-	
-		if(!scannedFolders.length && !scannedFiles.length) {
-			filemanager.find('.nothingfound').show();
-		} else {
-			filemanager.find('.nothingfound').hide();
-		}
-	
-		if(scannedFolders.length) {
-			scannedFolders.forEach(function(f) {
-				var itemsLength = f.items/*.length*/,
-					name = escapeHTML(f.name),
-					icon = '<span class="icon folder"></span>';
-	
-				if(itemsLength) {
-					icon = '<span class="icon folder full"></span>';
-				}
-	
-				if(itemsLength == 1) {
-					itemsLength += ' item';
-				} else if(itemsLength > 1) {
-					itemsLength += ' items';
-				} else {
-					itemsLength = 'Empty';
-				}
-	
-				var folder = $('<li class="folders"><a href="'+ f.path +'" title="'+ f.path +'" class="folders">'+icon+'<span class="name">' + name + '</span> <span class="details">' + itemsLength + '</span></a></li>');
-				folder.appendTo(fileList);
-			});
-		}
-	
-		if(scannedFiles.length) {
-			var idx = 0;
-			scannedFiles.forEach(function(f) {
-				var fileSize = bytesToSize(f.size),
-					name = escapeHTML(f.name),
-					fileType = name.split('.'),
-					icon = '<span class="icon file"></span>';
-	
-				fileType = fileType[fileType.length-1];
-	
-				var sp_icon = '<span class="icon file f-'+fileType+'">.'+fileType+'</span>';
-				var sp_name = '<span class="name">' + name + '</span>';
-				var sp_details = '<span class="details">' + fileSize + '</span>';
-
-				if (fileType === "mp4") {
-					var file = $('<li class="files">' + sp_name + sp_details + '</li>');
-					$(file).find('span.name').addClass('vid');
-					$(file).find('span.details').addClass('vid');
-					var player = $('<video preload="none" class="video-js vjs-default-skin" width="330" height="186" poster="" controls><source src="" type="video/mp4"/></video>');
-					player.find('source').attr('src', '/' + f.path);
-					var video_id = 'video' + idx++;
-					player.attr('id', video_id);
-					$(file).append(player);
-
-					file.appendTo(fileList);					
-				} else {
-					var file = $('<li class="files"><a href="'+ f.path+'" title="'+ f.path +'" class="files">' + sp_icon + sp_name + sp_details + '</a></li>');
-					file.appendTo(fileList);
-				}
-
-// 				if (f.icon)
-// 					$(file).addClass("thumbs");
-			});
-		}
-	
-		// Generate the breadcrumbs
-		var url = '';
-	
-		if(filemanager.hasClass('searching')){
-			url = '<span>Search results: </span>';
-			fileList.removeClass('animated');
-		} else {
-			fileList.addClass('animated');
-			breadcrumbsUrls.forEach(function (u, i) {
-				var name = u.split('/');
-	
-				if (i !== breadcrumbsUrls.length - 1) {
-					url += '<a href="'+u+'"><span class="folderName">' + name[name.length-1] + '</span></a> <span class="arrow">→</span> ';
-				} else {
-					url += '<span class="folderName">' + name[name.length-1] + '</span>';
-				}
-			});
-		}
-	
-		breadcrumbs.text('').append(url);
-	
-		// Show the generated elements
-		fileList.css({display:'inline-block'});
-
-		// Initialisation players
-		$(document).data('requestRunning', "");
-		var deferred = $.Deferred();
-		var promise = deferred.promise();
-		$('video').each(function(key, elt){
-			var player = videojs(elt);
-
-			var addThumb = function(data) {
-				player.addThumb(data.time, {
-	        		src: data.file,
-	    			style: {
-	    			      width: '200px',
-	    			    }
-			   	});
-		    };
-
-		    var addPoster = function(data) {
-			    console.log(player.id() + ' addPoster');
-				player.poster(data.file);
-		    };
-
-			//Générer poster image
-			promise
-				.then(function(){ return getVideoDuration(player) })
-				.then(function(data){
-					var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
-					getThumbAjax(player, time_seconds, addPoster);
-				});
-
-			//Plugin de génération des thumbnails
-			player.thumbnails({
-			      0: {
-			          src: ''
-			        }
-			      });
-
-			//Sauvegarde chemin vidéo
-			$(player).data('src', $(player.el()).find('source').attr('src'));
-
-			//Ecoute position souris sur barre de contrôle
-			player.on('thumbupdate', function(evt, data){
-				var player = this;
-				var settings = data.settings;
-				var video_id = player.el();
-				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
-
-				getThumbAjax(player, time, addThumb);
-		    });
-
-			//Affichage preview vidéo lors du passage de la souris sur son emplacement
-			player.on('mouseover', function(){
-				if (!player.isFullscreen()
-						&& $(document).data('requestRunning') !== player.id()) {
-					console.log(player.id() + ' mouseover');
-					player.controls(false);
-	
-					//Si preview absente la générer
-					if ($(player).data('preview') === undefined) {
-						//Vérifier existence de la preview
-						$.when(checkVideoPreviewExists(player))
-							.then(function(data) {
-								if (data.return_value === true) {
-									//Sauvegarde chemin de la preview vidéo
-									$(player).data('preview', data.file);
-									//Preview déjà créée on l'affiche
-									showVideoPreview(player);
-								} else {
-									//Génération preview si une génération n'est pas déjà en cours
-									if ($(document).data('requestRunning')) {
-								        return;
-								    } else
-										$(document).data('requestRunning', player.id());
-
-									//Icone de génération preview
-									var fa_refresh = '<i class="fa fa-refresh fa-spin fa-lg fa-fw margin-bottom"></i>';
-									var name = $(player.el()).closest('li').find('span.name');
-									$(name).prepend(fa_refresh);
-									
-									var deferred = $.Deferred();
-									var promise = deferred.promise();
-									//Générer la preview video
-									promise
-										.then(function(){ return getVideoDuration(player) })
-										.then(function(data){
-											var duration = Math.trunc(data.duration);
-											return getVideoPreview(player, duration);
-										})
-										.then(function(data) {
-											//Sauvegarde chemin de la preview vidéo
-											$(player).data('preview', data.file);
-											//Affichage preview
-											removePreviewIcon(player);
-											showVideoPreview(player);
-	
-											$(document).data('requestRunning', "");
-										});
-					
-									deferred.resolve();
-								}
-							});
-					} else {
-						//Preview déjà créée on l'affiche
-						showVideoPreview(player);
-					}
-				}
-			});
-
-			player.on('mouseleave', function(){
-				if ($(player).data('preview') !== undefined && !player.isFullscreen()){
-					console.log(player.id() + ' mouseleave');
-					player.pause();
-					//Restitution chemin vidéo
-					player.src($(player).data('src'));
-					player.controls(true);
-				}
-			});
-
-			player.on('click', function(evt){
-				if (!player.isFullscreen()) {
-					player.controls(true);
-					player.src($(player).data('src'));
-					player.play();
-					player.requestFullscreen();
-					evt.preventDefault();
-				}
-			});
-
-		});
-
-		deferred.resolve();
-
-		$('.vjs-loading-spinner').hide();
 	}
 	
 	// This function escapes special html characters in names
@@ -587,22 +299,28 @@ $(function(){
 		});
 
 		player.on('mouseleave', function(){
-			if ($(player).data('hasPreview') === true && !player.isFullscreen()){
+			//if ($(player).data('hasPreview') === true && !player.isFullscreen()){
 				console.log(player.id() + ' mouseleave');
 				player.pause();
 				//Restitution chemin vidéo
 				player.src($(player).data('src'));
 				player.controls(true);
-			}
+			//}
 		});
 
 		player.on('click', function(evt){
 			if (!player.isFullscreen()) {
-				player.controls(true);
-				player.src($(player).data('src'));
-				player.play();
-				player.requestFullscreen();
-				evt.preventDefault();
+				var videoType = $(player.el()).data('type');
+				var src = $(player).data('src');
+				if (videoType === 'mp4') {
+					evt.preventDefault();
+					player.controls(true);
+					player.src(src);
+					player.play();
+					player.requestFullscreen();
+				} else {
+					window.location = src;
+				}
 			}
 		});
 
@@ -801,18 +519,22 @@ var generatePreview = function(player) {
 				else:
 				$size = $this->escapeHtml($file['size']);
 			?>
-				<?php if ($fileType === 'mp4'): ?>
+				<?php if ($fileType === 'mp4'
+						|| $fileType === 'avi'
+						|| $fileType === 'wmv'
+						|| $fileType === 'mkv'
+						|| $fileType === 'flv'): ?>
 					<li class="files">
 						<span class="name vid"><?= $name ?></span>
 						<span class="details vid"><?= $size ?></span>
 						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
-							width="330" height="186" poster="" controls>
+							width="330" height="186" poster="" controls data-type="<?= $fileType ?>">
 							<source src="<?= '/' . $path ?>" type="video/mp4"/>
 						</video>
 					</li>
 				<?php else: ?>
 					<li class="files">
-						<a href="<?= $path ?>" title="<?= $path ?>" class="files">
+						<a href="<?= '/' . $path ?>" title="<?= $path ?>" class="files">
 							<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
 							<span class="name"><?= $name ?></span>
 							<span class="details"><?= $size ?></span>
