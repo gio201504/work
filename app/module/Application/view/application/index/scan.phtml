@@ -365,6 +365,7 @@ var getVideoDuration = function(player, callback) {
 	return $.ajax({
         type: "GET",
         url: "getVideoDuration",
+        dataType: "json",
         data: { file: file },
         success: function(data) {
     		if (typeof callback === 'function') {
