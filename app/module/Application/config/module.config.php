@@ -63,4 +63,25 @@ return [
         	'ViewJsonStrategy'
         ],
     ],
+    
+    'service_manager' => [
+    		'factories' => [
+    				'Zend\Cache' => 'Zend\Cache\Service\StorageCacheFactory',
+    				'CacheListener' => 'Application\Service\Factory\CacheListenerFactory',
+    		],
+    		'abstract_factories' => [
+    				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
+    				'Zend\Log\LoggerAbstractServiceFactory',
+    		],
+    		'aliases' => [
+    				'translator' => 'MvcTranslator',
+    		],
+    ],
+    
+    'cache' => [
+    		'adapter' => 'filesystem',
+    		'options' => [
+    				'cache_dir' => 'data/cache/fullpage'
+    		]
+    ],
 ];
