@@ -29,7 +29,7 @@ return [
                 'options' => [
                     'route'    => '/application[/:action]',
                     'constraints' => array(
-                    	'action' => '[scan|generate|check][a-zA-Z0-9_-]*',
+                    	'action' => '(scan|generate|check)[a-zA-Z0-9_-]*',
                     ),
                     'defaults' => [
                         'controller' => Controller\IndexController::class,
@@ -43,7 +43,7 @@ return [
 	            'options' => [
 	            'route'    => '/application[/:action]',
 	            'constraints' => array(
-	            	'action' => '[get][a-zA-Z0-9_-]*',
+	            	'action' => '(get)[a-zA-Z0-9_-]*',
 	            ),
 	            'defaults' => [
 		            'controller' => Controller\IndexController::class,
