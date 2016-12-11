@@ -29,14 +29,28 @@ return [
                 'options' => [
                     'route'    => '/application[/:action]',
                     'constraints' => array(
-                    	'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                    	'action' => '[scan][a-zA-Z0-9_-]*',
                     ),
                     'defaults' => [
                         'controller' => Controller\IndexController::class,
                         'action'     => 'index',
-                        'cache' => true
+                        'cache' => false
                     ],
                 ],
+            ],
+            'get' => [
+	            'type'    => Segment::class,
+	            'options' => [
+	            'route'    => '/application[/:action]',
+	            'constraints' => array(
+	            	'action' => '[get][a-zA-Z0-9_-]*',
+	            ),
+	            'defaults' => [
+		            'controller' => Controller\IndexController::class,
+		            'action'     => 'index',
+		            'cache' => true
+	            ],
+	            ],
             ],
         ],
     ],

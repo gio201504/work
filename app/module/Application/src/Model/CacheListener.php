@@ -32,7 +32,7 @@ class CacheListener extends AbstractListenerAggregate {
      
     // does our route have the cache flag set to true? 
         if ($match->getParam('cache')) {
-            $cacheKey = $this->genCacheName($match);
+            $cacheKey = $this->genCacheName($match, $event->getRequest());
  
         // get the cache page for this route
             $data = $this->cacheService->getItem($cacheKey);
@@ -60,12 +60,19 @@ class CacheListener extends AbstractListenerAggregate {
         	$response = $event->getResponse();
 			$data = $response->getContent();
  
-			$cacheKey = $this->genCacheName($match);
+			$cacheKey = $this->genCacheName($match, $event->getRequest());
 			$this->cacheService->setItem($cacheKey, $data);
         }
     }
 
-    protected function genCacheName($match) {
-    	return 'cache_' . str_replace('/', '-', $match->getMatchedRouteName() . '-' . md5(serialize($match->getParams())));
+    protected function genCacheName($match, $request) {
+    	$cacheName = 'cache_' . str_replace('/', '-', $match->getMatchedRouteName() . '-'
+    			. $match->getParam('action') . '-'
+    			. md5(serialize($match->getParams())));
+    	
+    	if ($request->isGet())
+    		$cacheName .= '-' . md5(serialize($request->getQuery()));
+    	
+    	return $cacheName;
     }
 }
