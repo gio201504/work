@@ -157,7 +157,7 @@ class IndexController extends AbstractActionController
     	}
     }
     
-    public function getThumbAjaxAction()
+    public function generateThumbAjaxAction()
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
@@ -228,7 +228,7 @@ class IndexController extends AbstractActionController
     	}
     }
     
-    public function getVideoPreviewAction()
+    public function generateVideoPreviewAction()
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
