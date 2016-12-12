@@ -157,7 +157,7 @@ class IndexController extends AbstractActionController
     	}
     }
     
-    public function generateThumbAjaxAction()
+    public function getThumbAjaxAction()
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {

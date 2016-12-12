@@ -238,7 +238,7 @@ $(function(){
 			.then(function(data){
 				var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
 				console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
-				generateThumbAjax(player, time_seconds, addPoster);
+				getThumbAjax(player, time_seconds, addPoster);
 			});
 
 		//Tester présence de la preview
@@ -282,7 +282,7 @@ $(function(){
 			var video_id = player.el();
 			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
 
-			generateThumbAjax(player, time, addThumb);
+			getThumbAjax(player, time, addThumb);
 	    });
 
 		//Affichage preview vidéo lors du passage de la souris sur son emplacement
@@ -332,7 +332,7 @@ $(function(){
 
 });
 
-var generateThumbAjax = function(player, time, callback) {
+var getThumbAjax = function(player, time, callback) {
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
 	
@@ -341,10 +341,11 @@ var generateThumbAjax = function(player, time, callback) {
     } else
     	$(video_id).data('requestRunning', true);
 	
-	console.log(player.id() + ' generateThumbAjax');
+	console.log(player.id() + ' getThumbAjax');
 	return $.ajax({
         type: "GET",
-        url: "generateThumbAjax",
+        url: "getThumbAjax",
+        dataType: "json",
         data: { file: file, time: time },
         success: function(data) {
     		if (typeof callback === 'function') {
