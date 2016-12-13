@@ -10,6 +10,9 @@ namespace Application;
 use Zend\Router\Http\Literal;
 use Zend\Router\Http\Segment;
 use Zend\ServiceManager\Factory\InvokableFactory;
+use Zend\Log\Logger;
+use Application\Controller\IndexController;
+use Zend\Log\Writer\Stream;
 
 return [
     'router' => [
@@ -56,7 +59,10 @@ return [
     ],
     'controllers' => [
         'factories' => [
-            Controller\IndexController::class => InvokableFactory::class,
+            //Controller\IndexController::class => InvokableFactory::class,
+            Controller\IndexController::class => function($sm) {
+            	return new IndexController($sm);
+            }
         ],
     ],
     'view_manager' => [
@@ -83,6 +89,13 @@ return [
     		'factories' => [
     				'Zend\Cache' => 'Zend\Cache\Service\StorageCacheFactory',
     				'CacheListener' => 'Application\Service\Factory\CacheListenerFactory',
+    				'log' => function($sm) {
+    					$filename = 'log_' . date('Ymd') . '.txt';
+    					$log = new Logger();
+    					$writer = new Stream(getcwd() . '/log/' . $filename);
+    					$log->addWriter($writer);
+    					return $log;
+    				}
     		],
 //     		'abstract_factories' => [
 //     				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',

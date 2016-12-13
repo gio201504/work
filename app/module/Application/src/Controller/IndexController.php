@@ -17,6 +17,12 @@ use Zend\View\Model\JsonModel;
 
 class IndexController extends AbstractActionController
 {
+	private $sm;
+	
+	public function __construct($sm) {
+		$this->sm = $sm;
+	}
+	
     public function indexAction()
     {
         return new ViewModel();
@@ -57,11 +63,12 @@ class IndexController extends AbstractActionController
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
+    		$log = $this->sm->get('log');
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
-    
+
     		$top_dir = apache_getenv('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
     		
@@ -88,9 +95,10 @@ class IndexController extends AbstractActionController
 	    			return 0;
     		}
 
-    		function scan($top_dir, $dir, $search = null) {
+    		function scan($top_dir, $dir, $search = null, $log) {
 //     			$thumbs = "thumbs";
     			$fulldir = $top_dir . $dir;
+    			$log->info($fulldir);
 				// Is there actually such a folder/file?
 	    		$files = array();
 				if(file_exists($fulldir)){
@@ -99,6 +107,8 @@ class IndexController extends AbstractActionController
 							continue; // Ignore hidden files
 						}
 						
+						$log->info($fulldir . ' ' . $f);
+
 						if ($search !== null
 								&& strpos($f, $search) === false
 	    						&& !is_dir($fulldir . '/' . $f))
@@ -135,8 +145,8 @@ class IndexController extends AbstractActionController
 				
 				return $files;
     		}
-    		
-    		$response = scan($top_dir, $dir, $search);
+
+    		$response = scan($top_dir, $dir, $search, $log);
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
