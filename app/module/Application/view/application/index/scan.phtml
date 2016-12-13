@@ -52,7 +52,6 @@ $(function(){
 
 			// Update the hash on every key stroke
 			//window.location.hash = 'search=' + value.trim();
-			//var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({search: value.trim()});
 			//window.location = url;
 		} else {
 			filemanager.removeClass('searching');
@@ -76,19 +75,7 @@ $(function(){
 			var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: dir, search: value.trim()});
 			window.location = url;
 		}
-	})/*.focusout(function(e){
-		// Cancel the search
-		var search = $(this);
-		if(!search.val().trim().length) {
-			//window.location.hash = encodeURIComponent(currentPath);
-			search.hide();
-			search.parent().find('span').show();
-		} else {
-			var value = this.value.trim();
-			var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({search: value.trim()});
-			window.location = url;
-		}
-	})*/;
+	});
 
 	// Clicking on folders
 	fileList.on('click', 'li.folders', function(e){
@@ -326,7 +313,7 @@ $(function(){
 
 	});
 
-	deferred.resolve();
+	//deferred.resolve();
 
 	$('.vjs-loading-spinner').hide();
 

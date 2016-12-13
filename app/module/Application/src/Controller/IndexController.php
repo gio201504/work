@@ -95,10 +95,9 @@ class IndexController extends AbstractActionController
 	    			return 0;
     		}
 
-    		function scan($top_dir, $dir, $search = null, $log) {
+    		function scan($top_dir, $dir, $search = null) {
 //     			$thumbs = "thumbs";
     			$fulldir = $top_dir . $dir;
-    			$log->info($fulldir);
 				// Is there actually such a folder/file?
 	    		$files = array();
 				if(file_exists($fulldir)){
@@ -107,8 +106,6 @@ class IndexController extends AbstractActionController
 							continue; // Ignore hidden files
 						}
 						
-						$log->info($fulldir . ' ' . $f);
-
 						if ($search !== null
 								&& strpos($f, $search) === false
 	    						&& !is_dir($fulldir . '/' . $f))
@@ -146,7 +143,9 @@ class IndexController extends AbstractActionController
 				return $files;
     		}
 
-    		$response = scan($top_dir, $dir, $search, $log);
+    		$log->info("Begin scan " . $top_dir . $dir);
+    		$response = scan($top_dir, $dir, $search);
+    		$log->info("End scan   " . $top_dir . $dir);
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
