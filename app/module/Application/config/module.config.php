@@ -29,13 +29,28 @@ return [
                 'options' => [
                     'route'    => '/application[/:action]',
                     'constraints' => array(
-                    	'action' => '[a-zA-Z][a-zA-Z0-9_-]*',
+                    	'action' => '(scan|generate|check)[a-zA-Z0-9_-]*',
                     ),
                     'defaults' => [
                         'controller' => Controller\IndexController::class,
                         'action'     => 'index',
+                        'cache' => false
                     ],
                 ],
+            ],
+            'get' => [
+	            'type'    => Segment::class,
+	            'options' => [
+	            'route'    => '/application[/:action]',
+	            'constraints' => array(
+	            	'action' => '(get)[a-zA-Z0-9_-]*',
+	            ),
+	            'defaults' => [
+		            'controller' => Controller\IndexController::class,
+		            'action'     => 'index',
+		            'cache' => true
+	            ],
+	            ],
             ],
         ],
     ],
@@ -62,5 +77,26 @@ return [
         'strategies' => [
         	'ViewJsonStrategy'
         ],
+    ],
+    
+    'service_manager' => [
+    		'factories' => [
+    				'Zend\Cache' => 'Zend\Cache\Service\StorageCacheFactory',
+    				'CacheListener' => 'Application\Service\Factory\CacheListenerFactory',
+    		],
+//     		'abstract_factories' => [
+//     				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
+//     				'Zend\Log\LoggerAbstractServiceFactory',
+//     		],
+//     		'aliases' => [
+//     				'translator' => 'MvcTranslator',
+//     		],
+    ],
+    
+    'cache' => [
+    		'adapter' => 'filesystem',
+    		'options' => [
+    				'cache_dir' => 'data/cache/fullpage'
+    		]
     ],
 ];

@@ -228,7 +228,7 @@ class IndexController extends AbstractActionController
     	}
     }
     
-    public function getVideoPreviewAction()
+    public function generateVideoPreviewAction()
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {

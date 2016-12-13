@@ -345,6 +345,7 @@ var getThumbAjax = function(player, time, callback) {
 	return $.ajax({
         type: "GET",
         url: "getThumbAjax",
+        dataType: "json",
         data: { file: file, time: time },
         success: function(data) {
     		if (typeof callback === 'function') {
@@ -365,6 +366,7 @@ var getVideoDuration = function(player, callback) {
 	return $.ajax({
         type: "GET",
         url: "getVideoDuration",
+        dataType: "json",
         data: { file: file },
         success: function(data) {
     		if (typeof callback === 'function') {
@@ -374,14 +376,14 @@ var getVideoDuration = function(player, callback) {
     });
 }
 
-var getVideoPreview = function(player, duration) {
-	console.log(player.id() + ' getVideoPreview duration=' + duration);
+var generateVideoPreview = function(player, duration) {
+	console.log(player.id() + ' generateVideoPreview duration=' + duration);
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
 
 	return $.ajax({
         type: "GET",
-        url: "getVideoPreview",
+        url: "generateVideoPreview",
         data: { file: file, duration: duration},
     });
 }
@@ -454,7 +456,7 @@ var generatePreview = function(player) {
 							.then(function(){ return getVideoDuration(player) })
 							.then(function(data){
 								var duration = Math.trunc(data.duration);
-								return getVideoPreview(player, duration);
+								return generateVideoPreview(player, duration);
 							})
 							.then(function(data) {
 								//Sauvegarde chemin de la preview vidéo
@@ -523,7 +525,9 @@ var generatePreview = function(player) {
 						|| $fileType === 'avi'
 						|| $fileType === 'wmv'
 						|| $fileType === 'mkv'
-						|| $fileType === 'flv'): ?>
+						|| $fileType === 'flv'
+						|| $fileType === 'mpeg'
+						|| $fileType === 'mpg'): ?>
 					<li class="files">
 						<span class="name vid"><?= $name ?></span>
 						<span class="details vid"><?= $size ?></span>
