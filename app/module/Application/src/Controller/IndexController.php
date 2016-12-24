@@ -252,7 +252,7 @@ class IndexController extends AbstractActionController
     		if (isset($file) && isset($duration) && !file_exists($out_file)) {
     			$cmd = 'ffmpeg -i "' . $top_dir . $file . '" -c:v libx264 -filter_complex "[0:v]scale=w=330:h=186[scale],[scale]split=5[copy0][copy1][copy2][copy3][copy4]';
     			for ($i = 0; $i < 5; $i++) {
-    				$start = intval($i * $duration / 5);
+    				$start = intval(($i + 1) * $duration / 6);
     				$end = $start + 1;
     				$cmd .= ',[copy' . $i . ']trim=' . $start . ':' . $end . ',setpts=PTS-STARTPTS[part' . $i . ']';
     			}
