@@ -317,6 +317,17 @@ $(function(){
 
 	$('.vjs-loading-spinner').hide();
 
+	//Test des éléments visibles
+	//$(document).scroll(function() {
+	$(window).on('DOMContentLoaded load resize scroll', function() {
+		$('li.files').each(function(key, elt) {
+			if (isElementInViewport(elt))
+				$(elt).css('border', '1px solid green');
+			else
+				$(elt).css('border', '1px solid red');
+		});
+	});
+
 });
 
 var getThumbAjax = function(player, time, callback) {
@@ -465,6 +476,22 @@ var generatePreview = function(player) {
 			showVideoPreview(player);
 		}
 	}
+}
+
+var isElementInViewport = function(el) {
+    //special bonus for those using jQuery
+    if (typeof jQuery === "function" && el instanceof jQuery) {
+        el = el[0];
+    }
+
+    var rect = el.getBoundingClientRect();
+
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
+    );
 }
 
 </script>
