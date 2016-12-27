@@ -199,124 +199,7 @@ $(function(){
 	fileList.css({display:'inline-block'});
 
 	// Initialisation players
-	$(document).data('requestRunning', "");
-	var deferred = $.Deferred();
-	var promise = deferred.promise();
-	$('video').each(function(key, elt) {
-		var player = videojs(elt);
-
-		var addThumb = function(data) {
-			player.addThumb(data.time, {
-        		src: data.file,
-    			style: {
-    			      width: '200px',
-    			    }
-		   	});
-	    };
-
-	    var addPoster = function(data) {
-		    console.log(player.id() + ' addPoster');
-			player.poster(data.file);
-	    };
-
-		//Générer poster image
-		promise
-			.then(function(){ return getVideoDuration(player) })
-			.then(function(data){
-				var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
-				console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
-				getThumbAjax(player, time_seconds, addPoster);
-			});
-
-		//Tester présence de la preview
-		$.when(checkVideoPreviewExists(player))
-			.then(function(data) {
-				//Icone de génération preview
-				var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
-				var name = $(player.el()).closest('li').find('span.name');
-				$(name).prepend(fa_refresh);
-				
-				if (data.return_value === true) {
-					//Preview existe
-					$(name).find('> i').css('color', 'green');
-					$(player).data('hasPreview', true);
-				} else {
-					//Pas de preview
-					$(name).find('> i').css('color', 'red');
-					$(player).data('hasPreview', false);
-
-					//Génération de la preview par click sur icône refresh rouge
-					$(name).find('> i').one('click', function(evt) {
-						generatePreview(player);
-					});
-				}
-			});
-
-		//Plugin de génération des thumbnails
-		player.thumbnails({
-		      0: {
-		          src: ''
-		        }
-		      });
-
-		//Sauvegarde chemin vidéo
-		$(player).data('src', $(player.el()).find('source').attr('src'));
-
-		//Ecoute position souris sur barre de contrôle
-		player.on('thumbupdate', function(evt, data){
-			var player = this;
-			var settings = data.settings;
-			var video_id = player.el();
-			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
-
-			getThumbAjax(player, time, addThumb);
-	    });
-
-		//Affichage preview vidéo lors du passage de la souris sur son emplacement
-		player.on('mouseover', function(){
-			if (!player.isFullscreen()
-					&& $(document).data('requestRunning') !== player.id()) {
-				console.log(player.id() + ' mouseover');
-
-				//Si preview déjà créée on l'affiche
-				if ($(player).data('hasPreview') === true) {
-					generatePreview(player);
-				}
-			}
-		});
-
-		player.on('mouseleave', function(){
-			//if ($(player).data('hasPreview') === true && !player.isFullscreen()){
-				console.log(player.id() + ' mouseleave');
-				player.pause();
-				//Restitution chemin vidéo
-				player.src($(player).data('src'));
-				player.controls(true);
-			//}
-		});
-
-		player.on('click', function(evt){
-			if (!player.isFullscreen()) {
-				var videoType = $(player.el()).data('type');
-				var src = $(player).data('src');
-				if (videoType === 'mp4') {
-					evt.preventDefault();
-					player.controls(true);
-					player.src(src);
-					player.play();
-					player.requestFullscreen();
-				} else {
-					window.location = src;
-				}
-			}
-		});
-
-	});
-
-	deferred.resolve();
-
-	$('.vjs-loading-spinner').hide();
-
+	initPlayers();
 });
 
 //Test des éléments visibles
@@ -491,6 +374,131 @@ var isElementInViewport = function(el) {
         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
         rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
     );
+}
+
+//Initialisation players
+var initPlayers = function() {
+	$(document).data('requestRunning', "");
+	var deferred = $.Deferred();
+	var promise = deferred.promise();
+	$('video').each(function(key, elt) {
+		if (isElementInViewport(elt)) {
+
+			var player = videojs(elt);
+	
+			var addThumb = function(data) {
+				player.addThumb(data.time, {
+	        		src: data.file,
+	    			style: {
+	    			      width: '200px',
+	    			    }
+			   	});
+		    };
+	
+		    var addPoster = function(data) {
+			    console.log(player.id() + ' addPoster');
+				player.poster(data.file);
+		    };
+	
+			//Générer poster image
+			promise
+				.then(function(){ return getVideoDuration(player) })
+				.then(function(data){
+					var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
+					console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
+					getThumbAjax(player, time_seconds, addPoster);
+				});
+	
+			//Tester présence de la preview
+			$.when(checkVideoPreviewExists(player))
+				.then(function(data) {
+					//Icone de génération preview
+					var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
+					var name = $(player.el()).closest('li').find('span.name');
+					$(name).prepend(fa_refresh);
+					
+					if (data.return_value === true) {
+						//Preview existe
+						$(name).find('> i').css('color', 'green');
+						$(player).data('hasPreview', true);
+					} else {
+						//Pas de preview
+						$(name).find('> i').css('color', 'red');
+						$(player).data('hasPreview', false);
+	
+						//Génération de la preview par click sur icône refresh rouge
+						$(name).find('> i').one('click', function(evt) {
+							generatePreview(player);
+						});
+					}
+				});
+	
+			//Plugin de génération des thumbnails
+			player.thumbnails({
+			      0: {
+			          src: ''
+			        }
+			      });
+	
+			//Sauvegarde chemin vidéo
+			$(player).data('src', $(player.el()).find('source').attr('src'));
+	
+			//Ecoute position souris sur barre de contrôle
+			player.on('thumbupdate', function(evt, data){
+				var player = this;
+				var settings = data.settings;
+				var video_id = player.el();
+				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+	
+				getThumbAjax(player, time, addThumb);
+		    });
+	
+			//Affichage preview vidéo lors du passage de la souris sur son emplacement
+			player.on('mouseover', function(){
+				if (!player.isFullscreen()
+						&& $(document).data('requestRunning') !== player.id()) {
+					console.log(player.id() + ' mouseover');
+	
+					//Si preview déjà créée on l'affiche
+					if ($(player).data('hasPreview') === true) {
+						generatePreview(player);
+					}
+				}
+			});
+	
+			player.on('mouseleave', function(){
+				//if ($(player).data('hasPreview') === true && !player.isFullscreen()){
+					console.log(player.id() + ' mouseleave');
+					player.pause();
+					//Restitution chemin vidéo
+					player.src($(player).data('src'));
+					player.controls(true);
+				//}
+			});
+	
+			player.on('click', function(evt){
+				if (!player.isFullscreen()) {
+					var videoType = $(player.el()).data('type');
+					var src = $(player).data('src');
+					if (videoType === 'mp4') {
+						evt.preventDefault();
+						player.controls(true);
+						player.src(src);
+						player.play();
+						player.requestFullscreen();
+					} else {
+						window.location = src;
+					}
+				}
+			});
+
+		}
+
+	});
+
+	deferred.resolve();
+
+	$('.vjs-loading-spinner').hide();
 }
 
 </script>
