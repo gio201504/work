@@ -205,9 +205,10 @@ $(function(){
 //Test des éléments visibles
 $(document).on('DOMContentLoaded load resize scroll', function() {
 	$('li.files').each(function(key, elt) {
-		if (isElementInViewport(elt))
+		if (isElementInViewport(elt)) {
 			$(elt).css('border', '1px solid green');
-		else
+			initPlayers();
+		} else
 			$(elt).css('border', '1px solid red');
 	});
 });
@@ -382,8 +383,7 @@ var initPlayers = function() {
 	var deferred = $.Deferred();
 	var promise = deferred.promise();
 	$('video').each(function(key, elt) {
-		if (isElementInViewport(elt)) {
-
+		if (isElementInViewport(elt) && !$(elt).hasClass('vjs-tech')) {
 			var player = videojs(elt);
 	
 			var addThumb = function(data) {
