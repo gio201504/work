@@ -318,8 +318,7 @@ $(function(){
 	$('.vjs-loading-spinner').hide();
 
 	//Test des éléments visibles
-	//$(document).scroll(function() {
-	$(window).on('DOMContentLoaded load resize scroll', function() {
+	$(document).on('DOMContentLoaded load resize scroll', function() {
 		$('li.files').each(function(key, elt) {
 			if (isElementInViewport(elt))
 				$(elt).css('border', '1px solid green');
