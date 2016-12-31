@@ -203,7 +203,7 @@ $(function(){
 });
 
 //Test des éléments visibles
-$(document).on('DOMContentLoaded load resize scroll', function() {
+$(document).on('DOMContentLoaded DOMMouseScroll mouseup', function() {
 	$('li.files').each(function(key, elt) {
 		if (isElementInViewport(elt)) {
 			$(elt).css('border', '1px solid green');
