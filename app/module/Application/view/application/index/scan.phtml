@@ -517,6 +517,7 @@ var initPlayers = function() {
 			foreach ($this->data['items'] as $file):
 				$path = $this->escapeHtml($file['path']);
 				$name = $this->escapeHtml($file['name']);
+				$thumb = isset($file['thumb']) ? $this->escapeHtml($file['thumb']) : null;
 				$pos = strrpos($name, '.');
 				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
 		?>
@@ -542,19 +543,12 @@ var initPlayers = function() {
 				else:
 				$size = $this->escapeHtml($file['size']);
 			?>
-				<?php if ($fileType === 'mp4'
-						|| $fileType === 'avi'
-						|| $fileType === 'wmv'
-						|| $fileType === 'mkv'
-						|| $fileType === 'flv'
-						|| $fileType === 'mpeg'
-						|| $fileType === 'mpg'
-						|| $fileType === 'mov'): ?>
+				<?php if ($thumb !== null): ?>
 					<li class="files">
 						<span class="name vid"><?= $name ?></span>
 						<span class="details vid"><?= $size ?></span>
 						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
-							width="330" height="186" poster="" controls data-type="<?= $fileType ?>">
+							width="330" height="186" poster="<?= $thumb ?>" controls data-type="<?= $fileType ?>">
 							<source src="<?= '/' . $path ?>" type="video/mp4"/>
 						</video>
 					</li>
