@@ -383,7 +383,7 @@ var initPlayers = function() {
 	var deferred = $.Deferred();
 	var promise = deferred.promise();
 	$('video').each(function(key, elt) {
-		if (isElementInViewport(elt) && !$(elt).hasClass('vjs-tech')) {
+		if (/*isElementInViewport(elt) &&*/ !$(elt).hasClass('vjs-tech')) {
 			var player = videojs(elt);
 	
 			var addThumb = function(data) {
@@ -401,13 +401,13 @@ var initPlayers = function() {
 		    };
 	
 			//Générer poster image
-			promise
-				.then(function(){ return getVideoDuration(player) })
-				.then(function(data){
-					var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
-					console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
-					getThumbAjax(player, time_seconds, addPoster);
-				});
+// 			promise
+// 				.then(function(){ return getVideoDuration(player) })
+// 				.then(function(data){
+// 					var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
+// 					console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
+// 					getThumbAjax(player, time_seconds, addPoster);
+// 				});
 	
 			//Tester présence de la preview
 			$.when(checkVideoPreviewExists(player))
