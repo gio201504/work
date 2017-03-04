@@ -133,7 +133,7 @@ class IndexController extends AbstractActionController
 							
 							//Si vidéo générer thumbnail
 							$filename = $fulldir . '/' . $f_utf8;
-							$mime = mime_content_type($filename);
+							$mime = mime_content_type($fulldir . '/' . $f);
 							if (strstr($mime, "video/")) {
 								//Durée de la vidéo
 								$data = (object) array('file' => $dir . '/' . $f_utf8);
