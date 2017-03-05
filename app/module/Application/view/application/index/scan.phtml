@@ -489,8 +489,10 @@ var initPlayers = function() {
 						.then(function(){ return getVideoDuration(player) })
 						.then(function(data){
 							var time = getMouseTime(player, event, data.duration);
-							//Génération et affichage thumbnail
+							//Pas de 10 pour les preview
+							time = Math.round((time / data.duration).toFixed(1) * data.duration);
 							var time_seconds = "00:00:" + time;
+							//Génération et affichage thumbnail
 		 					getThumbAjax(player, time_seconds, addPoster);
 		 					$(player).data('time', time);
 						});
