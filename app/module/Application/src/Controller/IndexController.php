@@ -154,8 +154,21 @@ class IndexController extends AbstractActionController
 										)
 								);
 								$thumb = array('thumb' => $result->file);
-
 								$array = array_merge($array, $thumb);
+								
+								//Test existence preview
+								$data = (object) array('file' => $f_utf8);
+								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+										array(
+												'action'	=> 'checkVideoPreviewExists',
+												'data'		=> $data,
+										)
+								);
+								
+								if ($result->return_value === true) {
+									$preview = array('preview' => $result->file);
+									$array = array_merge($array, $preview);
+								}
 							}
 							
 							$files[] = $array;
@@ -305,6 +318,7 @@ class IndexController extends AbstractActionController
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
 
     		$file = $data->file;
     		$top_dir = apache_getenv('top_dir');
