@@ -217,10 +217,10 @@ var getThumbAjax = function(player, time, callback) {
 	var video_id = player.el();
 	var file = $(video_id).find('video').attr('src');
 	
-	if ($(video_id).data('requestRunning')) {
-        return;
-    } else
-    	$(video_id).data('requestRunning', true);
+// 	if ($(video_id).data('requestRunning')) {
+//         return;
+//     } else
+//     	$(video_id).data('requestRunning', true);
 	
 	console.log(player.id() + ' getThumbAjax');
 	return $.ajax({
@@ -233,9 +233,9 @@ var getThumbAjax = function(player, time, callback) {
         		callback(data);
     		}
         },
-        complete: function() {
-        	$(video_id).data('requestRunning', false);
-        }
+//         complete: function() {
+//         	$(video_id).data('requestRunning', false);
+//         }
     });
 }
 
@@ -479,22 +479,29 @@ var initPlayers = function() {
 // 			});
 
 			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
-			player.on('mousemove', function(event){
+			player.on('mousemove', function(event) {
 				if (!player.isFullscreen()) {
+					if ($(player).data('requestRunning'))
+						return;
+					else
+						$(player).data('requestRunning', true);
+					
 					console.log(player.id() + ' mouseover');
 
 					var deferred = $.Deferred();
 					var promise = deferred.promise();
 					promise
-						.then(function(){ return getVideoDuration(player) })
+						.then(function(){ return getVideoDuration(player); })
 						.then(function(data){
 							var time = getMouseTime(player, event, data.duration);
 							//Pas de 10 pour les preview
 							time = Math.round((time / data.duration).toFixed(1) * data.duration);
 							var time_seconds = "00:00:" + time;
+							$(player).data('time', time);
 							//Génération et affichage thumbnail
-		 					getThumbAjax(player, time_seconds, addPoster);
-		 					$(player).data('time', time);
+		 					return getThumbAjax(player, time_seconds, addPoster);
+						}).then(function(){
+							$(player).data('requestRunning', false);
 						});
 	
 					deferred.resolve();
