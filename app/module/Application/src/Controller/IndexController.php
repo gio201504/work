@@ -156,19 +156,19 @@ class IndexController extends AbstractActionController
 								$thumb = array('thumb' => $result->file);
 								$array = array_merge($array, $thumb);
 								
-								//Test existence preview
-								$data = (object) array('file' => $f_utf8);
-								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-										array(
-												'action'	=> 'checkVideoPreviewExists',
-												'data'		=> $data,
-										)
-								);
+// 								//Test existence preview
+// 								$data = (object) array('file' => $f_utf8);
+// 								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+// 										array(
+// 												'action'	=> 'checkVideoPreviewExists',
+// 												'data'		=> $data,
+// 										)
+// 								);
 								
-								if ($result->return_value === true) {
-									$preview = array('preview' => $result->file);
-									$array = array_merge($array, $preview);
-								}
+// 								if ($result->return_value === true) {
+// 									$preview = array('preview' => $result->file);
+// 									$array = array_merge($array, $preview);
+// 								}
 							}
 							
 							$files[] = $array;

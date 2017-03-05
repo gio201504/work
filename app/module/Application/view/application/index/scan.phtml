@@ -425,25 +425,25 @@ var initPlayers = function() {
 // 				});
 	
 			//Tester présence de la preview
-			var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
-			var name = $(player.el()).closest('li').find('span.name');
-			$(name).prepend(fa_refresh);
+// 			var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
+// 			var name = $(player.el()).closest('li').find('span.name');
+// 			$(name).prepend(fa_refresh);
 			
-			var preview = $(elt).data('preview');
-			if (preview.length > 0) {
-				//Preview existe
-				$(name).find('> i').css('color', 'green');
-				$(player).data('hasPreview', true);
-			} else {
-				//Pas de preview
-				$(name).find('> i').css('color', 'red');
-				$(player).data('hasPreview', false);
+// 			var preview = $(elt).data('preview');
+// 			if (preview.length > 0) {
+// 				//Preview existe
+// 				$(name).find('> i').css('color', 'green');
+// 				$(player).data('hasPreview', true);
+// 			} else {
+// 				//Pas de preview
+// 				$(name).find('> i').css('color', 'red');
+// 				$(player).data('hasPreview', false);
 
-				//Génération de la preview par click sur icône refresh rouge
-				$(name).find('> i').one('click', function(evt) {
-					generatePreview(player);
-				});
-			}
+// 				//Génération de la preview par click sur icône refresh rouge
+// 				$(name).find('> i').one('click', function(evt) {
+// 					generatePreview(player);
+// 				});
+// 			}
 	
 			//Plugin de génération des thumbnails
 			player.thumbnails({
@@ -562,7 +562,6 @@ var initPlayers = function() {
 				$path = $this->escapeHtml($file['path']);
 				$name = $this->escapeHtml($file['name']);
 				$thumb = isset($file['thumb']) ? $this->escapeHtml($file['thumb']) : null;
-				$preview = isset($file['preview']) ? $this->escapeHtml($file['preview']) : null;
 				$pos = strrpos($name, '.');
 				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
 		?>
@@ -593,8 +592,7 @@ var initPlayers = function() {
 						<span class="name vid"><?= $name ?></span>
 						<span class="details vid"><?= $size ?></span>
 						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
-							width="330" height="186" poster="<?= $thumb ?>" controls data-type="<?= $fileType ?>"
-							data-preview="<?= $preview ?>">
+							width="330" height="186" poster="<?= $thumb ?>" controls data-type="<?= $fileType ?>">
 							<source src="<?= '/' . $path ?>" type="video/mp4"/>
 						</video>
 					</li>
