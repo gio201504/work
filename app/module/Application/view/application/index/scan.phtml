@@ -389,10 +389,7 @@ var getMouseTime = function(player, event, duration) {
 
 	//Position sur la vidéo en secondes
 	var time = Math.trunc(((x - left) / (right - left)) * duration);
-
-	//Génération et affichage thumbnail
-	var time_seconds = "00:00:" + time;
-	return time_seconds;
+	return time;
 }
 
 //Initialisation players
@@ -491,8 +488,11 @@ var initPlayers = function() {
 					promise
 						.then(function(){ return getVideoDuration(player) })
 						.then(function(data){
-							var time_seconds = getMouseTime(player, event, data.duration);
+							var time = getMouseTime(player, event, data.duration);
+							//Génération et affichage thumbnail
+							var time_seconds = "00:00:" + time;
 		 					getThumbAjax(player, time_seconds, addPoster);
+		 					$(player).data('time', time);
 						});
 	
 					deferred.resolve();
@@ -511,14 +511,16 @@ var initPlayers = function() {
 	
 			player.on('click', function(evt){
 				if (!player.isFullscreen()) {
+					var time = $(player).data('time');
 					var videoType = $(player.el()).data('type');
 					var src = $(player).data('src');
 					if (videoType === 'mp4') {
 						evt.preventDefault();
+						player.requestFullscreen();
 						player.controls(true);
 						player.src(src);
 						player.play();
-						player.requestFullscreen();
+						player.currentTime(time);
 					} else {
 						window.location = src;
 					}
