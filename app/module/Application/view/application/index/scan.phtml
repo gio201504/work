@@ -452,15 +452,35 @@ var initPlayers = function() {
 		    });
 	
 			//Affichage preview vidéo lors du passage de la souris sur son emplacement
-			player.on('mouseover', function(){
-				if (!player.isFullscreen()
-						&& $(document).data('requestRunning') !== player.id()) {
-					console.log(player.id() + ' mouseover');
+// 			player.on('mouseover', function(){
+// 				if (!player.isFullscreen()
+// 						&& $(document).data('requestRunning') !== player.id()) {
+// 					console.log(player.id() + ' mouseover');
 	
-					//Si preview déjà créée on l'affiche
-					if ($(player).data('hasPreview') === true) {
-						generatePreview(player);
-					}
+// 					//Si preview déjà créée on l'affiche
+// 					if ($(player).data('hasPreview') === true) {
+// 						generatePreview(player);
+// 					}
+// 				}
+// 			});
+
+			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
+			player.on('mouseover', function(event){
+				if (!player.isFullscreen()) {
+					console.log(player.id() + ' mouseover');
+
+					//Position de la souris par rapport à la vidéo
+					var video = player.el();
+					var rect = video.getBoundingClientRect();
+
+					//Position absolue souris
+					var x = event.pageX;
+					var y = event.pageY;
+					
+					//Position absolue vidéo
+					var left = $(video).offset().left;
+					var top = $(video).offset().top;
+					debugger;
 				}
 			});
 	
