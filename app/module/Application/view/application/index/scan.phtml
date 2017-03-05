@@ -426,7 +426,6 @@ var initPlayers = function() {
 
 				//Génération de la preview par click sur icône refresh rouge
 				$(name).find('> i').one('click', function(evt) {
-					debugger;
 					generatePreview(player);
 				});
 			}
@@ -465,22 +464,34 @@ var initPlayers = function() {
 // 			});
 
 			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
-			player.on('mouseover', function(event){
+			player.on('mousemove', function(event){
 				if (!player.isFullscreen()) {
 					console.log(player.id() + ' mouseover');
 
-					//Position de la souris par rapport à la vidéo
-					var video = player.el();
-					var rect = video.getBoundingClientRect();
+					var deferred = $.Deferred();
+					var promise = deferred.promise();
+					promise
+						.then(function(){ return getVideoDuration(player) })
+						.then(function(data){
+							//Position de la souris par rapport à la vidéo
+							var video = player.el();
+							var rect = video.getBoundingClientRect();
+							//Position absolue souris
+							var x = event.pageX;
+							//Position absolue vidéo
+							var left = rect.left;
+							var right = rect.right;
 
-					//Position absolue souris
-					var x = event.pageX;
-					var y = event.pageY;
-					
-					//Position absolue vidéo
-					var left = $(video).offset().left;
-					var top = $(video).offset().top;
-					debugger;
+							//Position sur la vidéo en secondes
+							var time = Math.trunc(((x - left) / (right - left)) * data.duration);
+
+							//Génération et affichage thumbnail
+							var time_seconds = "00:00:" + time;
+//		 					console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
+		 					getThumbAjax(player, time_seconds, addPoster);
+						});
+	
+					deferred.resolve();
 				}
 			});
 	
