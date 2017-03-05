@@ -52,7 +52,6 @@ $(function(){
 
 			// Update the hash on every key stroke
 			//window.location.hash = 'search=' + value.trim();
-			//var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({search: value.trim()});
 			//window.location = url;
 		} else {
 			filemanager.removeClass('searching');
@@ -76,19 +75,7 @@ $(function(){
 			var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: dir, search: value.trim()});
 			window.location = url;
 		}
-	})/*.focusout(function(e){
-		// Cancel the search
-		var search = $(this);
-		if(!search.val().trim().length) {
-			//window.location.hash = encodeURIComponent(currentPath);
-			search.hide();
-			search.parent().find('span').show();
-		} else {
-			var value = this.value.trim();
-			var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({search: value.trim()});
-			window.location = url;
-		}
-	})*/;
+	});
 
 	// Clicking on folders
 	fileList.on('click', 'li.folders', function(e){
@@ -212,124 +199,18 @@ $(function(){
 	fileList.css({display:'inline-block'});
 
 	// Initialisation players
-	$(document).data('requestRunning', "");
-	var deferred = $.Deferred();
-	var promise = deferred.promise();
-	$('video').each(function(key, elt) {
-		var player = videojs(elt);
+	initPlayers();
+});
 
-		var addThumb = function(data) {
-			player.addThumb(data.time, {
-        		src: data.file,
-    			style: {
-    			      width: '200px',
-    			    }
-		   	});
-	    };
-
-	    var addPoster = function(data) {
-		    console.log(player.id() + ' addPoster');
-			player.poster(data.file);
-	    };
-
-		//Générer poster image
-		promise
-			.then(function(){ return getVideoDuration(player) })
-			.then(function(data){
-				var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
-				console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
-				getThumbAjax(player, time_seconds, addPoster);
-			});
-
-		//Tester présence de la preview
-		$.when(checkVideoPreviewExists(player))
-			.then(function(data) {
-				//Icone de génération preview
-				var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
-				var name = $(player.el()).closest('li').find('span.name');
-				$(name).prepend(fa_refresh);
-				
-				if (data.return_value === true) {
-					//Preview existe
-					$(name).find('> i').css('color', 'green');
-					$(player).data('hasPreview', true);
-				} else {
-					//Pas de preview
-					$(name).find('> i').css('color', 'red');
-					$(player).data('hasPreview', false);
-
-					//Génération de la preview par click sur icône refresh rouge
-					$(name).find('> i').one('click', function(evt) {
-						generatePreview(player);
-					});
-				}
-			});
-
-		//Plugin de génération des thumbnails
-		player.thumbnails({
-		      0: {
-		          src: ''
-		        }
-		      });
-
-		//Sauvegarde chemin vidéo
-		$(player).data('src', $(player.el()).find('source').attr('src'));
-
-		//Ecoute position souris sur barre de contrôle
-		player.on('thumbupdate', function(evt, data){
-			var player = this;
-			var settings = data.settings;
-			var video_id = player.el();
-			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
-
-			getThumbAjax(player, time, addThumb);
-	    });
-
-		//Affichage preview vidéo lors du passage de la souris sur son emplacement
-		player.on('mouseover', function(){
-			if (!player.isFullscreen()
-					&& $(document).data('requestRunning') !== player.id()) {
-				console.log(player.id() + ' mouseover');
-
-				//Si preview déjà créée on l'affiche
-				if ($(player).data('hasPreview') === true) {
-					generatePreview(player);
-				}
-			}
-		});
-
-		player.on('mouseleave', function(){
-			//if ($(player).data('hasPreview') === true && !player.isFullscreen()){
-				console.log(player.id() + ' mouseleave');
-				player.pause();
-				//Restitution chemin vidéo
-				player.src($(player).data('src'));
-				player.controls(true);
-			//}
-		});
-
-		player.on('click', function(evt){
-			if (!player.isFullscreen()) {
-				var videoType = $(player.el()).data('type');
-				var src = $(player).data('src');
-				if (videoType === 'mp4') {
-					evt.preventDefault();
-					player.controls(true);
-					player.src(src);
-					player.play();
-					player.requestFullscreen();
-				} else {
-					window.location = src;
-				}
-			}
-		});
-
+//Test des éléments visibles
+$(document).on('DOMContentLoaded DOMMouseScroll mouseup', function() {
+	$('li.files').each(function(key, elt) {
+		if (isElementInViewport(elt)) {
+			$(elt).css('border', '1px solid green');
+			initPlayers();
+		} else
+			$(elt).css('border', '1px solid red');
 	});
-
-	deferred.resolve();
-
-	$('.vjs-loading-spinner').hide();
-
 });
 
 var getThumbAjax = function(player, time, callback) {
@@ -480,6 +361,144 @@ var generatePreview = function(player) {
 	}
 }
 
+var isElementInViewport = function(el) {
+    //special bonus for those using jQuery
+    if (typeof jQuery === "function" && el instanceof jQuery) {
+        el = el[0];
+    }
+
+    var rect = el.getBoundingClientRect();
+
+    return (
+        rect.top >= 0 &&
+        rect.left >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
+        rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
+    );
+}
+
+//Initialisation players
+var initPlayers = function() {
+	$(document).data('requestRunning', "");
+	var deferred = $.Deferred();
+	var promise = deferred.promise();
+	$('video').each(function(key, elt) {
+		if (/*isElementInViewport(elt) &&*/ !$(elt).hasClass('vjs-tech')) {
+			var player = videojs(elt);
+	
+			var addThumb = function(data) {
+				player.addThumb(data.time, {
+	        		src: data.file,
+	    			style: {
+	    			      width: '200px',
+	    			    }
+			   	});
+		    };
+	
+		    var addPoster = function(data) {
+			    console.log(player.id() + ' addPoster');
+				player.poster(data.file);
+		    };
+	
+			//Générer poster image
+// 			promise
+// 				.then(function(){ return getVideoDuration(player) })
+// 				.then(function(data){
+// 					var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
+// 					console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
+// 					getThumbAjax(player, time_seconds, addPoster);
+// 				});
+	
+			//Tester présence de la preview
+			var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
+			var name = $(player.el()).closest('li').find('span.name');
+			$(name).prepend(fa_refresh);
+			
+			var preview = $(elt).data('preview');
+			if (preview.length > 0) {
+				//Preview existe
+				$(name).find('> i').css('color', 'green');
+				$(player).data('hasPreview', true);
+			} else {
+				//Pas de preview
+				$(name).find('> i').css('color', 'red');
+				$(player).data('hasPreview', false);
+
+				//Génération de la preview par click sur icône refresh rouge
+				$(name).find('> i').one('click', function(evt) {
+					debugger;
+					generatePreview(player);
+				});
+			}
+	
+			//Plugin de génération des thumbnails
+			player.thumbnails({
+			      0: {
+			          src: ''
+			        }
+			      });
+	
+			//Sauvegarde chemin vidéo
+			$(player).data('src', $(player.el()).find('source').attr('src'));
+	
+			//Ecoute position souris sur barre de contrôle
+			player.on('thumbupdate', function(evt, data){
+				var player = this;
+				var settings = data.settings;
+				var video_id = player.el();
+				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+	
+				getThumbAjax(player, time, addThumb);
+		    });
+	
+			//Affichage preview vidéo lors du passage de la souris sur son emplacement
+			player.on('mouseover', function(){
+				if (!player.isFullscreen()
+						&& $(document).data('requestRunning') !== player.id()) {
+					console.log(player.id() + ' mouseover');
+	
+					//Si preview déjà créée on l'affiche
+					if ($(player).data('hasPreview') === true) {
+						generatePreview(player);
+					}
+				}
+			});
+	
+			player.on('mouseleave', function(){
+				//if ($(player).data('hasPreview') === true && !player.isFullscreen()){
+					console.log(player.id() + ' mouseleave');
+					player.pause();
+					//Restitution chemin vidéo
+					player.src($(player).data('src'));
+					player.controls(true);
+				//}
+			});
+	
+			player.on('click', function(evt){
+				if (!player.isFullscreen()) {
+					var videoType = $(player.el()).data('type');
+					var src = $(player).data('src');
+					if (videoType === 'mp4') {
+						evt.preventDefault();
+						player.controls(true);
+						player.src(src);
+						player.play();
+						player.requestFullscreen();
+					} else {
+						window.location = src;
+					}
+				}
+			});
+
+		}
+
+	});
+
+	deferred.resolve();
+
+	$('.vjs-loading-spinner').hide();
+}
+
 </script>
 
 <div class="filemanager">
@@ -496,6 +515,8 @@ var generatePreview = function(player) {
 			foreach ($this->data['items'] as $file):
 				$path = $this->escapeHtml($file['path']);
 				$name = $this->escapeHtml($file['name']);
+				$thumb = isset($file['thumb']) ? $this->escapeHtml($file['thumb']) : null;
+				$preview = isset($file['preview']) ? $this->escapeHtml($file['preview']) : null;
 				$pos = strrpos($name, '.');
 				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
 		?>
@@ -521,18 +542,13 @@ var generatePreview = function(player) {
 				else:
 				$size = $this->escapeHtml($file['size']);
 			?>
-				<?php if ($fileType === 'mp4'
-						|| $fileType === 'avi'
-						|| $fileType === 'wmv'
-						|| $fileType === 'mkv'
-						|| $fileType === 'flv'
-						|| $fileType === 'mpeg'
-						|| $fileType === 'mpg'): ?>
+				<?php if ($thumb !== null): ?>
 					<li class="files">
 						<span class="name vid"><?= $name ?></span>
 						<span class="details vid"><?= $size ?></span>
 						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
-							width="330" height="186" poster="" controls data-type="<?= $fileType ?>">
+							width="330" height="186" poster="<?= $thumb ?>" controls data-type="<?= $fileType ?>"
+							data-preview="<?= $preview ?>">
 							<source src="<?= '/' . $path ?>" type="video/mp4"/>
 						</video>
 					</li>

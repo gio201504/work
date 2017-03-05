@@ -17,6 +17,12 @@ use Zend\View\Model\JsonModel;
 
 class IndexController extends AbstractActionController
 {
+	private $sm;
+	
+	public function __construct($sm) {
+		$this->sm = $sm;
+	}
+	
     public function indexAction()
     {
         return new ViewModel();
@@ -57,13 +63,15 @@ class IndexController extends AbstractActionController
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
+    		$log = $this->sm->get('log');
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
-    
+
     		$top_dir = apache_getenv('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
+    		$forwardPlugin = $this->forward();
     		
     		// Convert file sizes from bytes to human readable units
     		function bytesToSize($bytes) {
@@ -88,7 +96,7 @@ class IndexController extends AbstractActionController
 	    			return 0;
     		}
 
-    		function scan($top_dir, $dir, $search = null) {
+    		function scan($top_dir, $dir, $search = null, $forwardPlugin) {
 //     			$thumbs = "thumbs";
     			$fulldir = $top_dir . $dir;
 				// Is there actually such a folder/file?
@@ -115,13 +123,55 @@ class IndexController extends AbstractActionController
 							);
 						} else {
 							// It is a file
-							$files[] = array(
+							$array = array(
 								"name" => $f_utf8,
 								"type" => "file",
 								"path" => $dir . '/' . $f_utf8,
 								"size" => bytesToSize(filesize($fulldir . '/' . $f)),
 								"fullname" => $fulldir . '/' . $f_utf8,
 							);
+							
+							//Si vidéo générer thumbnail
+							$filename = $fulldir . '/' . $f_utf8;
+							$mime = mime_content_type($fulldir . '/' . $f);
+							if (strstr($mime, "video/")) {
+								//Durée de la vidéo
+								$data = (object) array('file' => $dir . '/' . $f_utf8);
+								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+										array(
+											'action'	=> 'getVideoDuration',
+											'data'		=> $data,
+										)
+								);
+								$time = gmdate("H:i:s", $result->duration / 2);
+
+								//Génération thumbnail
+								$data = (object) array('file' => '/' . $dir . '/' . $f_utf8, 'time' => $time);
+								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+										array(
+												'action'	=> 'getThumbAjax',
+												'data'		=> $data,
+										)
+								);
+								$thumb = array('thumb' => $result->file);
+								$array = array_merge($array, $thumb);
+								
+								//Test existence preview
+								$data = (object) array('file' => $f_utf8);
+								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+										array(
+												'action'	=> 'checkVideoPreviewExists',
+												'data'		=> $data,
+										)
+								);
+								
+								if ($result->return_value === true) {
+									$preview = array('preview' => $result->file);
+									$array = array_merge($array, $preview);
+								}
+							}
+							
+							$files[] = $array;
 							
 							/*
 							if (file_exists($top_dir . $thumbs . '/' . $f . '.png'))
@@ -135,8 +185,10 @@ class IndexController extends AbstractActionController
 				
 				return $files;
     		}
-    		
-    		$response = scan($top_dir, $dir, $search);
+
+    		$log->info("Begin scan " . $top_dir . $dir);
+    		$response = scan($top_dir, $dir, $search, $forwardPlugin);
+    		$log->info("End scan   " . $top_dir . $dir);
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
@@ -162,6 +214,7 @@ class IndexController extends AbstractActionController
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
 //     		$uri = $request->getUri();
 //     		$basePath = sprintf('%s://%s', $uri->getScheme(), $uri->getHost());
     		
@@ -212,7 +265,8 @@ class IndexController extends AbstractActionController
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
-    		$data = $request->getQuery();    
+    		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
     		$top_dir = apache_getenv('top_dir') . '/';
     
@@ -243,7 +297,7 @@ class IndexController extends AbstractActionController
     		if (isset($file) && isset($duration) && !file_exists($out_file)) {
     			$cmd = 'ffmpeg -i "' . $top_dir . $file . '" -c:v libx264 -filter_complex "[0:v]scale=w=330:h=186[scale],[scale]split=5[copy0][copy1][copy2][copy3][copy4]';
     			for ($i = 0; $i < 5; $i++) {
-    				$start = intval($i * $duration / 5);
+    				$start = intval(($i + 1) * $duration / 6);
     				$end = $start + 1;
     				$cmd .= ',[copy' . $i . ']trim=' . $start . ':' . $end . ',setpts=PTS-STARTPTS[part' . $i . ']';
     			}
@@ -264,6 +318,7 @@ class IndexController extends AbstractActionController
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
 
     		$file = $data->file;
     		$top_dir = apache_getenv('top_dir');
