@@ -495,7 +495,7 @@ var initPlayers = function() {
 						.then(function(data){
 							var time = getMouseTime(player, event, data.duration);
 							//Pas de 10 pour les preview
-							time = Math.round((time / data.duration).toFixed(1) * data.duration);
+							//time = Math.round((time / data.duration).toFixed(1) * data.duration);
 							var time_seconds = "00:00:" + time;
 							$(player).data('time', time);
 							//Génération et affichage thumbnail
