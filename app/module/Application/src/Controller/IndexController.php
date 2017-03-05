@@ -146,7 +146,7 @@ class IndexController extends AbstractActionController
 								$time = gmdate("H:i:s", $result->duration / 2);
 
 								//Génération thumbnail
-								$data = (object) array('file' => $filename, 'time' => $time);
+								$data = (object) array('file' => '/' . $dir . '/' . $f_utf8, 'time' => $time);
 								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
 										array(
 												'action'	=> 'getThumbAjax',
