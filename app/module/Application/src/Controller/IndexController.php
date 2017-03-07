@@ -82,20 +82,20 @@ class IndexController extends AbstractActionController
     		}
     		
     		function countFiles($directory, $search = null, $log) {
-    			$log->info("   countFiles " . $directory);
+    			//$log->info("   countFiles " . $directory);
     			if ($search === null)
 	    			$files = glob($directory . '/*');
     			else
     				$files = glob($directory . '/*' . $search . '*');
 	    		
-	    		if ( $files !== false )
+	    		if ($files !== false)
 	    		{
 	    			$filecount = count($files);
-	    			$log->info("   countFiles " . $directory);
+	    			//$log->info("   countFiles " . $directory);
 	    			return $filecount;
 	    		}
 	    		else {
-	    			$log->info("   countFiles " . $directory);
+	    			//$log->info("   countFiles " . $directory);
 	    			return 0;
 	    		}
     		}
@@ -108,7 +108,7 @@ class IndexController extends AbstractActionController
 					$log->info("scandir(" . $fulldir . ")");
 					$handle = opendir($fulldir);
 					while(($f = readdir($handle)) !== false) {
-						$log->info($f);
+						//$log->info($f);
 						if(!$f || $f[0] == '.') {
 							continue; // Ignore hidden files
 						}
@@ -195,9 +195,7 @@ class IndexController extends AbstractActionController
 				return $files;
     		}
 
-    		$log->info("Begin scan " . $top_dir . $dir);
     		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log);
-    		$log->info("End scan   " . $top_dir . $dir);
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
