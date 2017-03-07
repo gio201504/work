@@ -178,6 +178,7 @@
       }
 
       div.style.left = left + 'px';
+      div.style.top = '15px';
     };
     
     player.addThumb = function(time, setting) {
