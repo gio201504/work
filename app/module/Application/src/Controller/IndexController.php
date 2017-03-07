@@ -81,7 +81,8 @@ class IndexController extends AbstractActionController
     			return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
     		}
     		
-    		function countFiles($directory, $search = null) {
+    		function countFiles($directory, $search = null, $log) {
+    			$log->info("   countFiles " . $directory);
     			if ($search === null)
 	    			$files = glob($directory . '/*');
     			else
@@ -90,36 +91,42 @@ class IndexController extends AbstractActionController
 	    		if ( $files !== false )
 	    		{
 	    			$filecount = count($files);
+	    			$log->info("   countFiles " . $directory);
 	    			return $filecount;
 	    		}
-	    		else
+	    		else {
+	    			$log->info("   countFiles " . $directory);
 	    			return 0;
+	    		}
     		}
 
-    		function scan($top_dir, $dir, $search = null, $forwardPlugin) {
-//     			$thumbs = "thumbs";
+    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log) {
     			$fulldir = $top_dir . $dir;
 				// Is there actually such a folder/file?
 	    		$files = array();
 				if(file_exists($fulldir)){
-					foreach(scandir($fulldir) as $f) {
+					$log->info("scandir(" . $fulldir . ")");
+					$handle = opendir($fulldir);
+					while(($f = readdir($handle)) !== false) {
+						$log->info($f);
 						if(!$f || $f[0] == '.') {
 							continue; // Ignore hidden files
 						}
 						
+						$is_dir = is_dir($fulldir . '/' . $f);
 						if ($search !== null
 								&& strpos($f, $search) === false
-	    						&& !is_dir($fulldir . '/' . $f))
+	    						&& !$is_dir)
 							continue;
 						
 						$f_utf8 = utf8_encode($f);
-						if(is_dir($fulldir . '/' . $f)) {
+						if($is_dir) {
 							// The path is a folder
 							$files[] = array(
 								"name" => $f_utf8,
 								"type" => "folder",
 								"path" => $dir . '/' . $f_utf8,
-								"items" => countFiles($top_dir . $dir . '/' . $f, $search),
+								"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
 							);
 						} else {
 							// It is a file
@@ -181,13 +188,15 @@ class IndexController extends AbstractActionController
 							*/
 						}
 					}
+					closedir($handle);
+					$log->info("scandir(" . $fulldir . ")");
 				}
 				
 				return $files;
     		}
 
     		$log->info("Begin scan " . $top_dir . $dir);
-    		$response = scan($top_dir, $dir, $search, $forwardPlugin);
+    		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log);
     		$log->info("End scan   " . $top_dir . $dir);
 
     		$viewmodel = new ViewModel();
