@@ -102,99 +102,87 @@ class IndexController extends AbstractActionController
 
     		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log) {
     			$fulldir = $top_dir . $dir;
-				// Is there actually such a folder/file?
-	    		$files = array();
-				if(file_exists($fulldir)){
-					$log->info("scandir(" . $fulldir . ")");
-					$handle = opendir($fulldir);
-					while(($f = readdir($handle)) !== false) {
-						//$log->info($f);
-						if(!$f || $f[0] == '.') {
-							continue; // Ignore hidden files
-						}
-						
-						$is_dir = is_dir($fulldir . '/' . $f);
-						if ($search !== null
-								&& strpos($f, $search) === false
-	    						&& !$is_dir)
-							continue;
-						
-						$f_utf8 = utf8_encode($f);
-						if($is_dir) {
-							// The path is a folder
-							$files[] = array(
-								"name" => $f_utf8,
-								"type" => "folder",
-								"path" => $dir . '/' . $f_utf8,
-								"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
-							);
-						} else {
-							// It is a file
-							$array = array(
-								"name" => $f_utf8,
-								"type" => "file",
-								"path" => $dir . '/' . $f_utf8,
-								"size" => bytesToSize(filesize($fulldir . '/' . $f)),
-								"fullname" => $fulldir . '/' . $f_utf8,
-							);
-							
-							//Si vidéo générer thumbnail
-							$filename = $fulldir . '/' . $f_utf8;
-							$mime = mime_content_type($fulldir . '/' . $f);
-							if (strstr($mime, "video/")) {
-								//Durée de la vidéo
-								$data = (object) array('file' => $dir . '/' . $f_utf8);
-								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-										array(
-											'action'	=> 'getVideoDuration',
-											'data'		=> $data,
-										)
-								);
-								$time = gmdate("H:i:s", $result->duration / 2);
+    			$log->info("scandir(" . $fulldir . ")");
 
-								//Génération thumbnail
-								$data = (object) array('file' => '/' . $dir . '/' . $f_utf8, 'time' => $time);
-								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-										array(
-												'action'	=> 'getThumbAjax',
-												'data'		=> $data,
-										)
-								);
-								$thumb = array('thumb' => $result->file);
-								$array = array_merge($array, $thumb);
-								
-// 								//Test existence preview
-// 								$data = (object) array('file' => $f_utf8);
-// 								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-// 										array(
-// 												'action'	=> 'checkVideoPreviewExists',
-// 												'data'		=> $data,
-// 										)
-// 								);
-								
-// 								if ($result->return_value === true) {
-// 									$preview = array('preview' => $result->file);
-// 									$array = array_merge($array, $preview);
-// 								}
+    			//Test existence cache
+    			$files = apcu_fetch($fulldir);
+    			
+    			if ($files === false) {
+		    		$files = array();
+		    		// Is there actually such a folder/file?
+					if(file_exists($fulldir)) {
+						$handle = opendir($fulldir);
+						while(($f = readdir($handle)) !== false) {
+							//$log->info($f);
+							if(!$f || $f[0] == '.') {
+								continue; // Ignore hidden files
 							}
 							
-							$files[] = $array;
+							$is_dir = is_dir($fulldir . '/' . $f);
+							if ($search !== null
+									&& strpos($f, $search) === false
+		    						&& !$is_dir)
+								continue;
 							
-							/*
-							if (file_exists($top_dir . $thumbs . '/' . $f . '.png'))
-								$files[] = array_merge($array, array("icon" => true));
-							else
+							$f_utf8 = utf8_encode($f);
+							if($is_dir) {
+								// The path is a folder
+								$files[] = array(
+									"name" => $f_utf8,
+									"type" => "folder",
+									"path" => $dir . '/' . $f_utf8,
+									"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
+								);
+							} else {
+								// It is a file
+								$array = array(
+									"name" => $f_utf8,
+									"type" => "file",
+									"path" => $dir . '/' . $f_utf8,
+									"size" => bytesToSize(filesize($fulldir . '/' . $f)),
+									"fullname" => $fulldir . '/' . $f_utf8,
+								);
+								
+								//Si vidéo générer thumbnail
+								$filename = $fulldir . '/' . $f_utf8;
+								$mime = mime_content_type($fulldir . '/' . $f);
+								if (strstr($mime, "video/")) {
+									//Durée de la vidéo
+									$data = (object) array('file' => $dir . '/' . $f_utf8);
+									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+											array(
+												'action'	=> 'getVideoDuration',
+												'data'		=> $data,
+											)
+									);
+									$time = gmdate("H:i:s", $result->duration / 2);
+	
+									//Génération thumbnail
+									$data = (object) array('file' => '/' . $dir . '/' . $f_utf8, 'time' => $time);
+									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+											array(
+													'action'	=> 'getThumbAjax',
+													'data'		=> $data,
+											)
+									);
+									$thumb = array('thumb' => $result->file);
+									$array = array_merge($array, $thumb);								
+								}
+								
 								$files[] = $array;
-							*/
+							}
 						}
+						closedir($handle);
 					}
-					closedir($handle);
-					$log->info("scandir(" . $fulldir . ")");
-				}
+					
+					//Sauvegarde dans le cache
+					apcu_store($fulldir, $files);
+    			}
 				
+    			$log->info("scandir(" . $fulldir . ")");
 				return $files;
     		}
-
+    		
     		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log);
 
     		$viewmodel = new ViewModel();
