@@ -244,7 +244,7 @@ class IndexController extends AbstractActionController
     
     private function data_uri($file, $mime = 'image/png')
     {
-    	$contents = file_get_contents($file);
+    	$contents = file_get_contents(utf8_decode($file));
     	$base64   = base64_encode($contents);
     	return 'data:' . $mime . ';base64,' . $base64;
     }
