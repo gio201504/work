@@ -262,15 +262,22 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
     		$top_dir = apache_getenv('top_dir') . '/';
-    
-    		if (isset($file)) {
-    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
-    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
-    			$duration = $outputAndErrors[0];
+
+    		$file_duration = basename($file) . '[duration]';
+    		$duration = apcu_fetch($file_duration);
+    		if ($duration === false) {
+	    		if (isset($file)) {
+	    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
+	    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+	    			$duration = $outputAndErrors[0];
+	    			
+	    			//Sauvegarde dans le cache
+	    			apcu_store($file_duration, $duration);
+	    		}
     		}
-    
+    		
     		return new JsonModel(array(
-    			'duration' => $duration,
+    				'duration' => $duration,
     		));
     	}
     }
