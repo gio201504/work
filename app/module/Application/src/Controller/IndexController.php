@@ -210,45 +210,43 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
-//     		$uri = $request->getUri();
-//     		$basePath = sprintf('%s://%s', $uri->getScheme(), $uri->getHost());
     		
     		$file = $data->file;
     		$time = $data->time;
     		$top_dir = apache_getenv('top_dir');
-    		
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+    			$thumbname = basename($file) . '[' . $time_seconds . '].jpg';
     			
-//     			$filetmp = dirname($file) . '/' . rawurlencode(basename($file));
-//     			$file = $filetmp;
-    			$thumb_path = getcwd() . '/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
-    			//$thumb_file = $basePath . $file . '[' . $time_seconds . '].jpg';
-    			$thumb_file = '/videojs/app/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
-    			if (!file_exists($thumb_path)) {
-// 		    		$ffmpeg = FFMpeg::create();
-// 		    		$video = $ffmpeg->open($basePath . $file);
-// 		    		$video
-// 			    		->filters()
-// 			    		//->resize(new Dimension(320, 240))
-// 			    		->synchronize();
-// 		    		$video
-// 			    		->frame(TimeCode::fromSeconds($time_seconds))
-// 			    		->save(rawurldecode($thumb_path));
-					//$time_formatted = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
-					//$cmd = "ffmpeg -ss " . $time_seconds . " -i " . $basePath . $file . " -vframes 1 -filter:v scale='200:-1' \"" . rawurldecode($thumb_path) . "\"";
-    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
-		    		//shell_exec("/usr/local/bin/ffmpeg -i test.mp3 -codec:a libmp3lame -b:a 128k out.mp3 2>&1");
-		    		shell_exec(utf8_decode($cmd));
+    			$data_uri = apcu_fetch($thumbname);
+    			if ($data_uri === false) {
+	    			$thumb_path = getcwd() . '/public/thumb/' . $thumbname;
+	    			$thumb_file = '/videojs/app/public/thumb/' . $thumbname;
+	
+	    			if (!file_exists($thumb_path)) {
+	    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
+			    		shell_exec(utf8_decode($cmd));
+	    			}	    			
+		    		
+		    		//Sauvegarde dans le cache
+		    		$data_uri = $this->data_uri($thumb_path);
+		    		apcu_store($thumbname, $data_uri);
     			}
+    			
+    			return new JsonModel(array(
+    					'time' => $time_seconds,
+    					'file' => $data_uri)
+    			);
     		}
-    		
-    		return new JsonModel(array(
-    				'time' => $time_seconds,
-    				'file' => $thumb_file)
-    		);
     	}    	
+    }
+    
+    private function data_uri($file, $mime = 'image/png')
+    {
+    	$contents = file_get_contents($file);
+    	$base64   = base64_encode($contents);
+    	return 'data:' . $mime . ';base64,' . $base64;
     }
     
     public function getThumbAction()
