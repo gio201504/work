@@ -13,6 +13,7 @@ use Zend\ServiceManager\Factory\InvokableFactory;
 use Zend\Log\Logger;
 use Application\Controller\IndexController;
 use Zend\Log\Writer\Stream;
+use Application\Cache\Storage\Adapter\ApcuFilesytem;
 
 return [
     'router' => [
@@ -97,13 +98,14 @@ return [
     					return $log;
     				}
     		],
-//     		'abstract_factories' => [
-//     				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
-//     				'Zend\Log\LoggerAbstractServiceFactory',
-//     		],
-//     		'aliases' => [
-//     				'translator' => 'MvcTranslator',
-//     		],
+    		'abstract_factories' => [
+    				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
+    				'Zend\Log\LoggerAbstractServiceFactory',
+    		],
+    		'aliases' => [
+    				'translator' => 'MvcTranslator',
+    				'apcufilesystem' => ApcuFilesytem::class,
+    		],
     ],
     
     'cache' => [
@@ -112,4 +114,16 @@ return [
     				'cache_dir' => 'data/cache/fullpage'
     		]
     ],
+    
+    'caches' => array(
+    		'filecache' => array(
+    				'adapter' => 'filesystem',
+    				'options' => [
+    					'cache_dir' => 'data/cache/filecache'
+    				]
+    		),
+    		'apcucache' => array(
+    				'adapter' => 'apcu',
+    		),
+    ),
 ];

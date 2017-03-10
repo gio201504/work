@@ -68,6 +68,7 @@ class IndexController extends AbstractActionController
     		$dir = $data->dir;
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
+    		$cache = $this->sm->get('filecache');
 
     		$top_dir = apache_getenv('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
