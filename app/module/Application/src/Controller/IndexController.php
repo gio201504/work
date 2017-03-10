@@ -68,7 +68,7 @@ class IndexController extends AbstractActionController
     		$dir = $data->dir;
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
-    		$cache = $this->sm->get('filecache');
+    		$cache = $this->sm->get('apcucache');
 
     		$top_dir = apache_getenv('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
@@ -101,14 +101,12 @@ class IndexController extends AbstractActionController
 	    		}
     		}
 
-    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log) {
+    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log, $cache) {
     			$fulldir = $top_dir . $dir;
     			$log->info("scandir(" . $fulldir . ")");
 
-    			//Test existence cache
-    			$files = apcu_fetch($fulldir);
-    			
-    			if ($files === false) {
+    			//Test existence cache    			
+    			if (!$cache->hasItem($fulldir)) {
 		    		$files = array();
 		    		// Is there actually such a folder/file?
 					if(file_exists($fulldir)) {
@@ -177,14 +175,15 @@ class IndexController extends AbstractActionController
 					}
 					
 					//Sauvegarde dans le cache
-					apcu_store($fulldir, $files);
-    			}
+					$cache->addItem($fulldir, $files);
+    			} else
+    				$files = $cache->getItem($fulldir);
 				
     			$log->info("scandir(" . $fulldir . ")");
 				return $files;
     		}
     		
-    		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log);
+    		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log, $cache);
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
@@ -211,6 +210,7 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
+    		$cache = $this->sm->get('apcucache');
     		
     		$file = $data->file;
     		$time = $data->time;
@@ -220,8 +220,7 @@ class IndexController extends AbstractActionController
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     			$thumbname = basename($file) . '[' . $time_seconds . '].jpg';
     			
-    			$data_uri = apcu_fetch($thumbname);
-    			if ($data_uri === false) {
+    			if (!$cache->hasItem($thumbname)) {
 	    			$thumb_path = getcwd() . '/public/thumb/' . $thumbname;
 	    			$thumb_file = '/videojs/app/public/thumb/' . $thumbname;
 	
@@ -232,8 +231,9 @@ class IndexController extends AbstractActionController
 		    		
 		    		//Sauvegarde dans le cache
 		    		$data_uri = $this->data_uri($thumb_path);
-		    		apcu_store($thumbname, $data_uri);
-    			}
+		    		$cache->addItem($thumbname, $data_uri);
+    			} else
+    				$data_uri = $cache->getItem($thumbname);
     			
     			return new JsonModel(array(
     					'time' => $time_seconds,
@@ -263,19 +263,20 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
     		$top_dir = apache_getenv('top_dir') . '/';
+    		$cache = $this->sm->get('apcucache');
 
     		$file_duration = basename($file) . '[duration]';
-    		$duration = apcu_fetch($file_duration);
-    		if ($duration === false) {
+    		if (!$cache->hasItem($file_duration)) {
 	    		if (isset($file)) {
 	    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
 	    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
 	    			$duration = $outputAndErrors[0];
 	    			
 	    			//Sauvegarde dans le cache
-	    			apcu_store($file_duration, $duration);
+	    			$cache->addItem($file_duration, $duration);
 	    		}
-    		}
+    		} else
+    			$duration = $cache->getItem($file_duration);
     		
     		return new JsonModel(array(
     				'duration' => $duration,

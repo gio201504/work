@@ -116,12 +116,12 @@ return [
     ],
     
     'caches' => array(
-    		'filecache' => array(
-    				'adapter' => 'filesystem',
-    				'options' => [
-    					'cache_dir' => 'data/cache/filecache'
-    				]
-    		),
+//     		'filecache' => array(
+//     				'adapter' => 'filesystem',
+//     				'options' => [
+//     					'cache_dir' => 'data/cache/filecache'
+//     				]
+//     		),
     		'apcucache' => array(
     				'adapter' => 'apcu',
     		),
