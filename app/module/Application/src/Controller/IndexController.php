@@ -61,6 +61,8 @@ class IndexController extends AbstractActionController
     
     public function scanAction()
     {
+    	$t1 = $this->milliseconds();
+    	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$log = $this->sm->get('log');
@@ -103,7 +105,6 @@ class IndexController extends AbstractActionController
 
     		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log, $cache) {
     			$fulldir = $top_dir . $dir;
-    			$log->info("scandir(" . $fulldir . ")");
 
     			//Test existence cache    			
     			if (!$cache->hasItem($fulldir)) {
@@ -179,11 +180,13 @@ class IndexController extends AbstractActionController
     			} else
     				$files = $cache->getItem($fulldir);
 				
-    			$log->info("scandir(" . $fulldir . ")");
 				return $files;
     		}
     		
     		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log, $cache);
+    		
+    		$t2 = $this->milliseconds();
+    		$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
@@ -206,11 +209,14 @@ class IndexController extends AbstractActionController
     
     public function getThumbAjaxAction()
     {
+    	$t1 = $this->milliseconds();
+    	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$cache = $this->sm->get('apcucache');
+    		$log = $this->sm->get('log');
     		
     		$file = $data->file;
     		$time = $data->time;
@@ -235,6 +241,9 @@ class IndexController extends AbstractActionController
     			} else
     				$data_uri = $cache->getItem($thumbname);
     			
+    			$t2 = $this->milliseconds();
+    			$log->info("getThumbAjax " . $thumbname . " " . ($t2 - $t1));
+    			
     			return new JsonModel(array(
     					'time' => $time_seconds,
     					'file' => $data_uri)
@@ -250,6 +259,11 @@ class IndexController extends AbstractActionController
     	return 'data:' . $mime . ';base64,' . $base64;
     }
     
+    private static function milliseconds() {
+    	$milliseconds = round(microtime(true) * 1000);
+    	return $milliseconds;
+    }
+    
     public function getThumbAction()
     {
 		return new ViewModel();
@@ -257,6 +271,8 @@ class IndexController extends AbstractActionController
     
     public function getVideoDurationAction()
     {
+    	$t1 = $this->milliseconds();
+    	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
@@ -264,6 +280,7 @@ class IndexController extends AbstractActionController
     		$file = $data->file;
     		$top_dir = apache_getenv('top_dir') . '/';
     		$cache = $this->sm->get('apcucache');
+    		$log = $this->sm->get('log');
 
     		$file_duration = basename($file) . '[duration]';
     		if (!$cache->hasItem($file_duration)) {
@@ -277,6 +294,9 @@ class IndexController extends AbstractActionController
 	    		}
     		} else
     			$duration = $cache->getItem($file_duration);
+    		
+    		$t2 = $this->milliseconds();
+    		$log->info("getVideoDurationAjax " . $file_duration . " " . ($t2 - $t1));
     		
     		return new JsonModel(array(
     				'duration' => $duration,
