@@ -227,19 +227,20 @@ class IndexController extends AbstractActionController
     			$thumbname = basename($file) . '[' . $time_seconds . '].jpg';
     			
     			if (!$cache->hasItem($thumbname)) {
-	    			$thumb_path = getcwd() . '/public/thumb/' . $thumbname;
+	    			$thumb_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $thumbname;
 	    			$thumb_file = '/videojs/app/public/thumb/' . $thumbname;
 	
 	    			if (!file_exists($thumb_path)) {
 	    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
 			    		shell_exec(utf8_decode($cmd));
-	    			}	    			
+	    			}
 		    		
 		    		//Sauvegarde dans le cache
 		    		$data_uri = $this->data_uri($thumb_path);
 		    		$cache->addItem($thumbname, $data_uri);
-    			} else
+    			} else {
     				$data_uri = $cache->getItem($thumbname);
+    			}
     			
     			$t2 = $this->milliseconds();
     			$log->info("getThumbAjax " . $thumbname . " " . ($t2 - $t1));
