@@ -230,7 +230,7 @@ class IndexController extends AbstractActionController
 	    			$thumb_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $thumbname;
 	    			$thumb_file = '/videojs/app/public/thumb/' . $thumbname;
 	
-	    			if (!file_exists($thumb_path)) {
+	    			if (!file_exists(utf8_decode($thumb_path))) {
 	    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
 			    		shell_exec(utf8_decode($cmd));
 	    			}
@@ -285,19 +285,23 @@ class IndexController extends AbstractActionController
 
     		$file_duration = basename($file) . '[duration]';
     		if (!$cache->hasItem($file_duration)) {
-	    		if (isset($file)) {
+    			$duration_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $file_duration;
+	    		if (!file_exists($duration_path)) {
 	    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
 	    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
 	    			$duration = $outputAndErrors[0];
 	    			
-	    			//Sauvegarde dans le cache
-	    			$cache->addItem($file_duration, $duration);
-	    		}
+	    			file_put_contents($duration_path, $duration);
+	    		} else
+	    			$duration = file_get_contents($duration_path);
+	    		
+	    		//Sauvegarde dans le cache
+	    		$cache->addItem($file_duration, $duration);
     		} else
     			$duration = $cache->getItem($file_duration);
     		
     		$t2 = $this->milliseconds();
-    		$log->info("getVideoDurationAjax " . $file_duration . " " . ($t2 - $t1));
+    		$log->info("getVideoDuration " . $file_duration . " " . ($t2 - $t1));
     		
     		return new JsonModel(array(
     				'duration' => $duration,
