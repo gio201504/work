@@ -379,8 +379,7 @@ var isElementInViewport = function(el) {
 
 //Retourne la position de la souris par rapport à la vidéo
 var getMouseTime = function(player, event, duration) {
-	var video = player.el();
-	var rect = video.getBoundingClientRect();
+	var rect = $(player).get(0).getBoundingClientRect();
 	//Position absolue souris
 	var x = event.pageX;
 	//Position absolue vidéo
