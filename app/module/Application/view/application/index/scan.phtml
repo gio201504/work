@@ -548,10 +548,10 @@ var initPlayers = function() {
 					<li class="files">
 						<span class="name vid"><?= $name ?></span>
 						<span class="details vid"><?= $size ?></span>
-						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
-							width="330" height="186" poster="<?= $thumb ?>" controls data-type="<?= $fileType ?>">
-							<source src="<?= '/' . $path ?>" type="video/mp4"/>
-						</video>
+						<img id="video<?= $idx++ ?>"
+							src="<?= $thumb ?>" data-type="<?= $fileType ?>"
+							data-src="<?= '/' . $path ?>"
+						</img>
 					</li>
 				<?php else: ?>
 					<li class="files">

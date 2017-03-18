@@ -165,10 +165,12 @@ body {
 .filemanager .data li {
 	border-radius: 3px;
 	background-color: #373743;
-	/*width: 307px;
-	height: 141px;*/
+	width: 340px;
+	height: 220px;
+	/*
 	min-width: 340px;
 	min-height: 220px;
+	*/
 	list-style-type: none;
 	margin: 3px;
 	display: inline-block;
