@@ -37,8 +37,7 @@ $(function(){
 		var video_id = player.el();
 		var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
 		var file = $(video_id).find('video source').attr('src');
-		debugger;
-		var idx = file.indexOf("welcome");
+		file = file.replace(/^.*\/\/[^\/]+/, '');
 		getThumbAjax(video_id, file, time, addThumb);
     });
 });
