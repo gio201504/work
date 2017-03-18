@@ -203,26 +203,26 @@ $(function(){
 });
 
 //Test des éléments visibles
-$(document).on('DOMContentLoaded DOMMouseScroll mouseup', function() {
-	$('li.files').each(function(key, elt) {
-		if (isElementInViewport(elt)) {
-			$(elt).css('border', '1px solid green');
-			initPlayers();
-		} else
-			$(elt).css('border', '1px solid red');
-	});
-});
+// $(document).on('DOMContentLoaded DOMMouseScroll mouseup', function() {
+// 	$('li.files').each(function(key, elt) {
+// 		if (isElementInViewport(elt)) {
+// 			$(elt).css('border', '1px solid green');
+// 			initPlayers();
+// 		} else
+// 			$(elt).css('border', '1px solid red');
+// 	});
+// });
 
 var getThumbAjax = function(player, time, callback) {
-	var video_id = player.el();
-	var file = $(video_id).find('video').attr('src');
+	var video_id = '#' + player.attr('id');
+	var file = $(video_id).attr('data-src');
 	
-	if ($(video_id).data('requestRunning')) {
-        return;
-    } else
-    	$(video_id).data('requestRunning', true);
+// 	if ($(video_id).data('requestRunning')) {
+//         return;
+//     } else
+//     	$(video_id).data('requestRunning', true);
 	
-	console.log(player.id() + ' getThumbAjax');
+	//console.log(player.id() + ' getThumbAjax');
 	return $.ajax({
         type: "GET",
         url: "getThumbAjax",
@@ -240,9 +240,9 @@ var getThumbAjax = function(player, time, callback) {
 }
 
 var getVideoDuration = function(player, callback) {
-	console.log(player.id() + ' getVideoDuration');
-	var video_id = player.el();
-	var file = $(video_id).find('video').attr('src');
+	//console.log(player.id() + ' getVideoDuration');
+	var video_id = '#' + player.attr('id');
+	var file = $(video_id).attr('data-src');
 
 	return $.ajax({
         type: "GET",
@@ -394,12 +394,10 @@ var getMouseTime = function(player, event, duration) {
 
 //Initialisation players
 var initPlayers = function() {
-	$(document).data('requestRunning', "");
-	var deferred = $.Deferred();
-	var promise = deferred.promise();
-	$('video').each(function(key, elt) {
+	$('li.files img').each(function(key, elt) {
 		if (/*isElementInViewport(elt) &&*/ !$(elt).hasClass('vjs-tech')) {
-			var player = videojs(elt);
+			//var player = videojs(elt);
+			var player = $(elt);
 	
 			var addThumb = function(data) {
 				player.addThumb(data.time, {
@@ -411,19 +409,20 @@ var initPlayers = function() {
 		    };
 	
 		    var addPoster = function(data) {
-			    console.log(player.id() + ' addPoster');
-				player.poster(data.file);
+			    //console.log(player.id() + ' addPoster');
+				//player.poster(data.file);
+			    player.attr('src', data.file);
 		    };
 	
 			//Plugin de génération des thumbnails
-			player.thumbnails({
-			      0: {
-			          src: ''
-			        }
-			      });
+// 			player.thumbnails({
+// 			      0: {
+// 			          src: ''
+// 			        }
+// 			      });
 	
 			//Sauvegarde chemin vidéo
-			$(player).data('src', $(player.el()).find('source').attr('src'));
+// 			$(player).data('src', $(player.el()).find('source').attr('src'));
 	
 			//Ecoute position souris sur barre de contrôle
 			player.on('thumbupdate', function(evt, data){
@@ -437,43 +436,41 @@ var initPlayers = function() {
 
 			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
 			player.on('mousemove', function(event) {
-				if (!player.isFullscreen()) {
-					if ($(player).data('requestRunning'))
-						return;
-					else
-						$(player).data('requestRunning', true);
-					
-					console.log(player.id() + ' mouseover');
+				if ($(player).data('requestRunning'))
+					return;
+				else
+					$(player).data('requestRunning', true);
+				
+				//console.log(player.id() + ' mouseover');
 
-					var deferred = $.Deferred();
-					var promise = deferred.promise();
-					promise
-						.then(function(){ return getVideoDuration(player); })
-						.then(function(data){
-							var time = getMouseTime(player, event, data.duration);
-							//Pas de 10 pour les preview
-							//time = Math.round((time / data.duration).toFixed(1) * data.duration);
-							var time_seconds = "00:00:" + time;
-							$(player).data('time', time);
-							//Génération et affichage thumbnail
-		 					return getThumbAjax(player, time_seconds, addPoster);
-						}).then(function(){
-							$(player).data('requestRunning', false);
-						});
-	
-					deferred.resolve();
-				}
+				var deferred = $.Deferred();
+				var promise = deferred.promise();
+				promise
+					.then(function(){ return getVideoDuration(player); })
+					.then(function(data){
+						var time = getMouseTime(player, event, data.duration);
+						//Pas de 10 pour les preview
+						//time = Math.round((time / data.duration).toFixed(1) * data.duration);
+						var time_seconds = "00:00:" + time;
+						$(player).data('time', time);
+						//Génération et affichage thumbnail
+	 					return getThumbAjax(player, time_seconds, addPoster);
+					}).then(function(){
+						$(player).data('requestRunning', false);
+					});
+
+				deferred.resolve();
 			});
 	
-			player.on('mouseleave', function(){
-				//if ($(player).data('hasPreview') === true && !player.isFullscreen()){
-					console.log(player.id() + ' mouseleave');
-					player.pause();
-					//Restitution chemin vidéo
-					player.src($(player).data('src'));
-					player.controls(true);
-				//}
-			});
+// 			player.on('mouseleave', function(){
+// 				//if ($(player).data('hasPreview') === true && !player.isFullscreen()){
+// 					console.log(player.id() + ' mouseleave');
+// 					player.pause();
+// 					//Restitution chemin vidéo
+// 					player.src($(player).data('src'));
+// 					player.controls(true);
+// 				//}
+// 			});
 	
 			player.on('click', function(evt){
 				if (!player.isFullscreen()) {
@@ -497,9 +494,7 @@ var initPlayers = function() {
 
 	});
 
-	deferred.resolve();
-
-	$('.vjs-loading-spinner').hide();
+	//$('.vjs-loading-spinner').hide();
 }
 
 </script>
