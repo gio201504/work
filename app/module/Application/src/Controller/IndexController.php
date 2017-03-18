@@ -358,4 +358,21 @@ class IndexController extends AbstractActionController
     		));
     	}
     }
+    
+    public function showPlayerAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$data = isset($data->path) ? $data : $this->params('data');
+    		
+    		$viewmodel = new ViewModel();
+    		
+    		$viewmodel->setVariables(array(
+    			"path" => $data->path,
+    		));
+    		
+    		return $viewmodel;
+    	}
+    }
 }
