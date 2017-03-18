@@ -377,6 +377,21 @@ var isElementInViewport = function(el) {
     );
 }
 
+//Retourne la position de la souris par rapport à la vidéo
+var getMouseTime = function(player, event, duration) {
+	var video = player.el();
+	var rect = video.getBoundingClientRect();
+	//Position absolue souris
+	var x = event.pageX;
+	//Position absolue vidéo
+	var left = rect.left;
+	var right = rect.right;
+
+	//Position sur la vidéo en secondes
+	var time = Math.trunc(((x - left) / (right - left)) * duration);
+	return time;
+}
+
 //Initialisation players
 var initPlayers = function() {
 	$(document).data('requestRunning', "");
@@ -410,26 +425,25 @@ var initPlayers = function() {
 // 				});
 	
 			//Tester présence de la preview
-			var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
-			var name = $(player.el()).closest('li').find('span.name');
-			$(name).prepend(fa_refresh);
+// 			var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
+// 			var name = $(player.el()).closest('li').find('span.name');
+// 			$(name).prepend(fa_refresh);
 			
-			var preview = $(elt).data('preview');
-			if (preview.length > 0) {
-				//Preview existe
-				$(name).find('> i').css('color', 'green');
-				$(player).data('hasPreview', true);
-			} else {
-				//Pas de preview
-				$(name).find('> i').css('color', 'red');
-				$(player).data('hasPreview', false);
+// 			var preview = $(elt).data('preview');
+// 			if (preview.length > 0) {
+// 				//Preview existe
+// 				$(name).find('> i').css('color', 'green');
+// 				$(player).data('hasPreview', true);
+// 			} else {
+// 				//Pas de preview
+// 				$(name).find('> i').css('color', 'red');
+// 				$(player).data('hasPreview', false);
 
-				//Génération de la preview par click sur icône refresh rouge
-				$(name).find('> i').one('click', function(evt) {
-					debugger;
-					generatePreview(player);
-				});
-			}
+// 				//Génération de la preview par click sur icône refresh rouge
+// 				$(name).find('> i').one('click', function(evt) {
+// 					generatePreview(player);
+// 				});
+// 			}
 	
 			//Plugin de génération des thumbnails
 			player.thumbnails({
@@ -452,15 +466,45 @@ var initPlayers = function() {
 		    });
 	
 			//Affichage preview vidéo lors du passage de la souris sur son emplacement
-			player.on('mouseover', function(){
-				if (!player.isFullscreen()
-						&& $(document).data('requestRunning') !== player.id()) {
-					console.log(player.id() + ' mouseover');
+// 			player.on('mouseover', function(){
+// 				if (!player.isFullscreen()
+// 						&& $(document).data('requestRunning') !== player.id()) {
+// 					console.log(player.id() + ' mouseover');
 	
-					//Si preview déjà créée on l'affiche
-					if ($(player).data('hasPreview') === true) {
-						generatePreview(player);
-					}
+// 					//Si preview déjà créée on l'affiche
+// 					if ($(player).data('hasPreview') === true) {
+// 						generatePreview(player);
+// 					}
+// 				}
+// 			});
+
+			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
+			player.on('mousemove', function(event) {
+				if (!player.isFullscreen()) {
+					if ($(player).data('requestRunning'))
+						return;
+					else
+						$(player).data('requestRunning', true);
+					
+					console.log(player.id() + ' mouseover');
+
+					var deferred = $.Deferred();
+					var promise = deferred.promise();
+					promise
+						.then(function(){ return getVideoDuration(player); })
+						.then(function(data){
+							var time = getMouseTime(player, event, data.duration);
+							//Pas de 10 pour les preview
+							//time = Math.round((time / data.duration).toFixed(1) * data.duration);
+							var time_seconds = "00:00:" + time;
+							$(player).data('time', time);
+							//Génération et affichage thumbnail
+		 					return getThumbAjax(player, time_seconds, addPoster);
+						}).then(function(){
+							$(player).data('requestRunning', false);
+						});
+	
+					deferred.resolve();
 				}
 			});
 	
@@ -476,14 +520,16 @@ var initPlayers = function() {
 	
 			player.on('click', function(evt){
 				if (!player.isFullscreen()) {
+					var time = $(player).data('time');
 					var videoType = $(player.el()).data('type');
 					var src = $(player).data('src');
 					if (videoType === 'mp4') {
 						evt.preventDefault();
+						player.requestFullscreen();
 						player.controls(true);
 						player.src(src);
 						player.play();
-						player.requestFullscreen();
+						player.currentTime(time);
 					} else {
 						window.location = src;
 					}
@@ -516,7 +562,6 @@ var initPlayers = function() {
 				$path = $this->escapeHtml($file['path']);
 				$name = $this->escapeHtml($file['name']);
 				$thumb = isset($file['thumb']) ? $this->escapeHtml($file['thumb']) : null;
-				$preview = isset($file['preview']) ? $this->escapeHtml($file['preview']) : null;
 				$pos = strrpos($name, '.');
 				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
 		?>
@@ -547,8 +592,7 @@ var initPlayers = function() {
 						<span class="name vid"><?= $name ?></span>
 						<span class="details vid"><?= $size ?></span>
 						<video id="video<?= $idx++ ?>" preload="none" class="video-js vjs-default-skin"
-							width="330" height="186" poster="<?= $thumb ?>" controls data-type="<?= $fileType ?>"
-							data-preview="<?= $preview ?>">
+							width="330" height="186" poster="<?= $thumb ?>" controls data-type="<?= $fileType ?>">
 							<source src="<?= '/' . $path ?>" type="video/mp4"/>
 						</video>
 					</li>

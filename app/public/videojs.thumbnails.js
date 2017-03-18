@@ -106,7 +106,7 @@
     // center the thumbnail over the cursor if an offset wasn't provided
     if (!img.style.left && !img.style.right) {
       img.onload = function() {
-        img.style.left = -img.width / 1.1 + 'px';
+        img.style.left = -(img.naturalWidth / 2) + 'px';
       };
     }
 
@@ -142,7 +142,7 @@
       // find the page offset of the mouse
       left = pageX || (event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft);
       // subtract the page offset of the positioned offset parent
-      //left -= offsetParent(progressControl.el()).getBoundingClientRect().left + pageXOffset;
+      left -= offsetParent(progressControl.el()).getBoundingClientRect().left + pageXOffset;
 
       // apply updated styles to the thumbnail if necessary
       // mouseTime is the position of the mouse along the progress control bar
@@ -155,11 +155,7 @@
           active = Math.max(active, time);
         }
       }
-      
-      player.trigger('thumbupdate', {settings: settings});
-
       setting = settings[active];
-      
       if (setting.src && img.src != setting.src) {
         img.src = setting.src;
       }
@@ -178,12 +174,7 @@
       }
 
       div.style.left = left + 'px';
-      div.style.top = '15px';
     };
-    
-    player.addThumb = function(time, setting) {
-      settings[time] = setting;
-    }
 
     // update the thumbnail while hovering
     progressControl.on('mousemove', moveListener);
@@ -194,9 +185,9 @@
     };
 
     // move the placeholder out of the way when not hovering
-//    progressControl.on('mouseout', moveCancel);
-//    progressControl.on('touchcancel', moveCancel);
-//    progressControl.on('touchend', moveCancel);
-//    player.on('userinactive', moveCancel);
+    progressControl.on('mouseout', moveCancel);
+    progressControl.on('touchcancel', moveCancel);
+    progressControl.on('touchend', moveCancel);
+    player.on('userinactive', moveCancel);
   });
 })();

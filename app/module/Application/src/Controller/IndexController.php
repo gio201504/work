@@ -61,6 +61,8 @@ class IndexController extends AbstractActionController
     
     public function scanAction()
     {
+    	$t1 = $this->milliseconds();
+    	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$log = $this->sm->get('log');
@@ -68,6 +70,7 @@ class IndexController extends AbstractActionController
     		$dir = $data->dir;
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
+    		$cache = $this->sm->get('apcucache');
 
     		$top_dir = apache_getenv('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
@@ -81,114 +84,109 @@ class IndexController extends AbstractActionController
     			return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
     		}
     		
-    		function countFiles($directory, $search = null) {
+    		function countFiles($directory, $search = null, $log) {
+    			//$log->info("   countFiles " . $directory);
     			if ($search === null)
 	    			$files = glob($directory . '/*');
     			else
     				$files = glob($directory . '/*' . $search . '*');
 	    		
-	    		if ( $files !== false )
+	    		if ($files !== false)
 	    		{
 	    			$filecount = count($files);
+	    			//$log->info("   countFiles " . $directory);
 	    			return $filecount;
 	    		}
-	    		else
+	    		else {
+	    			//$log->info("   countFiles " . $directory);
 	    			return 0;
+	    		}
     		}
 
-    		function scan($top_dir, $dir, $search = null, $forwardPlugin) {
-//     			$thumbs = "thumbs";
+    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log, $cache) {
     			$fulldir = $top_dir . $dir;
-				// Is there actually such a folder/file?
-	    		$files = array();
-				if(file_exists($fulldir)){
-					foreach(scandir($fulldir) as $f) {
-						if(!$f || $f[0] == '.') {
-							continue; // Ignore hidden files
-						}
-						
-						if ($search !== null
-								&& strpos($f, $search) === false
-	    						&& !is_dir($fulldir . '/' . $f))
-							continue;
-						
-						$f_utf8 = utf8_encode($f);
-						if(is_dir($fulldir . '/' . $f)) {
-							// The path is a folder
-							$files[] = array(
-								"name" => $f_utf8,
-								"type" => "folder",
-								"path" => $dir . '/' . $f_utf8,
-								"items" => countFiles($top_dir . $dir . '/' . $f, $search),
-							);
-						} else {
-							// It is a file
-							$array = array(
-								"name" => $f_utf8,
-								"type" => "file",
-								"path" => $dir . '/' . $f_utf8,
-								"size" => bytesToSize(filesize($fulldir . '/' . $f)),
-								"fullname" => $fulldir . '/' . $f_utf8,
-							);
-							
-							//Si vidéo générer thumbnail
-							$filename = $fulldir . '/' . $f_utf8;
-							$mime = mime_content_type($fulldir . '/' . $f);
-							if (strstr($mime, "video/")) {
-								//Durée de la vidéo
-								$data = (object) array('file' => $dir . '/' . $f_utf8);
-								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-										array(
-											'action'	=> 'getVideoDuration',
-											'data'		=> $data,
-										)
-								);
-								$time = gmdate("H:i:s", $result->duration / 2);
 
-								//Génération thumbnail
-								$data = (object) array('file' => '/' . $dir . '/' . $f_utf8, 'time' => $time);
-								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-										array(
-												'action'	=> 'getThumbAjax',
-												'data'		=> $data,
-										)
-								);
-								$thumb = array('thumb' => $result->file);
-								$array = array_merge($array, $thumb);
-								
-								//Test existence preview
-								$data = (object) array('file' => $f_utf8);
-								$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-										array(
-												'action'	=> 'checkVideoPreviewExists',
-												'data'		=> $data,
-										)
-								);
-								
-								if ($result->return_value === true) {
-									$preview = array('preview' => $result->file);
-									$array = array_merge($array, $preview);
-								}
+    			//Test existence cache    			
+    			if (!$cache->hasItem($fulldir)) {
+		    		$files = array();
+		    		// Is there actually such a folder/file?
+					if(file_exists($fulldir)) {
+						$handle = opendir($fulldir);
+						while(($f = readdir($handle)) !== false) {
+							//$log->info($f);
+							if(!$f || $f[0] == '.') {
+								continue; // Ignore hidden files
 							}
 							
-							$files[] = $array;
+							$is_dir = is_dir($fulldir . '/' . $f);
+							if ($search !== null
+									&& strpos($f, $search) === false
+		    						&& !$is_dir)
+								continue;
 							
-							/*
-							if (file_exists($top_dir . $thumbs . '/' . $f . '.png'))
-								$files[] = array_merge($array, array("icon" => true));
-							else
+							$f_utf8 = utf8_encode($f);
+							if($is_dir) {
+								// The path is a folder
+								$files[] = array(
+									"name" => $f_utf8,
+									"type" => "folder",
+									"path" => $dir . '/' . $f_utf8,
+									"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
+								);
+							} else {
+								// It is a file
+								$array = array(
+									"name" => $f_utf8,
+									"type" => "file",
+									"path" => $dir . '/' . $f_utf8,
+									"size" => bytesToSize(filesize($fulldir . '/' . $f)),
+									"fullname" => $fulldir . '/' . $f_utf8,
+								);
+								
+								//Si vidéo générer thumbnail
+								$filename = $fulldir . '/' . $f_utf8;
+								$mime = mime_content_type($fulldir . '/' . $f);
+								if (strstr($mime, "video/")) {
+									//Durée de la vidéo
+									$data = (object) array('file' => $dir . '/' . $f_utf8);
+									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+											array(
+												'action'	=> 'getVideoDuration',
+												'data'		=> $data,
+											)
+									);
+									$time = gmdate("H:i:s", $result->duration / 2);
+	
+									//Génération thumbnail
+									$data = (object) array('file' => '/' . $dir . '/' . $f_utf8, 'time' => $time);
+									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
+											array(
+													'action'	=> 'getThumbAjax',
+													'data'		=> $data,
+											)
+									);
+									$thumb = array('thumb' => $result->file);
+									$array = array_merge($array, $thumb);								
+								}
+								
 								$files[] = $array;
-							*/
+							}
 						}
+						closedir($handle);
 					}
-				}
+					
+					//Sauvegarde dans le cache
+					$cache->addItem($fulldir, $files);
+    			} else
+    				$files = $cache->getItem($fulldir);
 				
 				return $files;
     		}
-
-    		$log->info("Begin scan " . $top_dir . $dir);
-    		$response = scan($top_dir, $dir, $search, $forwardPlugin);
-    		$log->info("End scan   " . $top_dir . $dir);
+    		
+    		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log, $cache);
+    		
+    		$t2 = $this->milliseconds();
+    		$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);
@@ -211,49 +209,60 @@ class IndexController extends AbstractActionController
     
     public function getThumbAjaxAction()
     {
+    	$t1 = $this->milliseconds();
+    	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
-//     		$uri = $request->getUri();
-//     		$basePath = sprintf('%s://%s', $uri->getScheme(), $uri->getHost());
+    		$cache = $this->sm->get('apcucache');
+    		$log = $this->sm->get('log');
     		
     		$file = $data->file;
     		$time = $data->time;
     		$top_dir = apache_getenv('top_dir');
-    		
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+    			$thumbname = basename($file) . '[' . $time_seconds . '].jpg';
     			
-//     			$filetmp = dirname($file) . '/' . rawurlencode(basename($file));
-//     			$file = $filetmp;
-    			$thumb_path = getcwd() . '/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
-    			//$thumb_file = $basePath . $file . '[' . $time_seconds . '].jpg';
-    			$thumb_file = '/videojs/app/public/thumb/' . basename($file) . '[' . $time_seconds . '].jpg';
-    			if (!file_exists($thumb_path)) {
-// 		    		$ffmpeg = FFMpeg::create();
-// 		    		$video = $ffmpeg->open($basePath . $file);
-// 		    		$video
-// 			    		->filters()
-// 			    		//->resize(new Dimension(320, 240))
-// 			    		->synchronize();
-// 		    		$video
-// 			    		->frame(TimeCode::fromSeconds($time_seconds))
-// 			    		->save(rawurldecode($thumb_path));
-					//$time_formatted = sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
-					//$cmd = "ffmpeg -ss " . $time_seconds . " -i " . $basePath . $file . " -vframes 1 -filter:v scale='200:-1' \"" . rawurldecode($thumb_path) . "\"";
-    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
-		    		//shell_exec("/usr/local/bin/ffmpeg -i test.mp3 -codec:a libmp3lame -b:a 128k out.mp3 2>&1");
-		    		shell_exec(utf8_decode($cmd));
+    			if (!$cache->hasItem($thumbname)) {
+	    			$thumb_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $thumbname;
+	    			$thumb_file = '/videojs/app/public/thumb/' . $thumbname;
+	
+	    			if (!file_exists(utf8_decode($thumb_path))) {
+	    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
+			    		shell_exec(utf8_decode($cmd));
+	    			}
+		    		
+		    		//Sauvegarde dans le cache
+		    		$data_uri = $this->data_uri($thumb_path);
+		    		$cache->addItem($thumbname, $data_uri);
+    			} else {
+    				$data_uri = $cache->getItem($thumbname);
     			}
+    			
+    			$t2 = $this->milliseconds();
+    			$log->info("getThumbAjax " . $thumbname . " " . ($t2 - $t1));
+    			
+    			return new JsonModel(array(
+    					'time' => $time_seconds,
+    					'file' => $data_uri)
+    			);
     		}
-    		
-    		return new JsonModel(array(
-    				'time' => $time_seconds,
-    				'file' => $thumb_file)
-    		);
     	}    	
+    }
+    
+    private function data_uri($file, $mime = 'image/png')
+    {
+    	$contents = file_get_contents(utf8_decode($file));
+    	$base64   = base64_encode($contents);
+    	return 'data:' . $mime . ';base64,' . $base64;
+    }
+    
+    private static function milliseconds() {
+    	$milliseconds = round(microtime(true) * 1000);
+    	return $milliseconds;
     }
     
     public function getThumbAction()
@@ -263,21 +272,39 @@ class IndexController extends AbstractActionController
     
     public function getVideoDurationAction()
     {
+    	$t1 = $this->milliseconds();
+    	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
     		$top_dir = apache_getenv('top_dir') . '/';
-    
-    		if (isset($file)) {
-    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
-    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
-    			$duration = $outputAndErrors[0];
-    		}
-    
+    		$cache = $this->sm->get('apcucache');
+    		$log = $this->sm->get('log');
+
+    		$file_duration = basename($file) . '[duration]';
+    		if (!$cache->hasItem($file_duration)) {
+    			$duration_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $file_duration;
+	    		if (!file_exists($duration_path)) {
+	    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
+	    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+	    			$duration = $outputAndErrors[0];
+	    			
+	    			file_put_contents($duration_path, $duration);
+	    		} else
+	    			$duration = file_get_contents($duration_path);
+	    		
+	    		//Sauvegarde dans le cache
+	    		$cache->addItem($file_duration, $duration);
+    		} else
+    			$duration = $cache->getItem($file_duration);
+    		
+    		$t2 = $this->milliseconds();
+    		$log->info("getVideoDuration " . $file_duration . " " . ($t2 - $t1));
+    		
     		return new JsonModel(array(
-    			'duration' => $duration,
+    				'duration' => $duration,
     		));
     	}
     }
