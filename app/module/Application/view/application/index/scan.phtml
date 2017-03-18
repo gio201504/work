@@ -415,36 +415,6 @@ var initPlayers = function() {
 				player.poster(data.file);
 		    };
 	
-			//Générer poster image
-// 			promise
-// 				.then(function(){ return getVideoDuration(player) })
-// 				.then(function(data){
-// 					var time_seconds = "00:00:" + Math.trunc(data.duration / 2);
-// 					console.log(player.id() + ' genPoster ' + 'time_seconds = ' + time_seconds);
-// 					getThumbAjax(player, time_seconds, addPoster);
-// 				});
-	
-			//Tester présence de la preview
-// 			var fa_refresh = '<i class="fa fa-refresh fa-lg fa-fw margin-bottom"></i>';
-// 			var name = $(player.el()).closest('li').find('span.name');
-// 			$(name).prepend(fa_refresh);
-			
-// 			var preview = $(elt).data('preview');
-// 			if (preview.length > 0) {
-// 				//Preview existe
-// 				$(name).find('> i').css('color', 'green');
-// 				$(player).data('hasPreview', true);
-// 			} else {
-// 				//Pas de preview
-// 				$(name).find('> i').css('color', 'red');
-// 				$(player).data('hasPreview', false);
-
-// 				//Génération de la preview par click sur icône refresh rouge
-// 				$(name).find('> i').one('click', function(evt) {
-// 					generatePreview(player);
-// 				});
-// 			}
-	
 			//Plugin de génération des thumbnails
 			player.thumbnails({
 			      0: {
@@ -464,19 +434,6 @@ var initPlayers = function() {
 	
 				getThumbAjax(player, time, addThumb);
 		    });
-	
-			//Affichage preview vidéo lors du passage de la souris sur son emplacement
-// 			player.on('mouseover', function(){
-// 				if (!player.isFullscreen()
-// 						&& $(document).data('requestRunning') !== player.id()) {
-// 					console.log(player.id() + ' mouseover');
-	
-// 					//Si preview déjà créée on l'affiche
-// 					if ($(player).data('hasPreview') === true) {
-// 						generatePreview(player);
-// 					}
-// 				}
-// 			});
 
 			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
 			player.on('mousemove', function(event) {
