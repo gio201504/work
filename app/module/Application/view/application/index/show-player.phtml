@@ -33,12 +33,22 @@ $(function(){
 	//Ecoute position souris sur barre de contrôle
 	player.on('thumbupdate', function(evt, data) {
 		var player = this;
-		var settings = data.settings;
 		var video_id = player.el();
+
+	 	if ($(video_id).data('requestRunning')) {
+     		return;
+ 		} else
+ 			$(video_id).data('requestRunning', true);
+
+	 	var settings = data.settings;
 		var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
 		var file = $(video_id).find('video source').attr('src');
 		file = file.replace(/^.*\/\/[^\/]+/, '');
-		getThumbAjax(video_id, file, time, addThumb);
+		
+		getThumbAjax(video_id, file, time, addThumb)
+			.done(function() {
+				$(video_id).data('requestRunning', false);
+			});
     });
 });
 
