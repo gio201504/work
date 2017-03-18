@@ -1,0 +1,52 @@
+<?=
+	$this->headLink()
+		->prependStylesheet($this->basePath('css/videojs.thumbnails.css'))
+    	->prependStylesheet($this->basePath('css/video-js.css'));
+	
+    $this->headScript()
+    	->prependFile($this->basePath('js/videojs.thumbnails.js'))
+    	->prependFile($this->basePath('js/videojs-ie8.min.js'))
+    	->prependFile($this->basePath('js/video.js'));
+?>
+
+<script>
+
+$(function(){
+	var player = videojs('#player');
+
+	//Plugin de génération des thumbnails
+	player.thumbnails({
+	      0: {
+	          src: ''
+	        }
+	});
+
+	var addThumb = function(data) {
+		player.addThumb(data.time, {
+			src: data.file,
+			style: {
+			      width: '200px',
+			    }
+	   	});
+	};
+
+	//Ecoute position souris sur barre de contrôle
+	player.on('thumbupdate', function(evt, data) {
+		var player = this;
+		var settings = data.settings;
+		var video_id = player.el();
+		var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+		var file = $(video_id).find('video source').attr('src');
+		debugger;
+		var idx = file.indexOf("welcome");
+		getThumbAjax(video_id, file, time, addThumb);
+    });
+});
+
+</script>
+
+
+<video id='player' preload="none" class="video-js vjs-default-skin"
+	poster="" controls data-type="">
+	<source src="<?= $path ?>" type="video/mp4"/>
+</video>

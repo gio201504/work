@@ -206,32 +206,6 @@ $(function(){
 // 	});
 // });
 
-var getThumbAjax = function(player, time, callback) {
-	var video_id = '#' + player.attr('id');
-	var file = $(video_id).attr('data-src');
-	
-// 	if ($(video_id).data('requestRunning')) {
-//         return;
-//     } else
-//     	$(video_id).data('requestRunning', true);
-	
-	//console.log(player.id() + ' getThumbAjax');
-	return $.ajax({
-        type: "GET",
-        url: "getThumbAjax",
-        dataType: "json",
-        data: { file: file, time: time },
-        success: function(data) {
-    		if (typeof callback === 'function') {
-        		callback(data);
-    		}
-        },
-        complete: function() {
-        	$(video_id).data('requestRunning', false);
-        }
-    });
-}
-
 var getVideoDuration = function(player, callback) {
 	//console.log(player.id() + ' getVideoDuration');
 	var video_id = '#' + player.attr('id');
@@ -391,40 +365,11 @@ var initPlayers = function() {
 			//var player = videojs(elt);
 			var player = $(elt);
 	
-			var addThumb = function(data) {
-				player.addThumb(data.time, {
-	        		src: data.file,
-	    			style: {
-	    			      width: '200px',
-	    			    }
-			   	});
-		    };
-	
 		    var addPoster = function(data) {
 			    //console.log(player.id() + ' addPoster');
 				//player.poster(data.file);
 			    player.attr('src', data.file);
 		    };
-	
-			//Plugin de génération des thumbnails
-// 			player.thumbnails({
-// 			      0: {
-// 			          src: ''
-// 			        }
-// 			      });
-	
-			//Sauvegarde chemin vidéo
-// 			$(player).data('src', $(player.el()).find('source').attr('src'));
-	
-			//Ecoute position souris sur barre de contrôle
-			player.on('thumbupdate', function(evt, data){
-				var player = this;
-				var settings = data.settings;
-				var video_id = player.el();
-				var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
-	
-				getThumbAjax(player, time, addThumb);
-		    });
 
 			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
 			player.on('mousemove', function(event) {
@@ -446,7 +391,9 @@ var initPlayers = function() {
 						var time_seconds = "00:00:" + time;
 						$(player).data('time', time);
 						//Génération et affichage thumbnail
-	 					return getThumbAjax(player, time_seconds, addPoster);
+						var video_id = '#' + player.attr('id');
+						var file = $(video_id).attr('data-src');
+	 					return getThumbAjax(video_id, file, time_seconds, addPoster);
 					}).then(function(){
 						$(player).data('requestRunning', false);
 					});
