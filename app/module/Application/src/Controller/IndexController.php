@@ -376,6 +376,7 @@ class IndexController extends AbstractActionController
     		
     		$viewmodel->setVariables(array(
     			"path" => $path,
+    			"time" => $data->time,
     		));
     		
     		return $viewmodel;

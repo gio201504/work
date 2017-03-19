@@ -431,7 +431,9 @@ var initPlayers = function() {
 
 			player.on('click', function(evt){
 				var path = $(player).attr('data-src');
-				var url = 'showPlayer' + '?path=' + encodeURIComponent(path);
+				var time = $(player).data('time');
+				var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
+				var url = 'showPlayer' + params;
 				window.open(url);
 			});
 
