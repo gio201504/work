@@ -382,4 +382,31 @@ class IndexController extends AbstractActionController
     		return $viewmodel;
     	}
     }
+    
+    public function streamVideoAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
+    
+    		$file = $data->file;
+    		$time = $data->time;
+    		$top_dir = $request->getServer('top_dir');
+    		if (isset($file) && isset($time)) {
+    			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
+    			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+    
+    			if (!file_exists(utf8_decode($thumb_path))) {
+    				$cmd = sprintf('ffmpeg -ss 00:00:00 -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $top_dir . $file);
+    				shell_exec(utf8_decode($cmd));
+    			}
+    			    			 
+    			return new JsonModel(array(
+    					'time' => $time_seconds,
+    					'file' => $data_uri)
+    			);
+    		}
+    	}
+    }
 }

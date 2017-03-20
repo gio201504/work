@@ -61,10 +61,23 @@ $(function(){
     $("#streamButton").change(function() {
         if (this.checked) {
             var time = player.currentTime();
-            debugger;
+            var time_seconds = "00:00:" + Math.trunc(time);
+            var video_id = player.el();
+            var file = $(video_id).find('video source').attr('src');
+    		file = file.replace(/^.*\/\/[^\/]+/, '');
+            streamVideo(file, time_seconds);
         }
     });
 });
+
+var streamVideo = function(file, time) {
+	$.ajax({
+        type: "GET",
+        url: "streamVideo",
+        dataType: "json",
+        data: { file: file, time: time },
+    });
+}
 
 </script>
 
