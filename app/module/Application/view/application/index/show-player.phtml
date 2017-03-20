@@ -59,6 +59,7 @@ $(function(){
     $("#streamButton").button();
 
     $("#streamButton").change(function() {
+        debugger;
         if (this.checked) {
             var time = player.currentTime();
             var time_seconds = "00:00:" + Math.trunc(time);
@@ -66,16 +67,27 @@ $(function(){
             var file = $(video_id).find('video source').attr('src');
     		file = file.replace(/^.*\/\/[^\/]+/, '');
             streamVideo(file, time_seconds);
-        }
+        } else
+            streamKill();
     });
 });
 
 var streamVideo = function(file, time) {
+	debugger;
 	$.ajax({
         type: "GET",
         url: "streamVideo",
         dataType: "json",
         data: { file: file, time: time },
+    });
+}
+
+var streamKill = function(file, time) {
+	debugger;
+	$.ajax({
+        type: "GET",
+        url: "streamKill",
+        dataType: "json",
     });
 }
 

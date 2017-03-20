@@ -401,11 +401,19 @@ class IndexController extends AbstractActionController
     			$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
     			shell_exec(utf8_decode($cmd));
     			    			 
-    			return new JsonModel(array(
-    					'time' => $time_seconds,
-    					'file' => $data_uri)
-    			);
+    			return new JsonModel();
     		}
+    	}
+    }
+    
+    public function streamKillAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$cmd = 'taskkill /F /IM ffmpeg.exe';
+    		$output = shell_exec(utf8_decode($cmd));
+    		
+    		return new JsonModel();
     	}
     }
 }
