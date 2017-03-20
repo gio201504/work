@@ -55,10 +55,21 @@ $(function(){
     });
 
     player.play();
+
+    $("#streamButton").button();
+
+    $("#streamButton").change(function() {
+        if (this.checked) {
+            var time = player.currentTime();
+            debugger;
+        }
+    });
 });
 
 </script>
 
+<label for="streamButton">Stream video</label>
+<input type="checkbox" id="streamButton" />
 
 <video id='player' preload="none" class="video-js vjs-default-skin"
 	poster="" controls data-type="">
