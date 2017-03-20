@@ -397,10 +397,9 @@ class IndexController extends AbstractActionController
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     
-    			if (!file_exists(utf8_decode($thumb_path))) {
-    				$cmd = sprintf('ffmpeg -ss 00:00:00 -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $top_dir . $file);
-    				shell_exec(utf8_decode($cmd));
-    			}
+    			$gmdate = gmdate('H:i:s', $time_seconds);
+    			$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
+    			shell_exec(utf8_decode($cmd));
     			    			 
     			return new JsonModel(array(
     					'time' => $time_seconds,
