@@ -35,7 +35,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		
-    		$dir = apache_getenv('top_dir') . "/tmp";
+    		$dir = $request->getServer('top_dir') . "/tmp";
     		
     		// Open a directory, and read its contents
     		$fileList = array();
@@ -72,8 +72,8 @@ class IndexController extends AbstractActionController
     		$search = empty($search) ? null : $search;
     		$cache = $this->sm->get('apcucache');
 
-    		$top_dir = apache_getenv('top_dir') . '/';
-    		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
+    		$top_dir = $request->getServer('top_dir') . '/';
+    		$dir = (isset($dir) && !empty($dir)) ? $dir : $request->getServer('directory');
     		$forwardPlugin = $this->forward();
     		
     		// Convert file sizes from bytes to human readable units
@@ -220,7 +220,7 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = apache_getenv('top_dir');
+    		$top_dir = $request->getServer('top_dir');
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
@@ -279,7 +279,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
-    		$top_dir = apache_getenv('top_dir') . '/';
+    		$top_dir = $request->getServer('top_dir') . '/';
     		$cache = $this->sm->get('apcucache');
     		$log = $this->sm->get('log');
 
@@ -317,7 +317,7 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$duration = $data->duration;
-    		$top_dir = apache_getenv('top_dir');
+    		$top_dir = $request->getServer('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
     
@@ -348,7 +348,7 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
 
     		$file = $data->file;
-    		$top_dir = apache_getenv('top_dir');
+    		$top_dir = $request->getServer('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
 
