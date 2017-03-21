@@ -56,11 +56,8 @@ $(function(){
 
     player.play();
 
-    $("#streamButton").button();
-
-    $("#streamButton").change(function() {
-        debugger;
-        if (this.checked) {
+    $("#toggleButton").click(function() {
+        if (!$(this).hasClass('active')) {
             var time = player.currentTime();
             var time_seconds = "00:00:" + Math.trunc(time);
             var video_id = player.el();
@@ -73,7 +70,6 @@ $(function(){
 });
 
 var streamVideo = function(file, time) {
-	debugger;
 	$.ajax({
         type: "GET",
         url: "streamVideo",
@@ -83,7 +79,6 @@ var streamVideo = function(file, time) {
 }
 
 var streamKill = function(file, time) {
-	debugger;
 	$.ajax({
         type: "GET",
         url: "streamKill",
@@ -93,10 +88,10 @@ var streamKill = function(file, time) {
 
 </script>
 
-<label for="streamButton">Stream video</label>
-<input type="checkbox" id="streamButton" />
+<button id='toggleButton' type="button" class="btn btn-default"
+	data-toggle="button">Stream video to Ffmpeg</button>
 
 <video id='player' preload="none" class="video-js vjs-default-skin"
 	poster="" controls data-type="">
-	<source src="<?= $path ?>" type="video/mp4"/>
+	<source src="<?= $path ?>" type="video/mp4" />
 </video>
