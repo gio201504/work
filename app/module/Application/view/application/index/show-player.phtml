@@ -36,22 +36,36 @@ $(function(){
 	//Ecoute position souris sur barre de contrôle
 	player.on('thumbupdate', function(evt, data) {
 		var player = this;
-		var video_id = player.el();
-
-	 	if ($(video_id).data('requestRunning')) {
-     		return;
- 		} else
- 			$(video_id).data('requestRunning', true);
-
-	 	var settings = data.settings;
-		var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
-		var file = $(video_id).find('video source').attr('src');
-		file = file.replace(/^.*\/\/[^\/]+/, '');
+		var deferred = $.Deferred();
 		
-		getThumbAjax(video_id, file, time, addThumb)
-			.done(function() {
-				$(video_id).data('requestRunning', false);
-			});
+		//Arrêt streaming en cours
+		if ($('#toggleButton').hasClass('active')) {
+			$('#toggleButton').toggleClass('active');
+			var promise = streamKill();
+		} else {
+			var promise = deferred.promise();
+		}
+
+		promise.then(function() {
+			var video_id = player.el();
+	
+		 	if ($(video_id).data('requestRunning')) {
+	     		return;
+	 		} else
+	 			$(video_id).data('requestRunning', true);
+	
+		 	var settings = data.settings;
+			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+			var file = $(video_id).find('video source').attr('src');
+			file = file.replace(/^.*\/\/[^\/]+/, '');
+			
+			getThumbAjax(video_id, file, time, addThumb)
+				.done(function() {
+					$(video_id).data('requestRunning', false);
+				});
+		});
+
+		deferred.resolve();
     });
 
     player.play();
@@ -78,8 +92,8 @@ var streamVideo = function(file, time) {
     });
 }
 
-var streamKill = function(file, time) {
-	$.ajax({
+var streamKill = function() {
+	return $.ajax({
         type: "GET",
         url: "streamKill",
         dataType: "json",
