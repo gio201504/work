@@ -4,6 +4,7 @@
     	->prependStylesheet($this->basePath('css/video-js.css'));
 	
     $this->headScript()
+    	->prependFile($this->basePath('js/videojs-contrib-hls.js'))
     	->prependFile($this->basePath('js/videojs.thumbnails.js'))
     	->prependFile($this->basePath('js/videojs-ie8.min.js'))
     	->prependFile($this->basePath('js/video.js'));
