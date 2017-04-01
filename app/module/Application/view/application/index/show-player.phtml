@@ -4,7 +4,7 @@
     	->prependStylesheet($this->basePath('css/video-js.css'));
 	
     $this->headScript()
-    	->prependFile($this->basePath('js/videojs-contrib-hls.js'))
+    	//->prependFile($this->basePath('js/videojs-contrib-hls.js'))
     	->prependFile($this->basePath('js/videojs.thumbnails.js'))
     	->prependFile($this->basePath('js/videojs-ie8.min.js'))
     	->prependFile($this->basePath('js/video.js'));
@@ -69,7 +69,8 @@ $(function(){
 		deferred.resolve();
     });
 
-    player.play();
+    //player.play();
+    playTranscodedVideo(player);
 
     $("#toggleButton").click(function() {
         if (!$(this).hasClass('active')) {
@@ -82,12 +83,34 @@ $(function(){
         } else
             streamKill();
     });
+
+    $(player).on('timeupdate', function() {
+        debugger;
+        playTranscodedVideo(player);
+    });
 });
 
 var streamVideo = function(file, time) {
 	$.ajax({
         type: "GET",
         url: "streamVideo",
+        dataType: "json",
+        data: { file: file, time: time },
+    });
+}
+
+var playTranscodedVideo = function(player) {
+	debugger;
+    var time = player.currentTime();
+    var time_seconds = "00:00:" + Math.trunc(time);
+    var video_id = player.el();
+    var file = $(video_id).find('video source').attr('src');
+	file = file.replace(/^.*\/\/[^\/]+/, '');
+	streamKill();
+
+	$.ajax({
+        type: "GET",
+        url: "transcodeVideo",
         dataType: "json",
         data: { file: file, time: time },
     });

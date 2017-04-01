@@ -33,7 +33,7 @@ return [
                 'options' => [
                     'route'    => '/application[/:action]',
                     'constraints' => array(
-                    	'action' => '(scan|generate|check|show|stream)[a-zA-Z0-9_-]*',
+                    	'action' => '(scan|generate|check|show|stream|transcode)[a-zA-Z0-9_-]*',
                     ),
                     'defaults' => [
                         'controller' => Controller\IndexController::class,
