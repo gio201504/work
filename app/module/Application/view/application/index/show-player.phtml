@@ -4,8 +4,8 @@
     	->prependStylesheet($this->basePath('css/video-js.css'));
 	
     $this->headScript()
-    	//->prependFile($this->basePath('js/videojs-contrib-hls.js'))
-    	->prependFile($this->basePath('js/videojs.thumbnails.js'))
+    	->prependFile($this->basePath('js/hls.js'))
+    	//->prependFile($this->basePath('js/videojs.thumbnails.js'))
     	->prependFile($this->basePath('js/videojs-ie8.min.js'))
     	->prependFile($this->basePath('js/video.js'));
 ?>
@@ -13,17 +13,35 @@
 <script>
 
 $(function(){
-	var player = videojs('#player');
+	//var player = videojs('#player');
+
+	if(Hls.isSupported()) {
+// 		var config = {
+// 			xhrSetup: function(xhr, url) {
+// 				xhr.withCredentials = true; // do send cookies
+// 				xhr.setRequestHeader('Access-Control-Allow-Credentials', true);
+// 				xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+// 			}
+// 		};
+		var video = document.getElementById('player');
+	    var hls = new Hls(/*config*/);
+	    //hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
+	    hls.loadSource('http://192.168.0.1:8080/hls/mystream/index.m3u8');
+	    hls.attachMedia(video);
+	    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+		    video.play();
+	  	});
+	}
 
 	var time = <?php echo $this->time; ?>;
 	player.currentTime(time);
 
 	//Plugin de génération des thumbnails
-	player.thumbnails({
-	      0: {
-	          src: ''
-	        }
-	});
+// 	player.thumbnails({
+// 	      0: {
+// 	          src: ''
+// 	        }
+// 	});
 
 	var addThumb = function(data) {
 		player.addThumb(data.time, {
@@ -70,7 +88,7 @@ $(function(){
     });
 
     //player.play();
-    playTranscodedVideo(player);
+    //playTranscodedVideo(player);
 
     $("#toggleButton").click(function() {
         if (!$(this).hasClass('active')) {
@@ -131,5 +149,4 @@ var streamKill = function() {
 
 <video id='player' preload="none" class="video-js vjs-default-skin"
 	poster="" controls data-type="">
-	<source src="<?= $path ?>" type="video/mp4" />
 </video>
