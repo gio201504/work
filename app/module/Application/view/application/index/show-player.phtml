@@ -4,38 +4,49 @@
     	->prependStylesheet($this->basePath('css/video-js.css'));
 	
     $this->headScript()
-    	->prependFile($this->basePath('js/hls.js'))
+    	->prependFile($this->basePath('js/hls.js'));
     	//->prependFile($this->basePath('js/videojs.thumbnails.js'))
-    	->prependFile($this->basePath('js/videojs-ie8.min.js'))
-    	->prependFile($this->basePath('js/video.js'));
+    	//->prependFile($this->basePath('js/videojs-ie8.min.js'))
+    	//->prependFile($this->basePath('js/video.js'));
 ?>
 
 <script>
 
 $(function(){
-	//var player = videojs('#player');
+// 	var player = videojs('#player');
 
-	if(Hls.isSupported()) {
-// 		var config = {
-// 			xhrSetup: function(xhr, url) {
-// 				xhr.withCredentials = true; // do send cookies
-// 				xhr.setRequestHeader('Access-Control-Allow-Credentials', true);
-// 				xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-// 			}
-// 		};
-		var video = document.getElementById('player');
-	    var hls = new Hls(/*config*/);
-	    //hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
-	    hls.loadSource('http://192.168.0.1:8080/hls/mystream/index.m3u8');
-	    hls.attachMedia(video);
-	    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-		    video.play();
-	  	});
-	}
+	debugger;
+	var dfd = $.Deferred();
+	var promise = dfd.promise();
+	
+	promise
+		.then(function(){ return streamKill(); })
+		.then(function(){ return playTranscodedVideo(); })
+		.then(function() {
+			debugger;
+			if (Hls.isSupported()) {
+	// 		var config = {
+	// 			xhrSetup: function(xhr, url) {
+	// 				xhr.withCredentials = true; // do send cookies
+	// 				xhr.setRequestHeader('Access-Control-Allow-Credentials', true);
+	// 				xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+	// 			}
+	// 		};
+			var video = document.getElementById('player');
+		    var hls = new Hls(/*config*/);
+		    //hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
+		    hls.loadSource('http://192.168.0.1:8080/hls/mystream/index.m3u8');
+		    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
+		    hls.attachMedia(video);
+		    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+			    debugger;
+			    video.play();
+		  	});
+		}
+	});
 
-	var time = <?php echo $this->time; ?>;
-	player.currentTime(time);
-
+	dfd.resolve();
+	
 	//Plugin de génération des thumbnails
 // 	player.thumbnails({
 // 	      0: {
@@ -53,39 +64,39 @@ $(function(){
 	};
 
 	//Ecoute position souris sur barre de contrôle
-	player.on('thumbupdate', function(evt, data) {
-		var player = this;
-		var deferred = $.Deferred();
+// 	player.on('thumbupdate', function(evt, data) {
+// 		var player = this;
+// 		var deferred = $.Deferred();
 		
-		//Arrêt streaming en cours
-		if ($('#toggleButton').hasClass('active')) {
-			$('#toggleButton').toggleClass('active');
-			var promise = streamKill();
-		} else {
-			var promise = deferred.promise();
-		}
+// 		//Arrêt streaming en cours
+// 		if ($('#toggleButton').hasClass('active')) {
+// 			$('#toggleButton').toggleClass('active');
+// 			var promise = streamKill();
+// 		} else {
+// 			var promise = deferred.promise();
+// 		}
 
-		promise.then(function() {
-			var video_id = player.el();
+// 		promise.then(function() {
+// 			var video_id = player.el();
 	
-		 	if ($(video_id).data('requestRunning')) {
-	     		return;
-	 		} else
-	 			$(video_id).data('requestRunning', true);
+// 		 	if ($(video_id).data('requestRunning')) {
+// 	     		return;
+// 	 		} else
+// 	 			$(video_id).data('requestRunning', true);
 	
-		 	var settings = data.settings;
-			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
-			var file = $(video_id).find('video source').attr('src');
-			file = file.replace(/^.*\/\/[^\/]+/, '');
+// 		 	var settings = data.settings;
+// 			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+// 			var file = $(video_id).find('video source').attr('src');
+// 			file = file.replace(/^.*\/\/[^\/]+/, '');
 			
-			getThumbAjax(video_id, file, time, addThumb)
-				.done(function() {
-					$(video_id).data('requestRunning', false);
-				});
-		});
+// 			getThumbAjax(video_id, file, time, addThumb)
+// 				.done(function() {
+// 					$(video_id).data('requestRunning', false);
+// 				});
+// 		});
 
-		deferred.resolve();
-    });
+// 		deferred.resolve();
+//     });
 
     //player.play();
     //playTranscodedVideo(player);
@@ -102,10 +113,10 @@ $(function(){
             streamKill();
     });
 
-    $(player).on('timeupdate', function() {
-        debugger;
-        playTranscodedVideo(player);
-    });
+//     $(player).on('timeupdate', function() {
+//         debugger;
+//         playTranscodedVideo(player);
+//     });
 });
 
 var streamVideo = function(file, time) {
@@ -117,16 +128,14 @@ var streamVideo = function(file, time) {
     });
 }
 
-var playTranscodedVideo = function(player) {
+var playTranscodedVideo = function() {
 	debugger;
-    var time = player.currentTime();
+	var time = <?php echo $this->time; ?>;
+	var file = "<?php echo $this->path; ?>";
     var time_seconds = "00:00:" + Math.trunc(time);
-    var video_id = player.el();
-    var file = $(video_id).find('video source').attr('src');
 	file = file.replace(/^.*\/\/[^\/]+/, '');
-	streamKill();
 
-	$.ajax({
+	return $.ajax({
         type: "GET",
         url: "transcodeVideo",
         dataType: "json",
@@ -135,6 +144,7 @@ var playTranscodedVideo = function(player) {
 }
 
 var streamKill = function() {
+	debugger;
 	return $.ajax({
         type: "GET",
         url: "streamKill",
