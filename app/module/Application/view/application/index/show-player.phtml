@@ -15,36 +15,26 @@
 $(function(){
 // 	var player = videojs('#player');
 
-	var dfd = $.Deferred();
-	var promise = dfd.promise();
-	
-	promise
-		//.then(function(){ return streamKill(); })
-		.then(function(){ return playTranscodedVideo(); })
-		.then(function() {
-			if (Hls.isSupported()) {
-	// 		var config = {
-	// 			xhrSetup: function(xhr, url) {
-	// 				xhr.withCredentials = true; // do send cookies
-	// 				xhr.setRequestHeader('Access-Control-Allow-Credentials', true);
-	// 				xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-	// 			}
-	// 		};
-			var video = document.getElementById('player');
-		    var hls = new Hls(/*config*/);
-		    //hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
-		    hls.loadSource('http://192.168.0.1:8080/hls/mystream/index.m3u8');
-		    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
-		    hls.attachMedia(video);
-		    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-			    debugger;
-			    video.play();
-		  	});
-		}
-	});
+	if (Hls.isSupported()) {
+// 		var config = {
+// 			xhrSetup: function(xhr, url) {
+// 				xhr.withCredentials = true; // do send cookies
+// 				xhr.setRequestHeader('Access-Control-Allow-Credentials', true);
+// 				xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+// 			}
+// 		};
+		var video = document.getElementById('player');
+	    var hls = new Hls(/*config*/);
+	    //hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
+	    hls.loadSource('http://192.168.0.1:8080/hls/mystream/index.m3u8');
+	    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
+	    hls.attachMedia(video);
+	    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+		    debugger;
+		    video.play();
+	  	});
+	}
 
-	dfd.resolve();
-	
 	//Plugin de génération des thumbnails
 // 	player.thumbnails({
 // 	      0: {
@@ -124,21 +114,7 @@ var streamVideo = function(file, time) {
         dataType: "json",
         data: { file: file, time: time },
     });
-}
-
-var playTranscodedVideo = function() {
-	var time_seconds = <?php echo $this->time; ?>;
-	var file = "<?php echo $this->path; ?>";
-    //var time_seconds = "00:00:" + Math.trunc(time);
-	file = file.replace(/^.*\/\/[^\/]+/, '');
-
-	return $.ajax({
-        type: "GET",
-        url: "transcodeVideo",
-        dataType: "json",
-        data: { file: file, time: time_seconds },
-    });
-}
+};
 
 </script>
 

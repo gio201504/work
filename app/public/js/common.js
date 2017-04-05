@@ -19,7 +19,7 @@ var getThumbAjax = function(video_id, file, time, callback) {
         	$(video_id).data('requestRunning', false);
         }
     });
-}
+};
 
 var streamKill = function() {
 	return $.ajax({
@@ -27,4 +27,18 @@ var streamKill = function() {
         url: "streamKill",
         dataType: "json",
     });
-}
+};
+
+var playTranscodedVideo = function(file, time_seconds) {
+	//var time_seconds = <?php echo $this->time; ?>;
+	//var file = "<?php echo $this->path; ?>";
+    //var time_seconds = "00:00:" + Math.trunc(time);
+	file = file.replace(/^.*\/\/[^\/]+/, '');
+
+	return $.ajax({
+        type: "GET",
+        url: "transcodeVideo",
+        dataType: "json",
+        data: { file: file, time: time_seconds },
+    });
+};

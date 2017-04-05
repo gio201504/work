@@ -4,15 +4,16 @@
 ?>
 
 <script>
+var	breadcrumbsUrls;
 
 $(function(){
+	"use strict";
 	
 	var filemanager = $('.filemanager'),
 		breadcrumbs = $('.breadcrumbs'),
 		fileList = filemanager.find('.data');
 
-	var currentPath = '';
-	var	breadcrumbsUrls = [];
+	//var currentPath = '';
 
 	var folders = [],
 		files = [];
@@ -222,7 +223,7 @@ var getVideoDuration = function(player, callback) {
     		}
         },
     });
-}
+};
 
 var generateVideoPreview = function(player, duration) {
 	console.log(player.id() + ' generateVideoPreview duration=' + duration);
@@ -234,7 +235,7 @@ var generateVideoPreview = function(player, duration) {
         url: "generateVideoPreview",
         data: { file: file, duration: duration},
     });
-}
+};
 
 var checkVideoPreviewExists = function(player) {
 	console.log(player.id() + ' checkVideoPreviewExists');
@@ -246,7 +247,7 @@ var checkVideoPreviewExists = function(player) {
         url: "checkVideoPreviewExists",
         data: { file: file },
     });
-}
+};
 
 var showVideoPreview = function(player) {
 	//Afficher la préview si le pointeur est dessus et hors plein écran
@@ -256,18 +257,18 @@ var showVideoPreview = function(player) {
 		player.loop(true);
 		player.play();
 	}
-}
+};
 
 var removePreviewIcon = function(player) {
 	//Supprimer l'icône de génération de la preview
 	var name = $(player.el()).prevAll('span.name');
 	$(name).find('i').remove();
-}
+};
 
 $.urlParam = function(name){
 	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
 	return 0 || (results && results[1]);
-}
+};
 
 var generatePreview = function(player) {
 	if (!player.isFullscreen()
@@ -301,7 +302,7 @@ var generatePreview = function(player) {
 						var promise = deferred.promise();
 						//Générer la preview video
 						promise
-							.then(function(){ return getVideoDuration(player) })
+							.then(function(){ return getVideoDuration(player); })
 							.then(function(data){
 								var duration = Math.trunc(data.duration);
 								return generateVideoPreview(player, duration);
@@ -326,7 +327,7 @@ var generatePreview = function(player) {
 			showVideoPreview(player);
 		}
 	}
-}
+};
 
 var isElementInViewport = function(el) {
     //special bonus for those using jQuery
@@ -342,7 +343,7 @@ var isElementInViewport = function(el) {
         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
         rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
     );
-}
+};
 
 //Retourne la position de la souris par rapport à la vidéo
 var getMouseTime = function(player, event, duration) {
@@ -356,7 +357,7 @@ var getMouseTime = function(player, event, duration) {
 	//Position sur la vidéo en secondes
 	var time = Math.trunc(((x - left) / (right - left)) * duration);
 	return time;
-}
+};
 
 //Initialisation players
 var initPlayers = function() {
@@ -429,10 +430,18 @@ var initPlayers = function() {
 // 				}
 // 			});
 
-			player.on('click', function(evt){
-				streamKill();
+			player.on('click', function(evt) {
 				var path = $(player).attr('data-src');
 				var time = $(player).data('time');
+				var dfd = $.Deferred();
+				var promise = dfd.promise();
+
+				promise
+					.then(function(){ return streamKill(); })
+					.then(function(){ return playTranscodedVideo(path, time); });
+					
+				dfd.resolve();
+				
 				var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
 				var url = 'showPlayer' + params;
 				window.open(url);
@@ -443,7 +452,7 @@ var initPlayers = function() {
 	});
 
 	//$('.vjs-loading-spinner').hide();
-}
+};
 
 </script>
 
@@ -493,8 +502,7 @@ var initPlayers = function() {
 						<span class="details vid"><?= $size ?></span>
 						<img id="video<?= $idx++ ?>"
 							src="<?= $thumb ?>" data-type="<?= $fileType ?>"
-							data-src="<?= '/' . $path ?>"
-						</img>
+							data-src="<?= '/' . $path ?>">
 					</li>
 				<?php else: ?>
 					<li class="files">
