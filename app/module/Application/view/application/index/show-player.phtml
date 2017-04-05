@@ -30,7 +30,6 @@ $(function(){
 	    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
 	    hls.attachMedia(video);
 	    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-		    debugger;
 		    video.play();
 	  	});
 	}
@@ -105,6 +104,23 @@ $(function(){
 //         debugger;
 //         playTranscodedVideo(player);
 //     });
+
+//     $(window).on('beforeunload', function() {
+//         debugger;
+//         return "Do you really want to close?";
+//     });
+
+    $("#closeButton").click(function() {
+    	var dfd = $.Deferred();
+		var promise = dfd.promise();
+
+		promise
+			.then(function(){ return streamKill(); })
+			.then(function(){ window.close(); });
+			
+		dfd.resolve();
+    });
+
 });
 
 var streamVideo = function(file, time) {
@@ -120,6 +136,8 @@ var streamVideo = function(file, time) {
 
 <button id='toggleButton' type="button" class="btn btn-default"
 	data-toggle="button">Stream video to Ffmpeg</button>
+
+<button id='closeButton' type="button" class="btn btn-default">Close</button>
 
 <video id='player' preload="none" class="video-js vjs-default-skin"
 	poster="" controls data-type="">

@@ -63,7 +63,9 @@ div#player {
 }
 */
 
-button#toggleButton {
+button#toggleButton,
+button#closeButton,
+{
 	margin-bottom: 8px;
 	height: 5%;
 }
