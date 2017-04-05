@@ -15,15 +15,13 @@
 $(function(){
 // 	var player = videojs('#player');
 
-	debugger;
 	var dfd = $.Deferred();
 	var promise = dfd.promise();
 	
 	promise
-		.then(function(){ return streamKill(); })
+		//.then(function(){ return streamKill(); })
 		.then(function(){ return playTranscodedVideo(); })
 		.then(function() {
-			debugger;
 			if (Hls.isSupported()) {
 	// 		var config = {
 	// 			xhrSetup: function(xhr, url) {
@@ -129,26 +127,16 @@ var streamVideo = function(file, time) {
 }
 
 var playTranscodedVideo = function() {
-	debugger;
-	var time = <?php echo $this->time; ?>;
+	var time_seconds = <?php echo $this->time; ?>;
 	var file = "<?php echo $this->path; ?>";
-    var time_seconds = "00:00:" + Math.trunc(time);
+    //var time_seconds = "00:00:" + Math.trunc(time);
 	file = file.replace(/^.*\/\/[^\/]+/, '');
 
 	return $.ajax({
         type: "GET",
         url: "transcodeVideo",
         dataType: "json",
-        data: { file: file, time: time },
-    });
-}
-
-var streamKill = function() {
-	debugger;
-	return $.ajax({
-        type: "GET",
-        url: "streamKill",
-        dataType: "json",
+        data: { file: file, time: time_seconds },
     });
 }
 

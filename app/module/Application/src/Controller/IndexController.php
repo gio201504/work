@@ -425,11 +425,11 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
     
     		$file = $data->file;
-    		$time = $data->time;
+    		$time_seconds = $data->time;
     		$top_dir = $request->getServer('top_dir');
-    		if (isset($file) && isset($time)) {
-    			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
-    			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+    		if (isset($file) && isset($time_seconds)) {
+    			//sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
+    			//$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     
     			$gmdate = gmdate('H:i:s', $time_seconds);
     			$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);

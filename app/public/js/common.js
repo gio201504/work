@@ -21,3 +21,10 @@ var getThumbAjax = function(video_id, file, time, callback) {
     });
 }
 
+var streamKill = function() {
+	return $.ajax({
+        type: "GET",
+        url: "streamKill",
+        dataType: "json",
+    });
+}
