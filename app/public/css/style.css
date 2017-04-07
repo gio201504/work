@@ -69,3 +69,10 @@ button#closeButton,
 	margin-bottom: 8px;
 	height: 5%;
 }
+
+button#scanButton
+{
+	float: left;
+	margin-right: 1em;
+}
+

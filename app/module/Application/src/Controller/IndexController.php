@@ -76,6 +76,9 @@ class IndexController extends AbstractActionController
     		$dir = (isset($dir) && !empty($dir)) ? $dir : $request->getServer('directory');
     		$forwardPlugin = $this->forward();
     		
+    		if (isset($data->clear))
+    			$cache->removeItem($top_dir . $dir);
+
     		// Convert file sizes from bytes to human readable units
     		function bytesToSize($bytes) {
     			$sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB');

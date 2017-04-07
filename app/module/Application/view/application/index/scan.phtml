@@ -192,6 +192,18 @@ $(function(){
 	// Show the generated elements
 	fileList.css({display:'inline-block'});
 
+	$("#scanButton").click(function() {
+		var search = window.location.search;
+		search = search.replace(/\?clear|&clear/gi, '');
+		
+		if (search.length === 0)
+			search = "?clear";
+		else
+			search += "&clear";
+		
+		window.location.href = window.location.href.replace( /[\?#].*|$/, search);
+    });
+
 	// Initialisation players
 	initPlayers();
 });
@@ -457,6 +469,7 @@ var initPlayers = function() {
 </script>
 
 <div class="filemanager">
+	<button id='scanButton' type="button" class="btn btn-default">Rescan folder</button>
 
 	<div class="search">
 		<input type="search" placeholder="Find a file.." />
