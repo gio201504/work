@@ -33,8 +33,8 @@ $(function(){
 		promise
 			.then(function(){ return getVideoDuration($(video)); })
 			.then(function(data) {
-				debugger;
 			    var hls = new Hls(/*{ liveSyncDuration: data.duration }*/);
+			    video.finalDuration = data.duration;
 			    hls.attachMedia(video);
 			    hls.on(Hls.Events.MEDIA_ATTACHED, function() {
 			    	//hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
