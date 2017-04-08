@@ -431,13 +431,22 @@ class IndexController extends AbstractActionController
     		$time_seconds = $data->time;
     		$top_dir = $request->getServer('top_dir');
     		$directory = $request->getServer('directory');
+    		
+    		//Nettoyage dossier de travail
+    		$temp_dir = $top_dir . '/' . $directory . '/tmp/';
+    		$files = glob($temp_dir . '*');
+    		foreach ($files as $filename) {
+    			if(is_file($filename))
+    				unlink($filename);
+    		}
+    		
     		if (isset($file) && isset($time_seconds)) {
     			//sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			//$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     
     			$gmdate = gmdate('H:i:s', $time_seconds);
     			//$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
-    			$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 20 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $top_dir . '/' . $directory . '/tmp/');
+    			$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 10 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $temp_dir);
     			shell_exec(utf8_decode($cmd));
     			 
     			return new JsonModel();
