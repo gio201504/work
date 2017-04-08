@@ -24,15 +24,29 @@ $(function(){
 // 			}
 // 		};
 		var video = document.getElementById('player');
-	    var hls = new Hls(/*config*/);
-	    //hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
-	    //hls.loadSource('http://192.168.0.1:8080/hls/mystream/index.m3u8');
-	    hls.loadSource('http://127.0.0.1/download/tmp/index.m3u8');
-	    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
-	    hls.attachMedia(video);
-	    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-		    video.play();
-	  	});
+
+		var dfd = $.Deferred();
+		var promise = dfd.promise();
+		promise
+			.then(function(){ return getVideoDuration($(video)); })
+			.then(function(data) {
+				debugger;
+			    var hls = new Hls(/*{ liveSyncDuration: data.duration }*/);
+			    hls.attachMedia(video);
+			    hls.on(Hls.Events.MEDIA_ATTACHED, function() {
+			    	//hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
+				    //hls.loadSource('http://192.168.0.1:8080/hls/mystream/index.m3u8');
+				    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
+			    	hls.loadSource('http://127.0.0.1/download/tmp/index.m3u8');
+				    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+					    video.play();
+				  	});
+				    hls.on(Hls.Events.FRAG_LOADED, function(event, data) {
+					    debugger;
+				  	});
+			    });
+			});
+		dfd.resolve();
 	}
 
 	//Plugin de génération des thumbnails
@@ -141,5 +155,6 @@ var streamVideo = function(file, time) {
 <button id='closeButton' type="button" class="btn btn-default">Close</button>
 
 <video id='player' preload="none" class="video-js vjs-default-skin"
+	data-src="<?= $this->path ?>"
 	poster="" controls data-type="">
 </video>

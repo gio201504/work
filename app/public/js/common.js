@@ -42,3 +42,21 @@ var playTranscodedVideo = function(file, time_seconds) {
         data: { file: file, time: time_seconds },
     });
 };
+
+var getVideoDuration = function(player, callback) {
+	//console.log(player.id() + ' getVideoDuration');
+	var video_id = '#' + player.attr('id');
+	var file = $(video_id).attr('data-src');
+
+	return $.ajax({
+        type: "GET",
+        url: "getVideoDuration",
+        dataType: "json",
+        data: { file: file },
+        success: function(data) {
+    		if (typeof callback === 'function') {
+        		callback(data);
+    		}
+        },
+    });
+};
