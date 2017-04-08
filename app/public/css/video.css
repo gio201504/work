@@ -6,7 +6,7 @@
 
 #video-controls {
 	position: absolute;
-	bottom: 0;
+	bottom: -8px;
 	left: 0;
 	right: 0;
 	padding: 5px;
@@ -50,7 +50,7 @@ button:hover {
 }
 
 #seek-bar {
-	width: 360px;
+	width: 74%;
 }
 
 #volume-bar {
@@ -65,4 +65,5 @@ button:hover {
 #video-controls button
 {
 	float: left;
+	margin-right: 4px;
 }
