@@ -166,7 +166,8 @@ var streamVideo = function(file, time) {
 	<!-- Video Controls -->
 	<div id="video-controls">
 		<button type="button" id="play-pause">Pause</button>
-	    <input type="range" id="seek-bar" value="0">
+		<progress id="seek-bar" min="0" max="100" value="0">0% played</progress>
+	    <!--<input type="range" id="seek-bar" value="0">-->
 	    <button type="button" id="mute">Mute</button>
 	    <input type="range" id="volume-bar" min="0" max="1" step="0.1" value="1">
 	    <button type="button" id="full-screen">Full-Screen</button>

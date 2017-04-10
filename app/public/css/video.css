@@ -63,7 +63,8 @@ button:hover {
 }
 
 #video-controls input,
-#video-controls button
+#video-controls button,
+#video-controls progress
 {
 	float: left;
 	margin-right: 4px;

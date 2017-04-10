@@ -61,14 +61,14 @@ window.onload = function() {
 	});
 
 
-	// Event listener for the seek bar
-	seekBar.addEventListener("change", function() {
-		// Calculate the new time
-		var time = video.duration * (seekBar.value / 100);
-
-		// Update the video time
-		video.currentTime = time;
-	});
+//	// Event listener for the seek bar
+//	seekBar.addEventListener("change", function() {
+//		// Calculate the new time
+//		var time = video.duration * (seekBar.value / 100);
+//
+//		// Update the video time
+//		video.currentTime = time;
+//	});
 
 	
 	// Update the seek bar as the video plays
@@ -86,7 +86,24 @@ window.onload = function() {
 	});
 
 	// Play the video when the seek handle is dropped
-	seekBar.addEventListener("mouseup", function() {
+	seekBar.addEventListener("mouseup", function(event) {
+		//Progress bar
+		var rect = this.getBoundingClientRect();
+		//Position absolue souris
+		var x = event.pageX;
+		//Position absolue vidéo
+		var left = rect.left;
+		var right = rect.right;
+
+		//Position sur la vidéo en secondes
+		var percent = Math.trunc(((x - left) / (right - left)) * 100);
+		$(this).attr("value", percent);
+		
+		// Calculate the new time
+		var time = video.duration * (seekBar.value / 100);
+
+		// Update the video time
+		video.currentTime = time;
 		video.play();
 	});
 
