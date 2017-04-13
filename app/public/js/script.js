@@ -1,5 +1,4 @@
 window.onload = function() {
-
 	// Video
 	var video = document.getElementById("player");
 
@@ -74,7 +73,8 @@ window.onload = function() {
 	// Update the seek bar as the video plays
 	video.addEventListener("timeupdate", function() {
 		// Calculate the slider value
-		var value = (100 / video.duration) * video.currentTime;
+		var offset = parseInt(getParameterByName('time'));
+		var value = (100 / video.finalDuration) * (video.currentTime + offset);
 
 		// Update the slider value
 		seekBar.value = value;
@@ -100,7 +100,7 @@ window.onload = function() {
 		$(this).attr("value", percent);
 		
 		// Calculate the new time
-		var time = video.duration * (seekBar.value / 100);
+		var time = video.finalDuration * (seekBar.value / 100);
 
 		// Update the video time
 		video.currentTime = time;
