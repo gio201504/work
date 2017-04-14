@@ -104,21 +104,26 @@ window.onload = function() {
 
 		//Restart transcode
 		var path = $(video).attr('data-src');
-		startVideoTranscode(path, time);
 		
-		//Recalculer l'offset
 		debugger;
-		if (history.pushState) {
-		    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-		    var search = window.location.search;
-		    search = search.substring(0, search.indexOf('&time=') + 6);
-		    newurl += search + Math.trunc(time).toString();
-		    window.history.pushState({ path: newurl }, '', newurl);
-		    
-		    //Update the video time
-			video.currentTime = 0;
-			video.play();
-		}
+		var promise = startVideoTranscode(path, time);
+		promise.then(function() {
+			//Recalculer l'offset
+			debugger;
+			if (history.pushState) {
+			    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+			    var search = window.location.search;
+			    search = search.substring(0, search.indexOf('&time=') + 6);
+			    newurl += search + Math.trunc(time).toString();
+			    window.history.pushState({ path: newurl }, '', newurl);
+			    
+			    //Update the video time
+			    //video.load();
+				video.currentTime = 0;
+				video.play();
+			}
+		});
+		//dfd.resolve();
 	});
 
 	// Event listener for the volume bar

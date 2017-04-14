@@ -427,11 +427,15 @@ var initPlayers = function() {
 			player.on('click', function(evt) {
 				var path = $(player).attr('data-src');
 				var time = $(player).data('time');
-				startVideoTranscode(path, time, true);
-				
-				var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
-				var url = 'showPlayer' + params;
-				window.open(url);
+
+				debugger;
+				var promise = startVideoTranscode(path, time, true);
+				promise.done(function() {
+					debugger;
+					var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
+					var url = 'showPlayer' + params;
+					window.open(url);
+				});
 			});
 
 		}
