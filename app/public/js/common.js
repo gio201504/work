@@ -77,7 +77,6 @@ function getParameterByName(name, url) {
 }
 
 var startVideoTranscode = function(path, time_seconds, cleanFolder) {
-	debugger;
 	cleanFolder = (typeof cleanFolder === 'undefined') ? false : cleanFolder;
 	
 	var dfd = $.Deferred();

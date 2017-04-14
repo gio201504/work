@@ -18,13 +18,9 @@ $(function(){
 // 	var player = videojs('#player');
 
 	if (Hls.isSupported()) {
-// 		var config = {
-// 			xhrSetup: function(xhr, url) {
-// 				xhr.withCredentials = true; // do send cookies
-// 				xhr.setRequestHeader('Access-Control-Allow-Credentials', true);
-// 				xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-// 			}
-// 		};
+		var config = {
+			debug: false,
+		};
 		//Video
 		var video = document.getElementById('player');
 
@@ -33,7 +29,7 @@ $(function(){
 		promise
 			.then(function(){ return getVideoDuration($(video)); })
 			.then(function(data) {
-			    var hls = new Hls(/*{ liveSyncDuration: data.duration }*/);
+			    var hls = new Hls(config);
 			    video.finalDuration = data.duration;
 			    hls.attachMedia(video);
 			    hls.on(Hls.Events.MEDIA_ATTACHED, function() {
@@ -42,6 +38,7 @@ $(function(){
 				    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
 			    	hls.loadSource('http://127.0.0.1/download/tmp/index.m3u8');
 				    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+					    debugger;
 					    video.play();
 				  	});
 				    hls.on(Hls.Events.FRAG_LOADED, function(event, data) {

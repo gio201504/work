@@ -431,10 +431,13 @@ class IndexController extends AbstractActionController
     		$time_seconds = $data->time;
     		$top_dir = $request->getServer('top_dir');
     		$directory = $request->getServer('directory');
+    		$temp_dir = $top_dir . '/' . $directory . '/tmp/';
+    		
+    		//Nettoyage index.m3u8
+    		unlink($temp_dir . 'index.m3u8');
     		
     		//Nettoyage dossier de travail
     		if ($data->clean === 'true') {
-	    		$temp_dir = $top_dir . '/' . $directory . '/tmp/';
 	    		$files = glob($temp_dir . '*');
 	    		foreach ($files as $filename) {
 	    			if(is_file($filename))

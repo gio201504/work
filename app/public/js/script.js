@@ -105,6 +105,17 @@ window.onload = function() {
 		//Restart transcode
 		var path = $(video).attr('data-src');
 		startVideoTranscode(path, time);
+		
+		//Recalculer l'offset
+		debugger;
+		var offset = parseInt(getParameterByName('time'));
+		if (history.pushState) {
+		    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+		    var search = window.location.search;
+		    search = search.substring(0, search.indexOf('&time=') + 6);
+		    newurl += search + Math.trunc(time).toString();
+		    window.history.pushState({ path: newurl }, '', newurl);
+		}
 
 		//Update the video time
 		video.currentTime = time;
