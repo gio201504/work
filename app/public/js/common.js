@@ -1,3 +1,5 @@
+"use strict";
+
 var getThumbAjax = function(video_id, file, time, callback) {
 // 	if ($(video_id).data('requestRunning')) {
 //         return;
@@ -29,17 +31,18 @@ var streamKill = function() {
     });
 };
 
-var playTranscodedVideo = function(file, time_seconds) {
+var playTranscodedVideo = function(file, time_seconds, clean) {
 	//var time_seconds = <?php echo $this->time; ?>;
 	//var file = "<?php echo $this->path; ?>";
     //var time_seconds = "00:00:" + Math.trunc(time);
 	file = file.replace(/^.*\/\/[^\/]+/, '');
+	clean = (typeof clean === 'undefined') ? false : clean;
 
 	return $.ajax({
         type: "GET",
         url: "transcodeVideo",
         dataType: "json",
-        data: { file: file, time: time_seconds },
+        data: { file: file, time: time_seconds, clean: clean },
     });
 };
 
@@ -72,3 +75,17 @@ function getParameterByName(name, url) {
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
+
+var startVideoTranscode = function(path, time_seconds, cleanFolder) {
+	debugger;
+	cleanFolder = (typeof cleanFolder === 'undefined') ? false : cleanFolder;
+	
+	var dfd = $.Deferred();
+	var promise = dfd.promise();
+
+	promise
+		.then(function(){ return streamKill(); })
+		.then(function(){ return playTranscodedVideo(path, time_seconds, cleanFolder); });
+		
+	dfd.resolve();
+};

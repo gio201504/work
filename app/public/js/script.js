@@ -99,10 +99,14 @@ window.onload = function() {
 		var percent = Math.trunc(((x - left) / (right - left)) * 100);
 		$(this).attr("value", percent);
 		
-		// Calculate the new time
+		//Calculate the new time
 		var time = video.finalDuration * (seekBar.value / 100);
 
-		// Update the video time
+		//Restart transcode
+		var path = $(video).attr('data-src');
+		startVideoTranscode(path, time);
+
+		//Update the video time
 		video.currentTime = time;
 		video.play();
 	});

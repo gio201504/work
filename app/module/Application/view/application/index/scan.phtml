@@ -427,14 +427,7 @@ var initPlayers = function() {
 			player.on('click', function(evt) {
 				var path = $(player).attr('data-src');
 				var time = $(player).data('time');
-				var dfd = $.Deferred();
-				var promise = dfd.promise();
-
-				promise
-					.then(function(){ return streamKill(); })
-					.then(function(){ return playTranscodedVideo(path, time); });
-					
-				dfd.resolve();
+				startVideoTranscode(path, time, true);
 				
 				var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
 				var url = 'showPlayer' + params;

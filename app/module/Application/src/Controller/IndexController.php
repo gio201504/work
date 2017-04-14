@@ -433,11 +433,13 @@ class IndexController extends AbstractActionController
     		$directory = $request->getServer('directory');
     		
     		//Nettoyage dossier de travail
-    		$temp_dir = $top_dir . '/' . $directory . '/tmp/';
-    		$files = glob($temp_dir . '*');
-    		foreach ($files as $filename) {
-    			if(is_file($filename))
-    				unlink($filename);
+    		if ($data->clean === 'true') {
+	    		$temp_dir = $top_dir . '/' . $directory . '/tmp/';
+	    		$files = glob($temp_dir . '*');
+	    		foreach ($files as $filename) {
+	    			if(is_file($filename))
+	    				unlink($filename);
+	    		}
     		}
     		
     		if (isset($file) && isset($time_seconds)) {
