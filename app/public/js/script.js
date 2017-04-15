@@ -126,10 +126,20 @@ window.onload = function() {
 				}
 			});
 	});
+	
+	//Génération thumbnails de la barre de progression
+	seekBar.addEventListener('mousemove', function(event) {
+		getThumbAtMouse($(video), event, displayThumb);
+	});
 
 	// Event listener for the volume bar
 	volumeBar.addEventListener("change", function() {
 		// Update the video volume
 		video.volume = volumeBar.value;
 	});
+};
+
+var displayThumb = function(video_id, data) {
+	debugger;
+	
 };

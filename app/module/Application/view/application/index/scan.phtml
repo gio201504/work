@@ -339,61 +339,16 @@ var isElementInViewport = function(el) {
     );
 };
 
-//Retourne la position de la souris par rapport à la vidéo
-var getMouseTime = function(player, event, duration) {
-	var rect = $(player).get(0).getBoundingClientRect();
-	//Position absolue souris
-	var x = event.pageX;
-	//Position absolue vidéo
-	var left = rect.left;
-	var right = rect.right;
-
-	//Position sur la vidéo en secondes
-	var time = Math.trunc(((x - left) / (right - left)) * duration);
-	return time;
-};
-
 //Initialisation players
 var initPlayers = function() {
 	$('li.files img').each(function(key, elt) {
 		if (/*isElementInViewport(elt) &&*/ !$(elt).hasClass('vjs-tech')) {
 			//var player = videojs(elt);
 			var player = $(elt);
-	
-		    var addPoster = function(data) {
-			    //console.log(player.id() + ' addPoster');
-				//player.poster(data.file);
-			    player.attr('src', data.file);
-		    };
 
 			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
 			player.on('mousemove', function(event) {
-				if ($(player).data('requestRunning'))
-					return;
-				else
-					$(player).data('requestRunning', true);
-				
-				//console.log(player.id() + ' mouseover');
-
-				var deferred = $.Deferred();
-				var promise = deferred.promise();
-				promise
-					.then(function(){ return getVideoDuration(player); })
-					.then(function(data){
-						var time = getMouseTime(player, event, data.duration);
-						//Pas de 10 pour les preview
-						//time = Math.round((time / data.duration).toFixed(1) * data.duration);
-						var time_seconds = "00:00:" + time;
-						$(player).data('time', time);
-						//Génération et affichage thumbnail
-						var video_id = '#' + player.attr('id');
-						var file = $(video_id).attr('data-src');
-	 					return getThumbAjax(video_id, file, time_seconds, addPoster);
-					}).then(function(){
-						$(player).data('requestRunning', false);
-					});
-
-				deferred.resolve();
+				getThumbAtMouse(player, event, addPoster);
 			});
 	
 // 			player.on('mouseleave', function(){
