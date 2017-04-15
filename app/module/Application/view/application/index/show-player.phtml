@@ -38,7 +38,8 @@ $(function(){
 				    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
 			    	hls.loadSource('http://127.0.0.1/download/tmp/index.m3u8');
 				    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-					    //debugger;
+					    debugger;
+					    $(video).data('hls', hls);
 					    video.play();
 				  	});
 				    hls.on(Hls.Events.FRAG_LOADED, function(event, data) {

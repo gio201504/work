@@ -106,8 +106,9 @@ window.onload = function() {
 		var path = $(video).attr('data-src');
 		
 		debugger;
-		var src = video.currentSrc;
-		video.src = '';
+		video.pause();
+		var hls = $(video).data('hls');
+		hls.stopLoad();
 		var promise = startVideoTranscode(path, time, true);
 		promise.then(function() {
 			//Recalculer l'offset
@@ -120,8 +121,7 @@ window.onload = function() {
 			    window.history.pushState({ path: newurl }, '', newurl);
 			    
 			    //Update the video time
-			    //video.load();
-			    video.src = src;
+			    hls.startLoad();
 				video.currentTime = 0;
 				video.play();
 			}
