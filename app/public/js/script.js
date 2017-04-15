@@ -108,7 +108,6 @@ window.onload = function() {
 		video.pause();
 		var hls = $(video).data('hls');
 		hls.stopLoad();
-		debugger;
 		startVideoTranscode(path, time, true)
 			.then(function() {
 				//Recalculer l'offset

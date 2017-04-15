@@ -428,10 +428,8 @@ var initPlayers = function() {
 				var path = $(player).attr('data-src');
 				var time = $(player).data('time');
 
-				debugger;
 				startVideoTranscode(path, time, true)
 					.then(function() {
-						debugger;
 						var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
 						var url = 'showPlayer' + params;
 						window.open(url);

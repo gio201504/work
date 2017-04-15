@@ -24,7 +24,6 @@ var getThumbAjax = function(video_id, file, time, callback) {
 };
 
 var streamKill = function() {
-	debugger;
 	return $.ajax({
         type: "GET",
         url: "streamKill",
@@ -33,7 +32,6 @@ var streamKill = function() {
 };
 
 var playTranscodedVideo = function(file, time_seconds, clean) {
-	debugger;
 	//var time_seconds = <?php echo $this->time; ?>;
 	//var file = "<?php echo $this->path; ?>";
     //var time_seconds = "00:00:" + Math.trunc(time);
@@ -81,7 +79,6 @@ function getParameterByName(name, url) {
 var startVideoTranscode = function(path, time_seconds, cleanFolder) {
 	cleanFolder = (typeof cleanFolder === 'undefined') ? false : cleanFolder;
 	
-	debugger;
 	var dfd = $.Deferred();
 	var promise = dfd
 		.then(function(){ return streamKill(); })
