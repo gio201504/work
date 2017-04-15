@@ -98,7 +98,6 @@ var getMouseTime = function(clientRect, event, duration) {
 	//Position absolue vidéo
 	var left = rect.left;
 	var right = rect.right;
-	debugger;
 
 	//Position sur la vidéo en secondes
 	var time = Math.trunc(((x - left) / (right - left)) * duration);
