@@ -69,3 +69,9 @@ button:hover {
 	float: left;
 	margin-right: 4px;
 }
+
+#thumbs {
+	position: absolute;
+	top: -113px;
+	left: 0;
+}
