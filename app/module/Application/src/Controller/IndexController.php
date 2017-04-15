@@ -451,11 +451,15 @@ class IndexController extends AbstractActionController
     
     			$gmdate = gmdate('H:i:s', $time_seconds);
     			//$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
-    			$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $temp_dir);
-    			shell_exec(utf8_decode($cmd));
+    			$cmd = sprintf('start /min ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $temp_dir);
+    			//shell_exec(utf8_decode($cmd));
+    			pclose(popen(utf8_decode($cmd), "r"));
     			
-    			while(!file_exists($temp_dir . 'index.m3u8'));
-    			 
+    			do {
+    				clearstatcache();
+    				$file_exists = file_exists($temp_dir . 'index.m3u8');
+    			} while (!$file_exists);
+
     			return new JsonModel();
     		}
     	}
