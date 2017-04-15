@@ -129,7 +129,9 @@ window.onload = function() {
 	
 	//Génération thumbnails de la barre de progression
 	seekBar.addEventListener('mousemove', function(event) {
-		getThumbAtMouse($(video), event, displayThumb);
+		debugger;
+		//getThumbAtMouse($('#seek-bar'), event, displayThumb);
+		getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
 	});
 
 	// Event listener for the volume bar
@@ -140,8 +142,21 @@ window.onload = function() {
 };
 
 var displayThumb = function(video_id, data) {
-	//debugger;
-	//var player = $(video_id);
-	var img = $('#thumbs > img');
+	var player = $(video_id);
+	var duration = player.get(0).finalDuration;
+	var time = data.time;
+	var thumbs = $('#thumbs');
+	var img = $(thumbs).find('> img');
 	$(img).attr('src', data.file);
+	
+	//Progress bar
+	var rect = $('#seek-bar').get(0).getBoundingClientRect();
+	var left = rect.left;
+	var right = rect.right;
+	
+	//Positionnement thumbs
+	debugger;
+	var percent = time / duration;
+	var xpos = left + percent * (right - left);
+	$(thumbs).css('left', xpos + "px");
 };

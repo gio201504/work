@@ -91,13 +91,14 @@ var startVideoTranscode = function(path, time_seconds, cleanFolder) {
 };
 
 //Retourne la position de la souris par rapport à la vidéo
-var getMouseTime = function(player, event, duration) {
-	var rect = $(player).get(0).getBoundingClientRect();
+var getMouseTime = function(clientRect, event, duration) {
+	var rect = $(clientRect).get(0).getBoundingClientRect();
 	//Position absolue souris
 	var x = event.pageX;
 	//Position absolue vidéo
 	var left = rect.left;
 	var right = rect.right;
+	debugger;
 
 	//Position sur la vidéo en secondes
 	var time = Math.trunc(((x - left) / (right - left)) * duration);
@@ -110,7 +111,7 @@ var addPoster = function(player, data) {
     $(player).attr('src', data.file);
 };
 
-var getThumbAtMouse = function(player, event, callback) {
+var getThumbAtMouse = function(player, clientRect, event, callback) {
 	if ($(player).data('requestRunning'))
 		return;
 	else
@@ -121,7 +122,7 @@ var getThumbAtMouse = function(player, event, callback) {
 	promise
 		.then(function(){ return getVideoDuration(player); })
 		.then(function(data){
-			var time = getMouseTime(player, event, data.duration);
+			var time = getMouseTime(clientRect, event, data.duration);
 			//Pas de 10 pour les preview
 			//time = Math.round((time / data.duration).toFixed(1) * data.duration);
 			var time_seconds = "00:00:" + time;

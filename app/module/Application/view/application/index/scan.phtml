@@ -348,7 +348,7 @@ var initPlayers = function() {
 
 			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
 			player.on('mousemove', function(event) {
-				getThumbAtMouse(player, event, addPoster);
+				getThumbAtMouse(player, player, event, addPoster);
 			});
 	
 // 			player.on('mouseleave', function(){
