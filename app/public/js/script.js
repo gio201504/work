@@ -140,6 +140,8 @@ window.onload = function() {
 };
 
 var displayThumb = function(video_id, data) {
-	debugger;
-	
+	//debugger;
+	//var player = $(video_id);
+	var img = $('#thumbs > img');
+	$(img).attr('src', data.file);
 };

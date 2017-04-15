@@ -7,6 +7,7 @@ var getThumbAjax = function(video_id, file, time, callback) {
 //     	$(video_id).data('requestRunning', true);
 	
 	//console.log(player.id() + ' getThumbAjax');
+	file = file.replace(/^.*\/\/[^\/]+/, '');
 	return $.ajax({
         type: "GET",
         url: "getThumbAjax",
@@ -128,7 +129,7 @@ var getThumbAtMouse = function(player, event, callback) {
 			//Génération et affichage thumbnail
 			var video_id = '#' + player.attr('id');
 			var file = $(video_id).attr('data-src');
-				return getThumbAjax(video_id, file, time_seconds, callback);
+			return getThumbAjax(video_id, file, time_seconds, callback);
 		}).then(function(){
 			$(player).data('requestRunning', false);
 		});
