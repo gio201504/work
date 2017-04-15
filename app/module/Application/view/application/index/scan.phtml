@@ -429,13 +429,13 @@ var initPlayers = function() {
 				var time = $(player).data('time');
 
 				debugger;
-				var promise = startVideoTranscode(path, time, true);
-				promise.done(function() {
-					debugger;
-					var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
-					var url = 'showPlayer' + params;
-					window.open(url);
-				});
+				startVideoTranscode(path, time, true)
+					.then(function() {
+						debugger;
+						var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
+						var url = 'showPlayer' + params;
+						window.open(url);
+					});
 			});
 
 		}
