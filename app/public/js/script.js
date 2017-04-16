@@ -96,7 +96,8 @@ window.onload = function() {
 		var right = rect.right;
 
 		//Position sur la vidéo en secondes
-		var percent = Math.trunc(((x - left) / (right - left)) * 100);
+		debugger;
+		var percent = ((x - left) / (right - left)) * 100;
 		$(this).attr("value", percent);
 		
 		//Calculate the new time
