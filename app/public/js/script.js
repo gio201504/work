@@ -1,3 +1,5 @@
+var timer;
+
 window.onload = function() {
 	// Video
 	var video = document.getElementById("player");
@@ -130,8 +132,12 @@ window.onload = function() {
 	
 	//Génération thumbnails de la barre de progression
 	seekBar.addEventListener('mousemove', function(event) {
-		//getThumbAtMouse($('#seek-bar'), event, displayThumb);
-		getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
+		debugger;
+		clearTimeout(timer);
+
+		timer = setTimeout(function() {
+			getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
+		}, 300);
 	});
 
 	// Event listener for the volume bar
