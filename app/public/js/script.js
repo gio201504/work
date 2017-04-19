@@ -132,12 +132,12 @@ window.onload = function() {
 	
 	//Génération thumbnails de la barre de progression
 	seekBar.addEventListener('mousemove', function(event) {
-		debugger;
-		clearTimeout(timer);
-
-		timer = setTimeout(function() {
+//		debugger;
+//		clearTimeout(timer);
+//
+//		timer = setTimeout(function() {
 			getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
-		}, 300);
+//		}, 300);
 	});
 
 	// Event listener for the volume bar
