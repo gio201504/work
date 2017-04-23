@@ -111,12 +111,17 @@
 	    $(player).attr('src', data.file);
 	};
 	
-	debugger;
-	win.getThumbAtMouse = function(player, clientRect, event, callback) {
-		if ($(player).data('requestRunning'))
-			return;
-		else
-			$(player).data('requestRunning', true);
+	win.getThumbAtMouse = function(player, clientRect, event, callback, forced) {
+		if (typeof forced === "undefined") {
+			forced = false;
+		}
+
+		if (forced === false) {
+			if ($(player).data('requestRunning'))
+				return;
+			else
+				$(player).data('requestRunning', true);
+		}
 	
 		var dfd = $.Deferred();
 		var promise = dfd

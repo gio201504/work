@@ -125,7 +125,6 @@ window.onload = function() {
 				    window.history.pushState({ path: newurl }, '', newurl);
 				    
 				    //Update the video time
-				    debugger;
 				    hls.attachMedia(video);
 				    hls.startLoad();
 					video.currentTime = 0;
@@ -136,12 +135,12 @@ window.onload = function() {
 	
 	//Génération thumbnails de la barre de progression
 	seekBar.addEventListener('mousemove', function(event) {
-//		debugger;
-//		clearTimeout(timer);
-//
-//		timer = setTimeout(function() {
-			getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
-//		}, 300);
+		clearTimeout(timer);
+		getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
+		
+		timer = setTimeout(function() {
+			getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb, true);
+		}, 300);
 	});
 
 	// Event listener for the volume bar
