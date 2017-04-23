@@ -98,7 +98,6 @@ window.onload = function() {
 		var right = rect.right;
 
 		//Position sur la vidéo en secondes
-		debugger;
 		var percent = ((x - left) / (right - left)) * 100;
 		$(this).attr("value", percent);
 		
@@ -111,10 +110,13 @@ window.onload = function() {
 		video.pause();
 		var hls = $(video).data('hls');
 		hls.stopLoad();
+		//hls.detachMedia();
+		//RAZ buffers
+		hls.trigger(Hls.Events.BUFFER_RESET);
+		
 		startVideoTranscode(path, time, true)
 			.then(function() {
 				//Recalculer l'offset
-				debugger;
 				if (history.pushState) {
 				    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname;
 				    var search = window.location.search;
@@ -123,6 +125,8 @@ window.onload = function() {
 				    window.history.pushState({ path: newurl }, '', newurl);
 				    
 				    //Update the video time
+				    debugger;
+				    hls.attachMedia(video);
 				    hls.startLoad();
 					video.currentTime = 0;
 					video.play();
@@ -165,7 +169,6 @@ var displayThumb = function(video_id, data) {
 	var right = rect.right;
 	
 	//Positionnement thumbs
-	debugger;
 	var percent = time / duration;
 	var xpos = left - leftp + percent * (right - left);
 	$(thumbs).css('left', xpos + "px");
