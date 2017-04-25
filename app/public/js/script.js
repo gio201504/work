@@ -171,4 +171,6 @@ var displayThumb = function(video_id, data) {
 	var percent = time / duration;
 	var xpos = left - leftp + percent * (right - left);
 	$(thumbs).css('left', xpos + "px");
+	var height = $(thumbs).height();
+	$(thumbs).css('top', -height + "px");
 };
