@@ -106,16 +106,21 @@ class IndexController extends AbstractActionController
 	    		}
     		}
 
-    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log, $cache) {
+    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log, $cache, $isFtpFolder = false) {
     			$fulldir = $top_dir . $dir;
 
     			//Test existence cache    			
-    			if (!$cache->hasItem($fulldir)) {
+    			if ($isFtpFolder || !$cache->hasItem($fulldir)) {
 		    		$files = array();
 		    		// Is there actually such a folder/file?
-					if(file_exists($fulldir)) {
-						$handle = opendir($fulldir);
-						while(($f = readdir($handle)) !== false) {
+					if($isFtpFolder || file_exists($fulldir)) {
+						if (!$isFtpFolder) {
+							$handle = opendir($fulldir);
+						} else {
+							$handle = opendir($top_dir . '*');
+						}
+						
+						while(($f = readdir($handle)) !== false && isset($f)) {
 							//$log->info($f);
 							if(!$f || $f[0] == '.') {
 								continue; // Ignore hidden files
@@ -179,7 +184,9 @@ class IndexController extends AbstractActionController
 					}
 					
 					//Sauvegarde dans le cache
-					$cache->addItem($fulldir, $files);
+					if (!$isFtpFolder) {
+						$cache->addItem($fulldir, $files);
+					}
     			} else
     				$files = $cache->getItem($fulldir);
 				
@@ -187,6 +194,8 @@ class IndexController extends AbstractActionController
     		}
     		
     		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log, $cache);
+    		//Scan dossier ftp distant
+    		$response2 = scan('ftp://pi:melissa@127.0.0.1/', '.', $search, $forwardPlugin, $log, $cache, true);
     		
     		$t2 = $this->milliseconds();
     		$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
