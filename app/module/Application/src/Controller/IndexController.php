@@ -220,7 +220,14 @@ class IndexController extends AbstractActionController
     		
     		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log, $cache);
     		//Scan dossier ftp distant
-    		$response2 = scan('ftp://pi:melissa@127.0.0.1/', '.', $search, $forwardPlugin, $log, $cache, true);
+    		$responseFTP = scan('ftp://pi:melissa@127.0.0.1/', '.', $search, $forwardPlugin, $log, $cache, true);
+    		$folderFTP = array(
+    			'name' => 'FTP',
+    			'type' => 'ftp',
+    			'path' => 'ftp://127.0.0.1/',
+    			'items' => count($responseFTP),
+    		);
+    		$response = array_merge($response, $folderFTP);
     		
     		$t2 = $this->milliseconds();
     		$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
