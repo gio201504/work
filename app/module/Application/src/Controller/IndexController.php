@@ -153,7 +153,17 @@ class IndexController extends AbstractActionController
 								
 								//Si vidéo générer thumbnail
 								$filename = $fulldir . '/' . $f_utf8;
-								$mime = mime_content_type($fulldir . '/' . $f);
+								
+								//Renvoyer le type MIME
+								if (!$isFtpFolder) {
+									$mime = mime_content_type($fulldir . '/' . $f);
+								} else {
+									$stream_options = array('ftp' => array('overwrite' => false));
+									$context = stream_context_create($stream_options);									
+									$mime = @file_get_contents($filename, false, $context, 0, 20);
+									$result = strtoupper(substr(bin2hex($mime), 0, 20));
+								}
+								
 								if (strstr($mime, "video/")) {
 									//Durée de la vidéo
 									$data = (object) array('file' => $dir . '/' . $f_utf8);
