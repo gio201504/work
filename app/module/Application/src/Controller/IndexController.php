@@ -182,9 +182,14 @@ class IndexController extends AbstractActionController
 									$time = gmdate("H:i:s", $result->duration / 2);
 	
 									//Génération thumbnail
+									$file = '/' . $dir . '/' . $f_utf8;
+									if ($isFtpFolder) {
+										$file = basename($file);
+									}
+										
 									$data = (object) array(
 											'top_dir' => $top_dir,
-											'file' => '/' . $dir . '/' . $f_utf8,
+											'file' => $file,
 											'time' => $time
 									);
 									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
