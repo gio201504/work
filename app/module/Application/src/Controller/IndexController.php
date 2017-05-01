@@ -160,7 +160,7 @@ class IndexController extends AbstractActionController
 								} else {
  									$stream_options = array('ftp' => array('overwrite' => false));
  									$context = stream_context_create($stream_options);									
- 									$mime_data = @file_get_contents($filename, false, $context, 0, 24);
+ 									$mime_data = @file_get_contents($filename, false, $context, 0, 48);
 									
 									$finfo = finfo_open();
 									$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE, $context);
@@ -169,7 +169,10 @@ class IndexController extends AbstractActionController
 								
 								if (strstr($mime, "video/")) {
 									//Durée de la vidéo
-									$data = (object) array('file' => $dir . '/' . $f_utf8);
+									$data = (object) array(
+											'top_dir' => $top_dir,
+											'file' => $dir . '/' . $f_utf8
+									);
 									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
 											array(
 												'action'	=> 'getVideoDuration',
@@ -179,7 +182,11 @@ class IndexController extends AbstractActionController
 									$time = gmdate("H:i:s", $result->duration / 2);
 	
 									//Génération thumbnail
-									$data = (object) array('file' => '/' . $dir . '/' . $f_utf8, 'time' => $time);
+									$data = (object) array(
+											'top_dir' => $top_dir,
+											'file' => '/' . $dir . '/' . $f_utf8,
+											'time' => $time
+									);
 									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
 											array(
 													'action'	=> 'getThumbAjax',
@@ -245,7 +252,7 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = $request->getServer('top_dir');
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir');
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
@@ -304,7 +311,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
-    		$top_dir = $request->getServer('top_dir') . '/';
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
     		$cache = $this->sm->get('apcucache');
     		$log = $this->sm->get('log');
 
