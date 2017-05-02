@@ -35,7 +35,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		
-    		$dir = apache_getenv('top_dir') . "/tmp";
+    		$dir = $request->getServer('top_dir') . "/tmp";
     		
     		// Open a directory, and read its contents
     		$fileList = array();
@@ -72,10 +72,13 @@ class IndexController extends AbstractActionController
     		$search = empty($search) ? null : $search;
     		$cache = $this->sm->get('apcucache');
 
-    		$top_dir = apache_getenv('top_dir') . '/';
-    		$dir = (isset($dir) && !empty($dir)) ? $dir : apache_getenv('directory');
+    		$top_dir = $request->getServer('top_dir') . '/';
+    		$dir = (isset($dir) && !empty($dir)) ? $dir : $request->getServer('directory');
     		$forwardPlugin = $this->forward();
     		
+    		if (isset($data->clear))
+    			$cache->removeItem($top_dir . $dir);
+
     		// Convert file sizes from bytes to human readable units
     		function bytesToSize($bytes) {
     			$sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB');
@@ -103,16 +106,21 @@ class IndexController extends AbstractActionController
 	    		}
     		}
 
-    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log, $cache) {
+    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log, $cache, $isFtpFolder = false) {
     			$fulldir = $top_dir . $dir;
 
     			//Test existence cache    			
-    			if (!$cache->hasItem($fulldir)) {
+    			if ($isFtpFolder || !$cache->hasItem($fulldir)) {
 		    		$files = array();
 		    		// Is there actually such a folder/file?
-					if(file_exists($fulldir)) {
-						$handle = opendir($fulldir);
-						while(($f = readdir($handle)) !== false) {
+					if($isFtpFolder || file_exists($fulldir)) {
+						if (!$isFtpFolder) {
+							$handle = opendir($fulldir);
+						} else {
+							$handle = opendir($top_dir . '*');
+						}
+						
+						while(($f = readdir($handle)) !== false && isset($f)) {
 							//$log->info($f);
 							if(!$f || $f[0] == '.') {
 								continue; // Ignore hidden files
@@ -145,10 +153,26 @@ class IndexController extends AbstractActionController
 								
 								//Si vidéo générer thumbnail
 								$filename = $fulldir . '/' . $f_utf8;
-								$mime = mime_content_type($fulldir . '/' . $f);
+								
+								//Renvoyer le type MIME
+								if (!$isFtpFolder) {
+									$mime = mime_content_type($fulldir . '/' . $f);
+								} else {
+ 									$stream_options = array('ftp' => array('overwrite' => false));
+ 									$context = stream_context_create($stream_options);									
+ 									$mime_data = @file_get_contents($filename, false, $context, 0, 48);
+									
+									$finfo = finfo_open();
+									$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE, $context);
+									finfo_close($finfo);
+								}
+								
 								if (strstr($mime, "video/")) {
 									//Durée de la vidéo
-									$data = (object) array('file' => $dir . '/' . $f_utf8);
+									$data = (object) array(
+											'top_dir' => $top_dir,
+											'file' => $dir . '/' . $f_utf8
+									);
 									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
 											array(
 												'action'	=> 'getVideoDuration',
@@ -158,7 +182,16 @@ class IndexController extends AbstractActionController
 									$time = gmdate("H:i:s", $result->duration / 2);
 	
 									//Génération thumbnail
-									$data = (object) array('file' => '/' . $dir . '/' . $f_utf8, 'time' => $time);
+									$file = '/' . $dir . '/' . $f_utf8;
+									if ($isFtpFolder) {
+										$file = basename($file);
+									}
+										
+									$data = (object) array(
+											'top_dir' => $top_dir,
+											'file' => $file,
+											'time' => $time
+									);
 									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
 											array(
 													'action'	=> 'getThumbAjax',
@@ -176,7 +209,9 @@ class IndexController extends AbstractActionController
 					}
 					
 					//Sauvegarde dans le cache
-					$cache->addItem($fulldir, $files);
+					if (!$isFtpFolder) {
+						$cache->addItem($fulldir, $files);
+					}
     			} else
     				$files = $cache->getItem($fulldir);
 				
@@ -184,6 +219,15 @@ class IndexController extends AbstractActionController
     		}
     		
     		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log, $cache);
+    		//Scan dossier ftp distant
+    		$responseFTP = scan('ftp://pi:melissa@127.0.0.1/', '.', $search, $forwardPlugin, $log, $cache, true);
+    		$folderFTP = array(
+    			'name' => 'FTP',
+    			'type' => 'ftp',
+    			'path' => 'ftp://127.0.0.1/',
+    			'items' => count($responseFTP),
+    		);
+    		$response = array_merge($response, $folderFTP);
     		
     		$t2 = $this->milliseconds();
     		$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
@@ -220,7 +264,7 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = apache_getenv('top_dir');
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir');
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
@@ -279,7 +323,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
-    		$top_dir = apache_getenv('top_dir') . '/';
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
     		$cache = $this->sm->get('apcucache');
     		$log = $this->sm->get('log');
 
@@ -317,7 +361,7 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$duration = $data->duration;
-    		$top_dir = apache_getenv('top_dir');
+    		$top_dir = $request->getServer('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
     
@@ -348,7 +392,7 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
 
     		$file = $data->file;
-    		$top_dir = apache_getenv('top_dir');
+    		$top_dir = $request->getServer('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
 
@@ -356,6 +400,109 @@ class IndexController extends AbstractActionController
     				'return_value'	=> file_exists(utf8_decode($out_file)),
     				'file'			=> $preview_file,
     		));
+    	}
+    }
+    
+    public function showPlayerAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$data = isset($data->path) ? $data : $this->params('data');
+    		
+    		$uri = $this->getRequest()->getUri();
+    		$scheme = $uri->getScheme();
+    		$host = $uri->getHost();
+    		$base = sprintf('%s://%s', $scheme, $host);
+    		$path = $base . $data->path;
+    		
+    		$viewmodel = new ViewModel();
+    		
+    		$viewmodel->setVariables(array(
+    			"path" => $path,
+    			"time" => $data->time,
+    		));
+    		
+    		return $viewmodel;
+    	}
+    }
+    
+    public function streamVideoAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
+    
+    		$file = $data->file;
+    		$time = $data->time;
+    		$top_dir = $request->getServer('top_dir');
+    		if (isset($file) && isset($time)) {
+    			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
+    			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+    
+    			$gmdate = gmdate('H:i:s', $time_seconds);
+    			$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
+    			shell_exec(utf8_decode($cmd));
+    			    			 
+    			return new JsonModel();
+    		}
+    	}
+    }
+    
+    public function streamKillAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$cmd = 'taskkill /F /IM ffmpeg.exe';
+    		$output = shell_exec(utf8_decode($cmd));
+    		
+    		return new JsonModel();
+    	}
+    }
+    
+    public function transcodeVideoAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
+    
+    		$file = $data->file;
+    		$time_seconds = $data->time;
+    		$top_dir = $request->getServer('top_dir');
+    		$directory = $request->getServer('directory');
+    		$temp_dir = $top_dir . '/' . $directory . '/tmp/';
+    		
+    		//Nettoyage index.m3u8
+    		unlink($temp_dir . 'index.m3u8');
+    		
+    		//Nettoyage dossier de travail
+    		if ($data->clean === 'true') {
+	    		$files = glob($temp_dir . '*');
+	    		foreach ($files as $filename) {
+	    			if(is_file($filename))
+	    				unlink($filename);
+	    		}
+    		}
+    		
+    		if (isset($file) && isset($time_seconds)) {
+    			//sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
+    			//$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+    
+    			$gmdate = gmdate('H:i:s', $time_seconds);
+    			//$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
+    			$cmd = sprintf('start /min ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $temp_dir);
+    			//shell_exec(utf8_decode($cmd));
+    			pclose(popen(utf8_decode($cmd), "r"));
+    			
+    			do {
+    				clearstatcache();
+    				$file_exists = file_exists($temp_dir . 'index.m3u8');
+    			} while (!$file_exists);
+
+    			return new JsonModel();
+    		}
     	}
     }
 }

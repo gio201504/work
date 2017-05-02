@@ -1,6 +1,11 @@
+html {
+	height: 100%;
+}
+
 body {
     padding-top: 60px;
     padding-bottom: 40px;
+    height: 100%;
 }
 
 .zf-green {
@@ -37,8 +42,33 @@ div.container a.navbar-brand > img {
     list-style: outside none none;
 }
 
+div.filemanager li.files img {
+    display: inline;
+    list-style: outside none none;
+    width: 329px;
+    height: 185px;
+}
+
+div.container {
+	height: 100%;
+}
+
 /*
 .fa-refresh {
 	color: red;
 }
 */
+
+button#toggleButton,
+button#closeButton,
+{
+	margin-bottom: 8px;
+	height: 5%;
+}
+
+button#scanButton
+{
+	float: left;
+	margin-right: 1em;
+}
+

@@ -1,0 +1,174 @@
+<?=
+	$this->headLink()
+		//->prependStylesheet($this->basePath('css/videojs.thumbnails.css'))
+    	//->prependStylesheet($this->basePath('css/video-js.css'));
+		->prependStylesheet($this->basePath('css/video.css'));
+	
+    $this->headScript()
+    	->prependFile($this->basePath('js/hls.js'))
+    	->prependFile($this->basePath('js/script.js'));
+    	//->prependFile($this->basePath('js/videojs.thumbnails.js'))
+    	//->prependFile($this->basePath('js/videojs-ie8.min.js'))
+    	//->prependFile($this->basePath('js/video.js'));
+?>
+
+<script>
+
+$(function(){
+// 	var player = videojs('#player');
+
+	if (Hls.isSupported()) {
+		var config = {
+			debug: false,
+		};
+		//Video
+		var video = document.getElementById('player');
+
+		var dfd = $.Deferred();
+		var promise = dfd.promise();
+		promise
+			.then(function(){ return getVideoDuration($(video)); })
+			.then(function(data) {
+			    var hls = new Hls(config);
+			    video.finalDuration = data.duration;
+			    hls.attachMedia(video);
+			    hls.on(Hls.Events.MEDIA_ATTACHED, function() {
+			    	//hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
+				    //hls.loadSource('http://192.168.0.1:8080/hls/mystream/index.m3u8');
+				    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
+			    	hls.loadSource('http://127.0.0.1/download/tmp/index.m3u8');
+				    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+					    //debugger;
+					    $(video).data('hls', hls);
+					    video.play();
+				  	});
+				    hls.on(Hls.Events.FRAG_LOADED, function(event, data) {
+					    //debugger;
+				  	});
+			    });
+			});
+		dfd.resolve();
+	}
+
+	//Plugin de génération des thumbnails
+// 	player.thumbnails({
+// 	      0: {
+// 	          src: ''
+// 	        }
+// 	});
+
+	var addThumb = function(data) {
+		player.addThumb(data.time, {
+			src: data.file,
+			style: {
+			      width: '200px',
+			    }
+	   	});
+	};
+
+	//Ecoute position souris sur barre de contrôle
+// 	player.on('thumbupdate', function(evt, data) {
+// 		var player = this;
+// 		var deferred = $.Deferred();
+		
+// 		//Arrêt streaming en cours
+// 		if ($('#toggleButton').hasClass('active')) {
+// 			$('#toggleButton').toggleClass('active');
+// 			var promise = streamKill();
+// 		} else {
+// 			var promise = deferred.promise();
+// 		}
+
+// 		promise.then(function() {
+// 			var video_id = player.el();
+	
+// 		 	if ($(video_id).data('requestRunning')) {
+// 	     		return;
+// 	 		} else
+// 	 			$(video_id).data('requestRunning', true);
+	
+// 		 	var settings = data.settings;
+// 			var time = $(video_id).find("div.vjs-mouse-display").attr("data-current-time");
+// 			var file = $(video_id).find('video source').attr('src');
+// 			file = file.replace(/^.*\/\/[^\/]+/, '');
+			
+// 			getThumbAjax(video_id, file, time, addThumb)
+// 				.done(function() {
+// 					$(video_id).data('requestRunning', false);
+// 				});
+// 		});
+
+// 		deferred.resolve();
+//     });
+
+    //player.play();
+    //playTranscodedVideo(player);
+
+    $("#toggleButton").click(function() {
+        if (!$(this).hasClass('active')) {
+            var time = player.currentTime();
+            var time_seconds = "00:00:" + Math.trunc(time);
+            var video_id = player.el();
+            var file = $(video_id).find('video source').attr('src');
+    		file = file.replace(/^.*\/\/[^\/]+/, '');
+            streamVideo(file, time_seconds);
+        } else
+            streamKill();
+    });
+
+//     $(player).on('timeupdate', function() {
+//         debugger;
+//         playTranscodedVideo(player);
+//     });
+
+//     $(window).on('beforeunload', function() {
+//         debugger;
+//         return "Do you really want to close?";
+//     });
+
+    $("#closeButton").click(function() {
+    	var dfd = $.Deferred();
+		var promise = dfd.promise();
+
+		promise
+			.then(function(){ return streamKill(); })
+			.then(function(){ window.close(); });
+			
+		dfd.resolve();
+    });
+
+});
+
+var streamVideo = function(file, time) {
+	$.ajax({
+        type: "GET",
+        url: "streamVideo",
+        dataType: "json",
+        data: { file: file, time: time },
+    });
+};
+
+</script>
+
+<button id='toggleButton' type="button" class="btn btn-default"
+	data-toggle="button">Stream video to Ffmpeg</button>
+
+<button id='closeButton' type="button" class="btn btn-default">Close</button>
+
+<div id="video-container">
+  	<!-- Video -->
+	<video id='player' preload="none" class="video-js vjs-default-skin"
+		data-src="<?= $this->path ?>"
+		poster="" data-type="">
+	</video>
+	<!-- Video Controls -->
+	<div id="video-controls">
+		<button type="button" id="play-pause">Pause</button>
+		<progress id="seek-bar" min="0" max="100" value="0">0% played</progress>
+	    <!--<input type="range" id="seek-bar" value="0">-->
+	    <button type="button" id="mute">Mute</button>
+	    <input type="range" id="volume-bar" min="0" max="1" step="0.1" value="1">
+	    <button type="button" id="full-screen">Full-Screen</button>
+	    <div id="thumbs"><img src=""></div>
+	</div>
+</div>
