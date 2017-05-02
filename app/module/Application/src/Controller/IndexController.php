@@ -117,7 +117,7 @@ class IndexController extends AbstractActionController
 						if (!$isFtpFolder) {
 							$handle = opendir($fulldir);
 						} else {
-							$handle = opendir($top_dir . '*');
+							$handle = opendir($fulldir . '/*');
 						}
 						
 						while(($f = readdir($handle)) !== false && isset($f)) {
@@ -138,6 +138,7 @@ class IndexController extends AbstractActionController
 								$files[] = array(
 									"name" => $f_utf8,
 									"type" => "folder",
+									"emplacement" => $top_dir,
 									"path" => $dir . '/' . $f_utf8,
 									"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
 								);
@@ -148,7 +149,7 @@ class IndexController extends AbstractActionController
 									"type" => "file",
 									"path" => $dir . '/' . $f_utf8,
 									"size" => bytesToSize(filesize($fulldir . '/' . $f)),
-									"fullname" => $fulldir . '/' . $f_utf8,
+									//"fullname" => $fulldir . '/' . $f_utf8,
 								);
 								
 								//Si vidéo générer thumbnail
@@ -218,16 +219,24 @@ class IndexController extends AbstractActionController
 				return $files;
     		}
     		
+    		//Scan des emplacements
     		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log, $cache);
+    		$folder = array(
+    				'name' => $dir,
+    				'type' => 'folder',
+    				'path' => $top_dir,
+    				'items' => count($response),
+    		);
     		//Scan dossier ftp distant
-    		$responseFTP = scan('ftp://pi:melissa@127.0.0.1/', '.', $search, $forwardPlugin, $log, $cache, true);
+    		$responseFTP = scan('ftp://pi:melissa@127.0.0.1/', 'files', $search, $forwardPlugin, $log, $cache, true);
     		$folderFTP = array(
     			'name' => 'FTP',
-    			'type' => 'ftp',
-    			'path' => 'ftp://127.0.0.1/',
+    			'type' => 'folder',
+    			'path' => 'ftp',
     			'items' => count($responseFTP),
     		);
-    		$response = array_merge($response, $folderFTP);
+    		//$emplacements = array_merge($folder, $folderFTP);
+    		$emplacements = $response;
     		
     		$t2 = $this->milliseconds();
     		$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
@@ -239,7 +248,7 @@ class IndexController extends AbstractActionController
     				"name" => $dir,
     				"type" => "folder",
     				"path" => $dir,
-    				"items" => $response,
+    				"items" => $emplacements,
     		);
 
     		$viewmodel->setVariables(array(
