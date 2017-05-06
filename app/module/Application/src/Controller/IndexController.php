@@ -61,7 +61,7 @@ class IndexController extends AbstractActionController
     
     public function scanAction()
     {
-    	$t1 = $this->milliseconds();
+    	//$t1 = $this->milliseconds();
     	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
@@ -75,6 +75,7 @@ class IndexController extends AbstractActionController
     		$top_dir = $request->getServer('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : $request->getServer('directory');
     		$forwardPlugin = $this->forward();
+    		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		
     		if (isset($data->clear))
     			$cache->removeItem($top_dir . $dir);
@@ -106,7 +107,7 @@ class IndexController extends AbstractActionController
 	    		}
     		}
 
-    		function scan($top_dir, $dir, $search = null, $forwardPlugin, $log, $cache, $isFtpFolder = false) {
+    		function scan($empl, $top_dir, $dir, $search = null, $forwardPlugin, $log, $cache, $isFtpFolder = false) {
     			$fulldir = $top_dir . $dir;
 
     			//Test existence cache    			
@@ -138,7 +139,7 @@ class IndexController extends AbstractActionController
 								$files[] = array(
 									"name" => $f_utf8,
 									"type" => "folder",
-									"emplacement" => $top_dir,
+									"emplacement" => $empl,
 									"path" => $dir . '/' . $f_utf8,
 									"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
 								);
@@ -147,6 +148,7 @@ class IndexController extends AbstractActionController
 								$array = array(
 									"name" => $f_utf8,
 									"type" => "file",
+									"emplacement" => $empl,
 									"path" => $dir . '/' . $f_utf8,
 									"size" => bytesToSize(filesize($fulldir . '/' . $f)),
 									//"fullname" => $fulldir . '/' . $f_utf8,
@@ -220,26 +222,43 @@ class IndexController extends AbstractActionController
     		}
     		
     		//Scan des emplacements
-    		$response = scan($top_dir, $dir, $search, $forwardPlugin, $log, $cache);
-    		$folder = array(
-    				'name' => $dir,
-    				'type' => 'folder',
-    				'path' => $top_dir,
-    				'items' => count($response),
-    		);
-    		//Scan dossier ftp distant
-    		$responseFTP = scan('ftp://pi:melissa@127.0.0.1/', 'files', $search, $forwardPlugin, $log, $cache, true);
-    		$folderFTP = array(
-    			'name' => 'FTP',
-    			'type' => 'folder',
-    			'path' => 'ftp',
-    			'items' => count($responseFTP),
-    		);
-    		//$emplacements = array_merge($folder, $folderFTP);
-    		$emplacements = $response;
+    		$folder = $folderFTP = $response = $responseFTP = array();
     		
-    		$t2 = $this->milliseconds();
-    		$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
+    		if ($empl === 0) {
+    			$folder[] = array(
+    					'name' => $dir,
+    					'type' => 'folder',
+    					'emplacement' => 1,
+    					'path' => 'download',
+    					//'items' => count($response),
+    					'items' => '',
+    			);
+    			
+    			$folderFTP[] = array(
+    					'name' => 'FTP',
+    					'type' => 'folder',
+    					'emplacement' => 2,
+    					'path' => 'files',
+    					//'items' => count($responseFTP),
+    					'items' => '',
+    			);
+    		}
+    		
+    		if ($empl === '1') {
+	    		//Scan dossier local
+	    		$folder = scan($empl, 'D:/NewsBin64/', $dir, $search, $forwardPlugin, $log, $cache);
+    		}
+    		
+    		if ($empl === '2') {
+    			//Scan dossier ftp distant
+    			$folderFTP = scan($empl, 'ftp://pi:melissa@127.0.0.1/', $dir, $search, $forwardPlugin, $log, $cache, true);
+    		}
+    		
+    		$emplacements = array_merge($folderFTP, $folder);
+    		//$emplacements = $response;
+    		
+    		//$t2 = $this->milliseconds();
+    		//$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
 
     		$viewmodel = new ViewModel();
     		$viewmodel->setTerminal(false);

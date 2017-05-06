@@ -75,7 +75,10 @@ $(function(){
 	fileList.on('click', 'li.folders', function(e){
 		e.preventDefault();
 
-		var nextDir = $(this).find('a.folders').attr('href');
+		debugger;
+		var folder = $(this).find('a.folders');
+		var nextDir = folder.attr('href');
+		var empl = folder.data('empl');
 		if(filemanager.hasClass('searching')) {
 			// Building the breadcrumbs
 			breadcrumbsUrls = generateBreadcrumbs(nextDir);
@@ -88,7 +91,7 @@ $(function(){
 		}
 
 		//window.location.hash = encodeURIComponent(nextDir);
-		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
+		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir, empl: empl});
 		window.location = url;
 		currentPath = nextDir;
 	});
@@ -418,6 +421,7 @@ var initPlayers = function() {
 				$thumb = isset($file['thumb']) ? $this->escapeHtml($file['thumb']) : null;
 				$pos = strrpos($name, '.');
 				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
+				$empl = $this->escapeHtml($file['emplacement']);
 		?>
 			<?php
 				if ($file['type'] === 'folder'):
@@ -431,7 +435,7 @@ var initPlayers = function() {
 					}
 			?>
 				<li class="folders">
-					<a href="<?= $path ?>" title="<?= $path ?>" class="folders">
+					<a href="<?= $path ?>" title="<?= $path ?>" data-empl="<?= $empl ?>" class="folders">
 						<span class="icon folder full"></span>
 						<span class="name"><?= $name ?></span>
 						<span class="details"><?= $items ?></span>
