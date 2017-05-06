@@ -12,6 +12,7 @@ $(function(){
 	var filemanager = $('.filemanager'),
 		breadcrumbs = $('.breadcrumbs'),
 		fileList = filemanager.find('.data');
+	var emplacement = "<?= $this->escapeHtml($data['emplacement']) ?>";
 
 	//var currentPath = '';
 
@@ -105,15 +106,22 @@ $(function(){
 
 		breadcrumbsUrls.length = Number(index);
 		//window.location.hash = encodeURIComponent(nextDir);
-		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
+		var url = "<?php echo $this->basePath('application/scan'); ?>";
+
+		if (index > 0) {
+			nextDir = nextDir.split('/').slice(1).join('/');
+			url += '?' + $.param({dir: nextDir, empl: emplacement});
+		}
+		
 		window.location = url;
 	});
 	
 	// Splits a file path and turns it into clickable breadcrumbs
-	function generateBreadcrumbs(nextDir){
+	function generateBreadcrumbs(nextDir) {
+		nextDir = '[Empl0]/' + nextDir;
 		var path = nextDir.split('/').slice(0);
-		for(var i=1;i<path.length;i++){
-			path[i] = path[i-1]+ '/' +path[i];
+		for(var i = 1; i < path.length; i++) {
+			path[i] = path[i-1] + '/' + path[i];
 		}
 		return path;
 	}

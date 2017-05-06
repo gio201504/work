@@ -73,7 +73,7 @@ class IndexController extends AbstractActionController
     		$cache = $this->sm->get('apcucache');
 
     		$top_dir = $request->getServer('top_dir') . '/';
-    		$dir = (isset($dir) && !empty($dir)) ? $dir : $request->getServer('directory');
+    		$dir = (isset($dir) && !empty($dir)) ? $dir : null;
     		$forwardPlugin = $this->forward();
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		
@@ -222,11 +222,11 @@ class IndexController extends AbstractActionController
     		}
     		
     		//Scan des emplacements
-    		$folder = $folderFTP = $response = $responseFTP = array();
+    		$folder = $folderFTP = array();
     		
     		if ($empl === 0) {
     			$folder[] = array(
-    					'name' => $dir,
+    					'name' => 'download',
     					'type' => 'folder',
     					'emplacement' => 1,
     					'path' => 'download',
@@ -267,6 +267,7 @@ class IndexController extends AbstractActionController
     				"name" => $dir,
     				"type" => "folder",
     				"path" => $dir,
+    				"emplacement" => $empl,
     				"items" => $emplacements,
     		);
 
