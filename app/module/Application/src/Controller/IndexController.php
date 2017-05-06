@@ -458,17 +458,18 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->path) ? $data : $this->params('data');
     		
-    		$uri = $this->getRequest()->getUri();
-    		$scheme = $uri->getScheme();
-    		$host = $uri->getHost();
-    		$base = sprintf('%s://%s', $scheme, $host);
-    		$path = $base . $data->path;
+//     		$uri = $this->getRequest()->getUri();
+//     		$scheme = $uri->getScheme();
+//     		$host = $uri->getHost();
+//     		$base = sprintf('%s://%s', $scheme, $host);
+//     		$path = $base . $data->path;
     		
     		$viewmodel = new ViewModel();
     		
     		$viewmodel->setVariables(array(
-    			"path" => $path,
+    			"path" => $data->path,
     			"time" => $data->time,
+    			"emplacement" => $data->empl,
     		));
     		
     		return $viewmodel;
