@@ -5,6 +5,7 @@
 
 <script>
 var	breadcrumbsUrls;
+var emplacement = "<?= $this->escapeHtml($data['emplacement']) ?>";
 
 $(function(){
 	"use strict";
@@ -12,7 +13,6 @@ $(function(){
 	var filemanager = $('.filemanager'),
 		breadcrumbs = $('.breadcrumbs'),
 		fileList = filemanager.find('.data');
-	var emplacement = "<?= $this->escapeHtml($data['emplacement']) ?>";
 
 	//var currentPath = '';
 
@@ -76,7 +76,6 @@ $(function(){
 	fileList.on('click', 'li.folders', function(e){
 		e.preventDefault();
 
-		debugger;
 		var folder = $(this).find('a.folders');
 		var nextDir = folder.attr('href');
 		var empl = folder.data('empl');
@@ -459,11 +458,11 @@ var initPlayers = function() {
 						<span class="details vid"><?= $size ?></span>
 						<img id="video<?= $idx++ ?>"
 							src="<?= $thumb ?>" data-type="<?= $fileType ?>"
-							data-src="<?= '/' . $path ?>">
+							data-src="<?= $path ?>">
 					</li>
 				<?php else: ?>
 					<li class="files">
-						<a href="<?= '/' . $path ?>" title="<?= $path ?>" class="files">
+						<a href="<?= $path ?>" title="<?= $path ?>" class="files">
 							<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
 							<span class="name"><?= $name ?></span>
 							<span class="details"><?= $size ?></span>

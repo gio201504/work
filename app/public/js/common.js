@@ -13,7 +13,7 @@
 	        type: "GET",
 	        url: "getThumbAjax",
 	        dataType: "json",
-	        data: { file: file, time: time },
+	        data: { empl: win.emplacement, file: file, time: time },
 	        success: function(data) {
 	    		if (typeof callback === 'function') {
 	        		callback(video_id, data);
@@ -57,7 +57,7 @@
 	        type: "GET",
 	        url: "getVideoDuration",
 	        dataType: "json",
-	        data: { file: file },
+	        data: { empl: win.emplacement, file: file },
 	        success: function(data) {
 	    		if (typeof callback === 'function') {
 	        		callback(data);

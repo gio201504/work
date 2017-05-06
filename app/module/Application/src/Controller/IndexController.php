@@ -174,7 +174,8 @@ class IndexController extends AbstractActionController
 									//Durée de la vidéo
 									$data = (object) array(
 											'top_dir' => $top_dir,
-											'file' => $dir . '/' . $f_utf8
+											'file' => $dir . '/' . $f_utf8,
+											'empl' => $empl,
 									);
 									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
 											array(
@@ -185,7 +186,7 @@ class IndexController extends AbstractActionController
 									$time = gmdate("H:i:s", $result->duration / 2);
 	
 									//Génération thumbnail
-									$file = '/' . $dir . '/' . $f_utf8;
+									$file = $dir . '/' . $f_utf8;
 									if ($isFtpFolder) {
 										$file = basename($file);
 									}
@@ -193,7 +194,8 @@ class IndexController extends AbstractActionController
 									$data = (object) array(
 											'top_dir' => $top_dir,
 											'file' => $file,
-											'time' => $time
+											'time' => $time,
+											'empl' => $empl,
 									);
 									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
 											array(
@@ -293,7 +295,16 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir');
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
+    		
+    		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
+    		if ($empl === '1') {
+    			$top_dir = 'D:/NewsBin64/';
+    		}
+    		if ($empl === '2') {
+    			$top_dir = 'ftp://pi:melissa@127.0.0.1/';
+    		}
+    		
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
@@ -355,6 +366,14 @@ class IndexController extends AbstractActionController
     		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
     		$cache = $this->sm->get('apcucache');
     		$log = $this->sm->get('log');
+    		
+    		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
+    		if ($empl === '1') {
+    			$top_dir = 'D:/NewsBin64/';
+    		}
+    		if ($empl === '2') {
+    			$top_dir = 'ftp://pi:melissa@127.0.0.1/';
+    		}
 
     		$file_duration = basename($file) . '[duration]';
     		if (!$cache->hasItem($file_duration)) {
