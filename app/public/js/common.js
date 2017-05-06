@@ -44,7 +44,7 @@
 	        type: "GET",
 	        url: "transcodeVideo",
 	        dataType: "json",
-	        data: { file: file, time: time_seconds, clean: clean },
+	        data: { empl: win.emplacement, file: file, time: time_seconds, clean: clean },
 	    });
 	};
 	

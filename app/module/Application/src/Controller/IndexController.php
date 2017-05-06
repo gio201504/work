@@ -518,9 +518,15 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$time_seconds = $data->time;
-    		$top_dir = $request->getServer('top_dir');
-    		$directory = $request->getServer('directory');
-    		$temp_dir = $top_dir . '/' . $directory . '/tmp/';
+			$temp_dir = 'D:/NewsBin64/download/tmp/';
+    		
+    		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
+    		if ($empl === '1') {
+    			$top_dir = 'D:/NewsBin64/';
+    		}
+    		if ($empl === '2') {
+    			$top_dir = 'ftp://pi:melissa@127.0.0.1/';
+    		}
     		
     		//Nettoyage index.m3u8
     		unlink($temp_dir . 'index.m3u8');
