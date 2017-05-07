@@ -224,40 +224,28 @@ class IndexController extends AbstractActionController
     		}
     		
     		//Scan des emplacements
+    		$config = $this->sm->get('Config');
+    		$emplacements = $config['emplacements'];
     		$folder = $folderFTP = array();
-    		
+
     		if ($empl === 0) {
-    			$folder[] = array(
-    					'name' => 'download',
-    					'type' => 'folder',
-    					'emplacement' => 1,
-    					'path' => 'download',
-    					//'items' => count($response),
-    					'items' => '',
-    			);
-    			
-    			$folderFTP[] = array(
-    					'name' => 'FTP',
-    					'type' => 'folder',
-    					'emplacement' => 2,
-    					'path' => 'files',
-    					//'items' => count($responseFTP),
-    					'items' => '',
-    			);
+    			$folder[] = $emplacements['1'];
+    			$folderFTP[] = $emplacements['2'];
     		}
     		
     		if ($empl === '1') {
 	    		//Scan dossier local
-	    		$folder = scan($empl, 'D:/NewsBin64/', $dir, $search, $forwardPlugin, $log, $cache);
+	    		$empl_dir = $emplacements[$empl]['top_dir'];
+	    		$folder = scan($empl, $empl_dir, $dir, $search, $forwardPlugin, $log, $cache);
     		}
     		
     		if ($empl === '2') {
     			//Scan dossier ftp distant
-    			$folderFTP = scan($empl, 'ftp://pi:melissa@127.0.0.1/', $dir, $search, $forwardPlugin, $log, $cache, true);
+    			$empl_dir = $emplacements[$empl]['top_dir'];
+    			$folderFTP = scan($empl, $empl_dir, $dir, $search, $forwardPlugin, $log, $cache, true);
     		}
     		
-    		$emplacements = array_merge($folderFTP, $folder);
-    		//$emplacements = $response;
+    		$items = array_merge($folderFTP, $folder);
     		
     		//$t2 = $this->milliseconds();
     		//$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
@@ -270,7 +258,7 @@ class IndexController extends AbstractActionController
     				"type" => "folder",
     				"path" => $dir,
     				"emplacement" => $empl,
-    				"items" => $emplacements,
+    				"items" => $items,
     		);
 
     		$viewmodel->setVariables(array(
@@ -298,11 +286,10 @@ class IndexController extends AbstractActionController
     		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
-    		if ($empl === '1') {
-    			$top_dir = 'D:/NewsBin64/';
-    		}
-    		if ($empl === '2') {
-    			$top_dir = 'ftp://pi:melissa@127.0.0.1/';
+    		if ($empl !== 0) {
+    			$config = $this->sm->get('Config');
+    			$emplacements = $config['emplacements'];
+    			$top_dir = $emplacements[$empl]['top_dir'];
     		}
     		
     		if (isset($file) && isset($time)) {
@@ -368,11 +355,10 @@ class IndexController extends AbstractActionController
     		$log = $this->sm->get('log');
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
-    		if ($empl === '1') {
-    			$top_dir = 'D:/NewsBin64/';
-    		}
-    		if ($empl === '2') {
-    			$top_dir = 'ftp://pi:melissa@127.0.0.1/';
+    		if ($empl !== 0) {
+    			$config = $this->sm->get('Config');
+    			$emplacements = $config['emplacements'];
+    			$top_dir = $emplacements[$empl]['top_dir'];
     		}
 
     		$file_duration = basename($file) . '[duration]';
@@ -522,11 +508,10 @@ class IndexController extends AbstractActionController
 			$temp_dir = 'D:/NewsBin64/download/tmp/';
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
-    		if ($empl === '1') {
-    			$top_dir = 'D:/NewsBin64/';
-    		}
-    		if ($empl === '2') {
-    			$top_dir = 'ftp://pi:melissa@127.0.0.1/';
+    		if ($empl !== 0) {
+    			$config = $this->sm->get('Config');
+    			$emplacements = $config['emplacements'];
+    			$top_dir = $emplacements[$empl]['top_dir'];
     		}
     		
     		//Nettoyage index.m3u8
