@@ -8,6 +8,7 @@
 	        	'top_dir' => 'D:/NewsBin64/',
 				'path' => 'download',
 				'items' => '',
+	        	'protocole' => 'file',
 			),
 	        '2' => array(
 				'name' => 'FTP',
@@ -16,6 +17,7 @@
 	        	'top_dir' => 'ftp://ftp:localftp@127.0.0.1/',
 				'path' => 'files',
 				'items' => '',
+	        	'protocole' => 'ftp',
 	    	),
 	    )
 	);

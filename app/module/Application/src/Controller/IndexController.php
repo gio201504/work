@@ -229,23 +229,18 @@ class IndexController extends AbstractActionController
     		$folder = $folderFTP = array();
 
     		if ($empl === 0) {
-    			$folder[] = $emplacements['1'];
-    			$folderFTP[] = $emplacements['2'];
-    		}
-    		
-    		if ($empl === '1') {
-	    		//Scan dossier local
+    			//Liste des emplacements
+    			$items = array();
+    			foreach ($emplacements as $emplacement) {
+	    			$items[] = $emplacement;
+    			}
+    		} else {
+    			//Contenu de l'emplacement courant
+    			$emplacement = $emplacements[$empl];
 	    		$empl_dir = $emplacements[$empl]['top_dir'];
-	    		$folder = scan($empl, $empl_dir, $dir, $search, $forwardPlugin, $log, $cache);
+	    		$isFTP = $emplacement['protocole'] === 'ftp';
+	    		$items = scan($empl, $empl_dir, $dir, $search, $forwardPlugin, $log, $cache, $isFTP);
     		}
-    		
-    		if ($empl === '2') {
-    			//Scan dossier ftp distant
-    			$empl_dir = $emplacements[$empl]['top_dir'];
-    			$folderFTP = scan($empl, $empl_dir, $dir, $search, $forwardPlugin, $log, $cache, true);
-    		}
-    		
-    		$items = array_merge($folderFTP, $folder);
     		
     		//$t2 = $this->milliseconds();
     		//$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
