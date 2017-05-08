@@ -145,17 +145,21 @@ class IndexController extends AbstractActionController
 								);
 							} else {
 								// It is a file
+								$filesize = @filesize($fulldir . '/' . $f);
+								if (!$filesize) {
+									$filesize = 0;
+								}
 								$array = array(
 									"name" => $f_utf8,
 									"type" => "file",
 									"emplacement" => $empl,
 									"path" => $dir . '/' . $f_utf8,
-									"size" => bytesToSize(filesize($fulldir . '/' . $f)),
+									"size" => bytesToSize($filesize),
 									//"fullname" => $fulldir . '/' . $f_utf8,
 								);
 								
 								//Si vidéo générer thumbnail
-								$filename = $fulldir . '/' . $f_utf8;
+								$filename = $fulldir . '/' . $f;
 								
 								//Renvoyer le type MIME
 								if (!$isFtpFolder) {
@@ -298,7 +302,7 @@ class IndexController extends AbstractActionController
 	
 	    			if (!file_exists(utf8_decode($thumb_path))) {
 	    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
-			    		shell_exec(utf8_decode($cmd));
+			    		exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
 	    			}
 		    		
 		    		//Sauvegarde dans le cache
@@ -321,7 +325,7 @@ class IndexController extends AbstractActionController
     
     private function data_uri($file, $mime = 'image/png')
     {
-    	$contents = file_get_contents(utf8_decode($file));
+    	$contents = @file_get_contents(utf8_decode($file));
     	$base64   = base64_encode($contents);
     	return 'data:' . $mime . ';base64,' . $base64;
     }
@@ -364,12 +368,16 @@ class IndexController extends AbstractActionController
 	    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
 	    			$duration = $outputAndErrors[0];
 	    			
-	    			file_put_contents($duration_path, $duration);
-	    		} else
+	    			if (is_numeric($duration)) {
+	    				file_put_contents($duration_path, $duration);
+	    				//Sauvegarde dans le cache
+	    				$cache->addItem($file_duration, $duration);
+	    			}
+	    		} else {
 	    			$duration = file_get_contents($duration_path);
-	    		
-	    		//Sauvegarde dans le cache
-	    		$cache->addItem($file_duration, $duration);
+	    			//Sauvegarde dans le cache
+	    			$cache->addItem($file_duration, $duration);
+	    		}
     		} else
     			$duration = $cache->getItem($file_duration);
     		
