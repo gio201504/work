@@ -19,5 +19,14 @@
 				'items' => '',
 	        	'protocole' => 'ftp',
 	    	),
+    		'3' => array(
+    				'name' => 'FTP',
+    				'type' => 'folder',
+    				'emplacement' => 3,
+    				'top_dir' => 'ftp://ftp:localftp@192.168.1.10/',
+    				'path' => 'Album',
+    				'items' => '',
+    				'protocole' => 'ftp',
+    		),
 	    )
 	);
