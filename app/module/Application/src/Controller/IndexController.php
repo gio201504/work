@@ -191,10 +191,6 @@ class IndexController extends AbstractActionController
 	
 									//Génération thumbnail
 									$file = $dir . '/' . $f_utf8;
-									if ($isFtpFolder) {
-										$file = basename($file);
-									}
-										
 									$data = (object) array(
 											'top_dir' => $top_dir,
 											'file' => $file,
@@ -301,7 +297,7 @@ class IndexController extends AbstractActionController
 	    			$thumb_file = '/videojs/app/public/thumb/' . $thumbname;
 	
 	    			if (!file_exists(utf8_decode($thumb_path))) {
-	    				$cmd = "ffmpeg -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
+	    				$cmd = "ffmpeg.exe -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
 			    		exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
 	    			}
 		    		
@@ -403,7 +399,7 @@ class IndexController extends AbstractActionController
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
     
     		if (isset($file) && isset($duration) && !file_exists($out_file)) {
-    			$cmd = 'ffmpeg -i "' . $top_dir . $file . '" -c:v libx264 -filter_complex "[0:v]scale=w=330:h=186[scale],[scale]split=5[copy0][copy1][copy2][copy3][copy4]';
+    			$cmd = 'ffmpeg.exe -i "' . $top_dir . $file . '" -c:v libx264 -filter_complex "[0:v]scale=w=330:h=186[scale],[scale]split=5[copy0][copy1][copy2][copy3][copy4]';
     			for ($i = 0; $i < 5; $i++) {
     				$start = intval(($i + 1) * $duration / 6);
     				$end = $start + 1;
@@ -480,7 +476,7 @@ class IndexController extends AbstractActionController
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     
     			$gmdate = gmdate('H:i:s', $time_seconds);
-    			$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
+    			$cmd = sprintf('ffmpeg.exe -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
     			shell_exec(utf8_decode($cmd));
     			    			 
     			return new JsonModel();
@@ -518,7 +514,7 @@ class IndexController extends AbstractActionController
     		}
     		
     		//Nettoyage index.m3u8
-    		unlink($temp_dir . 'index.m3u8');
+    		@unlink($temp_dir . 'index.m3u8');
     		
     		//Nettoyage dossier de travail
     		if ($data->clean === 'true') {
@@ -535,7 +531,7 @@ class IndexController extends AbstractActionController
     
     			$gmdate = gmdate('H:i:s', $time_seconds);
     			//$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
-    			$cmd = sprintf('start /min ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $temp_dir);
+    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $temp_dir);
     			//shell_exec(utf8_decode($cmd));
     			pclose(popen(utf8_decode($cmd), "r"));
     			
