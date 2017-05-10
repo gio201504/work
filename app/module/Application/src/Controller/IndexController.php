@@ -106,6 +106,50 @@ class IndexController extends AbstractActionController
 	    			return 0;
 	    		}
     		}
+    		
+    		function getFtpConnection($uri) {
+    			// Split FTP URI into:
+    			// $match[0] = ftp://username:password@sld.domain.tld/path1/path2/
+    			// $match[1] = ftp://
+    			// $match[2] = username
+    			// $match[3] = password
+    			// $match[4] = sld.domain.tld
+    			// $match[5] = /path1/path2/
+    			preg_match("/ftp:\/\/(.*?):(.*?)@(.*?)(\/.*)/i", $uri, $match);
+    		
+    			// Set up a connection
+    			$conn = ftp_connect($match[3]);
+    		
+    			// Login
+    			if (ftp_login($conn, $match[1], $match[2]))
+    			{
+    				// Change the dir
+    				ftp_chdir($conn, dirname($match[4]));
+    		
+    				// Return the resource
+    				return $conn;
+    			}
+    		
+    			// Or retun null
+    			return null;
+    		}
+    		
+    		function ftp_get_contents($conn_id, $filename, $maxlen) {
+    			//Create temp handler
+    			$tempHandle = fopen('php://memory', 'r+');
+    			 
+    			//Initate the download
+    			$ret = ftp_nb_fget($conn_id, $tempHandle, $filename, FTP_BINARY);
+    			if ($ret !== FTP_FAILED) {
+    				rewind($tempHandle);
+    				$content = stream_get_contents($tempHandle, $maxlen);
+    				fclose($tempHandle);
+    				return $content;
+    			} else {
+    				fclose($tempHandle);
+    				return false;
+    			}
+    		}
 
     		function scan($empl, $top_dir, $dir, $search = null, $forwardPlugin, $log, $cache, $isFtpFolder = false) {
     			$fulldir = $top_dir . $dir;
@@ -164,13 +208,12 @@ class IndexController extends AbstractActionController
 								//Renvoyer le type MIME
 								if (!$isFtpFolder) {
 									$mime = mime_content_type($fulldir . '/' . $f);
-								} else {
- 									$stream_options = array('ftp' => array('overwrite' => false));
- 									$context = stream_context_create($stream_options);									
- 									$mime_data = @file_get_contents($filename, false, $context, 0, 48);
+								} else { 									
+									$conn = getFtpConnection($filename);
+									$mime_data = ftp_get_contents($conn, $f, 48);
 									
 									$finfo = finfo_open();
-									$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE, $context);
+									$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE);
 									finfo_close($finfo);
 								}
 								
