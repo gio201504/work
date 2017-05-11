@@ -176,23 +176,31 @@ class IndexController extends AbstractActionController
 //     			}
     			
     			//Create temp handler
-    			$tempHandle = fopen('php://memory', 'r+');
+    			//$tempHandle = fopen('php://memory', 'r+');
+    			$tempHandle = fopen('D:/Newsbin64/download/tmp_ftp', 'w+');
     		
     			//Initate the download
     			$ret = ftp_nb_fget($conn_id, $tempHandle, $filename, FTP_BINARY);
-    			$content = "";
     			if ($ret !== FTP_FAILED) {
     				//rewind($tempHandle);
-    				while ($ret === FTP_MOREDATA && strlen($content) < $maxlen) {
-	    				rewind($tempHandle);
-	    				$content = stream_get_contents($tempHandle, $maxlen);
+    				while ($ret === FTP_MOREDATA) {
+	    				//rewind($tempHandle);
+	    				//$content = stream_get_contents($tempHandle, 2048);
 	    				//socket_write($sock, $content, strlen($content));
 	    				//$sent = socket_write($msgsock, $content, strlen($content));
 	    				//$maxlen -= $sent;
 	    				$ret = ftp_nb_continue($conn_id);
     				}
-    				$sent = socket_write($msgsock, $content, strlen($content));
     				fclose($tempHandle);
+    				
+    				$tempHandle = fopen('D:/Newsbin64/download/tmp_ftp', 'r');
+    				$sent = 1;
+    				while (!feof($tempHandle) && $sent > 0) {
+    					$content = fread($tempHandle, 8192);
+    					$sent = socket_write($msgsock, $content, strlen($content));
+    				}
+    				fclose($tempHandle);
+    				//$sent = socket_write($msgsock, file_get_contents('D:/Newsbin64/download/tmp_ftp'), strlen($content));
     				socket_close($sock);
     				return $content;
     			} else {
@@ -464,7 +472,7 @@ class IndexController extends AbstractActionController
 // 						);
 
 	    				$conn = getFtpConnection($top_dir . $file);
-	    				ftp_get_to_tcp($conn, basename($file), 100000);
+	    				ftp_get_to_tcp($conn, basename($file), 500000000);
 
 	    				//$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
 	    				$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 tcp://127.0.0.1:8000?listen";
