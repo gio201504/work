@@ -150,6 +150,57 @@ class IndexController extends AbstractActionController
     				return false;
     			}
     		}
+    		
+    		function ftp_get_to_tcp($conn_id, $filename, $maxlen) {
+    			$address = '127.0.0.1';
+    			$port = 8000;
+    			
+    			if (($sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
+    				echo "socket_create() a échoué : raison : " . socket_strerror(socket_last_error()) . "\n";
+    			}
+    			
+    			if (socket_bind($sock, $address, $port) === false) {
+    				echo "socket_bind() a échoué : raison : " . socket_strerror(socket_last_error($sock)) . "\n";
+    			}
+    			
+    			if (socket_listen($sock, 5) === false) {
+    				echo "socket_listen() a échoué : raison : " . socket_strerror(socket_last_error($sock)) . "\n";
+    			}
+    			
+    			if (($msgsock = socket_accept($sock)) === false) {
+    				echo "socket_accept() a échoué : raison : " . socket_strerror(socket_last_error($sock)) . "\n";
+    			}
+
+//     			if (socket_connect($sock, $address, $port) === false) {
+//     				echo "socket_bind() a échoué : raison : " . socket_strerror(socket_last_error($sock)) . "\n";
+//     			}
+    			
+    			//Create temp handler
+    			$tempHandle = fopen('php://memory', 'r+');
+    		
+    			//Initate the download
+    			$ret = ftp_nb_fget($conn_id, $tempHandle, $filename, FTP_BINARY);
+    			$content = "";
+    			if ($ret !== FTP_FAILED) {
+    				//rewind($tempHandle);
+    				while ($ret === FTP_MOREDATA && strlen($content) < $maxlen) {
+	    				rewind($tempHandle);
+	    				$content = stream_get_contents($tempHandle, $maxlen);
+	    				//socket_write($sock, $content, strlen($content));
+	    				//$sent = socket_write($msgsock, $content, strlen($content));
+	    				//$maxlen -= $sent;
+	    				$ret = ftp_nb_continue($conn_id);
+    				}
+    				$sent = socket_write($msgsock, $content, strlen($content));
+    				fclose($tempHandle);
+    				socket_close($sock);
+    				return $content;
+    			} else {
+    				fclose($tempHandle);
+    				socket_close($sock);
+    				return false;
+    			}
+    		}
 
     		function scan($empl, $top_dir, $dir, $search = null, $forwardPlugin, $log, $cache, $isFtpFolder = false) {
     			$fulldir = $top_dir . $dir;
@@ -397,15 +448,35 @@ class IndexController extends AbstractActionController
     			$config = $this->sm->get('Config');
     			$emplacements = $config['emplacements'];
     			$top_dir = $emplacements[$empl]['top_dir'];
+    			$protocole = $emplacements[$empl]['protocole'];
     		}
 
     		$file_duration = basename($file) . '[duration]';
     		if (!$cache->hasItem($file_duration)) {
     			$duration_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $file_duration;
 	    		if (!file_exists($duration_path)) {
-	    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
-	    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
-	    			$duration = $outputAndErrors[0];
+	    			if ($protocole === 'ftp') {
+// 	    				$descriptorspec = array(
+// 							0 => array("pipe", "r"),  // // stdin est un pipe où le processus va lire
+// 							1 => array("pipe", "w"),  // stdout est un pipe où le processus va écrire
+// 							//2 => array("p", "D:/NewsBin64/download/error-output.txt", "a") // stderr est un fichier
+// 	    					2 => array("pipe", "a")
+// 						);
+
+	    				$conn = getFtpConnection($top_dir . $file);
+	    				ftp_get_to_tcp($conn, basename($file), 100000);
+
+	    				//$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
+	    				$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 tcp://127.0.0.1:8000?listen";
+	    				//exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+	    				//$duration = $outputAndErrors[0];	    				
+	    				//$process = proc_open($cmd, $descriptorspec, $pipes);
+	    				//stream_set_blocking($pipes[1], true);
+	    			} else {
+		    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
+		    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+		    			$duration = $outputAndErrors[0];
+	    			}
 	    			
 	    			if (is_numeric($duration)) {
 	    				file_put_contents($duration_path, $duration);
