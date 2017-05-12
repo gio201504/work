@@ -463,29 +463,10 @@ class IndexController extends AbstractActionController
     		if (!$cache->hasItem($file_duration)) {
     			$duration_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $file_duration;
 	    		if (!file_exists($duration_path)) {
-	    			if ($protocole === 'ftp') {
-// 	    				$descriptorspec = array(
-// 							0 => array("pipe", "r"),  // // stdin est un pipe où le processus va lire
-// 							1 => array("pipe", "w"),  // stdout est un pipe où le processus va écrire
-// 							//2 => array("p", "D:/NewsBin64/download/error-output.txt", "a") // stderr est un fichier
-// 	    					2 => array("pipe", "a")
-// 						);
+		    		$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
+		    		exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+					$duration = $outputAndErrors[0];
 
-	    				$conn = getFtpConnection($top_dir . $file);
-	    				ftp_get_to_tcp($conn, basename($file), 500000000);
-
-	    				//$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
-	    				$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 tcp://127.0.0.1:8000?listen";
-	    				//exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
-	    				//$duration = $outputAndErrors[0];	    				
-	    				//$process = proc_open($cmd, $descriptorspec, $pipes);
-	    				//stream_set_blocking($pipes[1], true);
-	    			} else {
-		    			$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
-		    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
-		    			$duration = $outputAndErrors[0];
-	    			}
-	    			
 	    			if (is_numeric($duration)) {
 	    				file_put_contents($duration_path, $duration);
 	    				//Sauvegarde dans le cache
