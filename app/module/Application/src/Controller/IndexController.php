@@ -236,14 +236,13 @@ class IndexController extends AbstractActionController
 		    						&& !$is_dir)
 								continue;
 							
-							$f_utf8 = utf8_encode($f);
 							if($is_dir) {
 								// The path is a folder
 								$files[] = array(
-									"name" => $f_utf8,
+									"name" => $f,
 									"type" => "folder",
 									"emplacement" => $empl,
-									"path" => $dir . '/' . $f_utf8,
+									"path" => $dir . '/' . $f,
 									"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
 								);
 							} else {
@@ -253,10 +252,10 @@ class IndexController extends AbstractActionController
 									$filesize = 0;
 								}
 								$array = array(
-									"name" => $f_utf8,
+									"name" => $f,
 									"type" => "file",
 									"emplacement" => $empl,
-									"path" => $dir . '/' . $f_utf8,
+									"path" => $dir . '/' . $f,
 									"size" => bytesToSize($filesize),
 									//"fullname" => $fulldir . '/' . $f_utf8,
 								);
@@ -280,7 +279,7 @@ class IndexController extends AbstractActionController
 									//Durée de la vidéo
 									$data = (object) array(
 											'top_dir' => $top_dir,
-											'file' => $dir . '/' . $f_utf8,
+											'file' => $dir . '/' . $f,
 											'empl' => $empl,
 									);
 									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
@@ -292,7 +291,7 @@ class IndexController extends AbstractActionController
 									$time = gmdate("H:i:s", $result->duration / 2);
 	
 									//Génération thumbnail
-									$file = $dir . '/' . $f_utf8;
+									$file = $dir . '/' . $f;
 									$data = (object) array(
 											'top_dir' => $top_dir,
 											'file' => $file,
@@ -459,12 +458,16 @@ class IndexController extends AbstractActionController
     			$protocole = $emplacements[$empl]['protocole'];
     		}
 
+    		if ($protocole === 'ftp') {
+    			$file = iconv("ISO-8859-1", "UTF-8", $file);
+    		}
+    		
     		$file_duration = basename($file) . '[duration]';
     		if (!$cache->hasItem($file_duration)) {
     			$duration_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $file_duration;
 	    		if (!file_exists($duration_path)) {
 		    		$cmd = "ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 " . "\"" . $top_dir . $file . "\"";
-		    		exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+		    		exec($cmd.' 2>&1', $outputAndErrors, $return_value);
 					$duration = $outputAndErrors[0];
 
 	    			if (is_numeric($duration)) {
