@@ -386,6 +386,11 @@ class IndexController extends AbstractActionController
     			$config = $this->sm->get('Config');
     			$emplacements = $config['emplacements'];
     			$top_dir = $emplacements[$empl]['top_dir'];
+    			$protocole = $emplacements[$empl]['protocole'];
+    		}
+    		
+    		if ($protocole === 'ftp') {
+    			$file = iconv("ISO-8859-1", "UTF-8", $file);
     		}
     		
     		if (isset($file) && isset($time)) {
@@ -397,9 +402,9 @@ class IndexController extends AbstractActionController
 	    			$thumb_path = str_replace('\\', '/', getcwd()) . '/public/thumb/' . $thumbname;
 	    			$thumb_file = '/videojs/app/public/thumb/' . $thumbname;
 	
-	    			if (!file_exists(utf8_decode($thumb_path))) {
+	    			if (!file_exists($thumb_path)) {
 	    				$cmd = "ffmpeg.exe -ss " . $time_seconds . " -i " . "\"" . $top_dir . $file . "\" -vframes 1 -filter:v scale='200:-1' \"" . $thumb_path . "\"";
-			    		exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+			    		exec($cmd.' 2>&1', $outputAndErrors, $return_value);
 	    			}
 		    		
 		    		//Sauvegarde dans le cache
