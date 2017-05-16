@@ -230,6 +230,12 @@ class IndexController extends AbstractActionController
 								continue; // Ignore hidden files
 							}
 							
+							if ($isFtpFolder) {
+								$f_utf8 = iconv("ISO-8859-1", "UTF-8", $f);
+							} else {
+								$f_utf8 = $f;
+							}
+							
 							$is_dir = is_dir($fulldir . '/' . $f);
 							if ($search !== null
 									&& strpos($f, $search) === false
@@ -239,7 +245,7 @@ class IndexController extends AbstractActionController
 							if($is_dir) {
 								// The path is a folder
 								$files[] = array(
-									"name" => $f,
+									"name" => $f_utf8,
 									"type" => "folder",
 									"emplacement" => $empl,
 									"path" => $dir . '/' . $f,
@@ -252,7 +258,7 @@ class IndexController extends AbstractActionController
 									$filesize = 0;
 								}
 								$array = array(
-									"name" => $f,
+									"name" => $f_utf8,
 									"type" => "file",
 									"emplacement" => $empl,
 									"path" => $dir . '/' . $f,
