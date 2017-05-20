@@ -96,7 +96,8 @@ return [
     					$writer = new Stream(getcwd() . '/log/' . $filename);
     					$log->addWriter($writer);
     					return $log;
-    				}
+    				},
+    				'Emplacements' => Service\Factory\EmplacementsFactory::class,
     		],
     		'abstract_factories' => [
     				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',

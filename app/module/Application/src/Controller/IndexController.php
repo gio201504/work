@@ -106,111 +106,9 @@ class IndexController extends AbstractActionController
 	    			return 0;
 	    		}
     		}
-    		
-    		function getFtpConnection($uri) {
-    			// Split FTP URI into:
-    			// $match[0] = ftp://username:password@sld.domain.tld/path1/path2/
-    			// $match[1] = ftp://
-    			// $match[2] = username
-    			// $match[3] = password
-    			// $match[4] = sld.domain.tld
-    			// $match[5] = /path1/path2/
-    			preg_match("/ftp:\/\/(.*?):(.*?)@(.*?)(\/.*)/i", $uri, $match);
-    		
-    			// Set up a connection
-    			$conn = ftp_connect($match[3]);
-    		
-    			// Login
-    			if (ftp_login($conn, $match[1], $match[2]))
-    			{
-    				// Change the dir
-    				ftp_chdir($conn, dirname($match[4]));
-    		
-    				// Return the resource
-    				return $conn;
-    			}
-    		
-    			// Or retun null
-    			return null;
-    		}
-    		
-    		function ftp_get_contents($conn_id, $filename, $maxlen) {
-    			//Create temp handler
-    			$tempHandle = fopen('php://memory', 'r+');
-    			 
-    			//Initate the download
-    			$ret = ftp_nb_fget($conn_id, $tempHandle, $filename, FTP_BINARY);
-    			if ($ret !== FTP_FAILED) {
-    				rewind($tempHandle);
-    				$content = stream_get_contents($tempHandle, $maxlen);
-    				fclose($tempHandle);
-    				return $content;
-    			} else {
-    				fclose($tempHandle);
-    				return false;
-    			}
-    		}
-    		
-    		function ftp_get_to_tcp($conn_id, $filename, $maxlen) {
-    			$address = '127.0.0.1';
-    			$port = 8000;
-    			
-    			if (($sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
-    				echo "socket_create() a échoué : raison : " . socket_strerror(socket_last_error()) . "\n";
-    			}
-    			
-    			if (socket_bind($sock, $address, $port) === false) {
-    				echo "socket_bind() a échoué : raison : " . socket_strerror(socket_last_error($sock)) . "\n";
-    			}
-    			
-    			if (socket_listen($sock, 5) === false) {
-    				echo "socket_listen() a échoué : raison : " . socket_strerror(socket_last_error($sock)) . "\n";
-    			}
-    			
-    			if (($msgsock = socket_accept($sock)) === false) {
-    				echo "socket_accept() a échoué : raison : " . socket_strerror(socket_last_error($sock)) . "\n";
-    			}
-
-//     			if (socket_connect($sock, $address, $port) === false) {
-//     				echo "socket_bind() a échoué : raison : " . socket_strerror(socket_last_error($sock)) . "\n";
-//     			}
-    			
-    			//Create temp handler
-    			//$tempHandle = fopen('php://memory', 'r+');
-    			$tempHandle = fopen('D:/Newsbin64/download/tmp_ftp', 'w+');
-    		
-    			//Initate the download
-    			$ret = ftp_nb_fget($conn_id, $tempHandle, $filename, FTP_BINARY);
-    			if ($ret !== FTP_FAILED) {
-    				//rewind($tempHandle);
-    				while ($ret === FTP_MOREDATA) {
-	    				//rewind($tempHandle);
-	    				//$content = stream_get_contents($tempHandle, 2048);
-	    				//socket_write($sock, $content, strlen($content));
-	    				//$sent = socket_write($msgsock, $content, strlen($content));
-	    				//$maxlen -= $sent;
-	    				$ret = ftp_nb_continue($conn_id);
-    				}
-    				fclose($tempHandle);
-    				
-    				$tempHandle = fopen('D:/Newsbin64/download/tmp_ftp', 'r');
-    				$sent = 1;
-    				while (!feof($tempHandle) && $sent > 0) {
-    					$content = fread($tempHandle, 8192);
-    					$sent = socket_write($msgsock, $content, strlen($content));
-    				}
-    				fclose($tempHandle);
-    				//$sent = socket_write($msgsock, file_get_contents('D:/Newsbin64/download/tmp_ftp'), strlen($content));
-    				socket_close($sock);
-    				return $content;
-    			} else {
-    				fclose($tempHandle);
-    				socket_close($sock);
-    				return false;
-    			}
-    		}
 
     		function scan($empl, $top_dir, $dir, $search = null, $forwardPlugin, $log, $cache, $isFtpFolder = false) {
+    			$Empl = $this->sm->get('emplacements');
     			$fulldir = $top_dir . $dir;
 
     			//Test existence cache    			
@@ -333,6 +231,7 @@ class IndexController extends AbstractActionController
     		//Scan des emplacements
     		$config = $this->sm->get('Config');
     		$emplacements = $config['emplacements'];
+    		$Empl = $this->sm->get('Emplacements');
     		$folder = $folderFTP = array();
 
     		if ($empl === 0) {
