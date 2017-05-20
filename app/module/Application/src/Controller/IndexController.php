@@ -248,7 +248,7 @@ class IndexController extends AbstractActionController
 									"name" => $f_utf8,
 									"type" => "folder",
 									"emplacement" => $empl,
-									"path" => $dir . '/' . $f,
+									"path" => $dir . '/' . $f_utf8,
 									"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
 								);
 							} else {
@@ -261,7 +261,7 @@ class IndexController extends AbstractActionController
 									"name" => $f_utf8,
 									"type" => "file",
 									"emplacement" => $empl,
-									"path" => $dir . '/' . $f,
+									"path" => $dir . '/' . $f_utf8,
 									"size" => bytesToSize($filesize),
 									//"fullname" => $fulldir . '/' . $f_utf8,
 								);
@@ -397,6 +397,7 @@ class IndexController extends AbstractActionController
     		
     		if ($protocole === 'ftp') {
     			$file = iconv("ISO-8859-1", "UTF-8", $file);
+    			$file = utf8_decode($file);
     		}
     		
     		if (isset($file) && isset($time)) {
@@ -433,7 +434,7 @@ class IndexController extends AbstractActionController
     
     private function data_uri($file, $mime = 'image/png')
     {
-    	$contents = @file_get_contents(utf8_decode($file));
+    	$contents = @file_get_contents($file);
     	$base64   = base64_encode($contents);
     	return 'data:' . $mime . ';base64,' . $base64;
     }
@@ -471,6 +472,7 @@ class IndexController extends AbstractActionController
 
     		if ($protocole === 'ftp') {
     			$file = iconv("ISO-8859-1", "UTF-8", $file);
+    			$file = utf8_decode($file);
     		}
     		
     		$file_duration = basename($file) . '[duration]';
