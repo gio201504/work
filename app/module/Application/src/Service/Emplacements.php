@@ -4,6 +4,10 @@ namespace Application\Service;
 class Emplacements {
 	private $connections = array();
 	
+	private $emplacements = array();
+	
+	private $currentEmpl;
+	
 	public function __construct($sm) {
 		$config = $sm->get('Config');
 		$emplacements = $config['emplacements'];
@@ -16,6 +20,7 @@ class Emplacements {
 				$this->connections[$num_empl] = $conn;
 			}
 		}
+		$this->emplacements = $emplacements;
 	}
 	
 	private function getFtpConnection($uri) {
@@ -127,5 +132,13 @@ class Emplacements {
 			socket_close($sock);
 			return false;
 		}
+	}
+	
+	public function getCurrentEmpl() {
+		return $this->emplacements[$this->currentEmpl];
+	}
+	
+	public function setCurrentEmpl($num_empl) {
+		$this->currentEmpl = $num_empl;
 	}
 }

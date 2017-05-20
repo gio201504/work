@@ -107,8 +107,11 @@ class IndexController extends AbstractActionController
 	    		}
     		}
 
-    		function scan($empl, $top_dir, $dir, $search = null, $forwardPlugin, $log, $cache, $isFtpFolder = false) {
-    			$Empl = $this->sm->get('emplacements');
+    		function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache) {
+    			$emplacement = $Empl->getCurrentEmpl();
+    			$top_dir = $emplacement['top_dir'];
+    			$isFtpFolder = $emplacement['protocole'] === 'ftp';
+    			$empl = $emplacement['emplacement'];
     			$fulldir = $top_dir . $dir;
 
     			//Test existence cache    			
@@ -171,8 +174,7 @@ class IndexController extends AbstractActionController
 								if (!$isFtpFolder) {
 									$mime = mime_content_type($fulldir . '/' . $f);
 								} else { 									
-									$conn = getFtpConnection($filename);
-									$mime_data = ftp_get_contents($conn, $f, 48);
+									$mime_data = $Empl->ftp_get_contents($empl, $dir . '/' . $f, 48);
 									
 									$finfo = finfo_open();
 									$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE);
@@ -229,23 +231,21 @@ class IndexController extends AbstractActionController
     		}
     		
     		//Scan des emplacements
-    		$config = $this->sm->get('Config');
-    		$emplacements = $config['emplacements'];
-    		$Empl = $this->sm->get('Emplacements');
     		$folder = $folderFTP = array();
 
     		if ($empl === 0) {
     			//Liste des emplacements
+    			$config = $this->sm->get('Config');
+    			$emplacements = $config['emplacements'];
     			$items = array();
     			foreach ($emplacements as $emplacement) {
 	    			$items[] = $emplacement;
     			}
     		} else {
     			//Contenu de l'emplacement courant
-    			$emplacement = $emplacements[$empl];
-	    		$empl_dir = $emplacements[$empl]['top_dir'];
-	    		$isFTP = $emplacement['protocole'] === 'ftp';
-	    		$items = scan($empl, $empl_dir, $dir, $search, $forwardPlugin, $log, $cache, $isFTP);
+    			$Empl = $this->sm->get('Emplacements');
+    			$Empl->setCurrentEmpl($empl);
+	    		$items = scan($Empl, $dir, $search, $forwardPlugin, $log, $cache);
     		}
     		
     		//$t2 = $this->milliseconds();
