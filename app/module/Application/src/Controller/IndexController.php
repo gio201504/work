@@ -137,7 +137,11 @@ class IndexController extends AbstractActionController
 								$f_utf8 = $f;
 							}
 							
+							$t1 = round(microtime(true) * 1000);
 							$is_dir = is_dir($fulldir . '/' . $f);
+							$t2 = round(microtime(true) * 1000);
+							$log->info("is_dir(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
+							
 							if ($search !== null
 									&& strpos($f, $search) === false
 		    						&& !$is_dir)
