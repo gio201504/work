@@ -137,9 +137,16 @@ class IndexController extends AbstractActionController
 								$f_utf8 = $f;
 							}
 							
-							$t1 = round(microtime(true) * 1000);
-							$is_dir = is_dir($fulldir . '/' . $f);
-							$t2 = round(microtime(true) * 1000);
+							if ($isFtpFolder) {
+								$t1 = round(microtime(true) * 1000);
+								$conn_id = $Empl->getConnection($empl);
+								$is_dir = @ftp_chdir($conn_id, $dir . '/' . $f);
+								$t2 = round(microtime(true) * 1000);
+							} else {
+								$t1 = round(microtime(true) * 1000);
+								$is_dir = is_dir($fulldir . '/' . $f);
+								$t2 = round(microtime(true) * 1000);
+							}
 							$log->info("is_dir(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 							
 							if ($search !== null
@@ -158,10 +165,19 @@ class IndexController extends AbstractActionController
 								);
 							} else {
 								// It is a file
-								$filesize = @filesize($fulldir . '/' . $f);
+								if ($isFtpFolder) {
+									$t1 = round(microtime(true) * 1000);
+									$conn_id = $Empl->getConnection($empl);
+									$filesize = ftp_size($conn_id, $dir . '/' . $f);
+									$t2 = round(microtime(true) * 1000);
+								} else {
+									$filesize = @filesize($fulldir . '/' . $f);
+								}
 								if (!$filesize) {
 									$filesize = 0;
 								}
+								$log->info("filesize(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
+								
 								$array = array(
 									"name" => $f_utf8,
 									"type" => "file",

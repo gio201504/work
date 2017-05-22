@@ -50,7 +50,7 @@ class Emplacements {
 		return null;
 	}
 	
-	private function getConnection($empl) {
+	public function getConnection($empl) {
 		return $this->connections[$empl];
 	}
 	
