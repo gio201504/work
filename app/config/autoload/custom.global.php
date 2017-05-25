@@ -28,5 +28,14 @@
     				'items' => '',
     				'protocole' => 'ftp',
     		),
+    		'4' => array(
+    				'name' => 'Films HD',
+    				'type' => 'folder',
+    				'emplacement' => 4,
+    				'top_dir' => 'D:/',
+    				'path' => 'Films HD',
+    				'items' => '',
+    				'protocole' => 'file',
+    		),
 	    )
 	);
