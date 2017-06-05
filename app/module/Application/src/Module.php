@@ -11,6 +11,7 @@ use Zend\Mvc\MvcEvent;
 use Zend\Mvc\ModuleRouteListener;
 use Zend\ModuleManager\Feature\AutoloaderProviderInterface;
 use Zend\ModuleManager\Feature\ConfigProviderInterface;
+use Zend\Session\SessionManager;
 
 class Module implements AutoloaderProviderInterface, ConfigProviderInterface
 {
@@ -37,8 +38,10 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface
     
     public function onBootstrap(MvcEvent $e)
     {
-    	$eventManager        = $e->getApplication()->getEventManager();
-    	$moduleRouteListener = new ModuleRouteListener();
+    	$application			= $e->getApplication();
+    	$eventManager			= $application->getEventManager();
+    	$serviceManager			= $application->getServiceManager();
+    	$moduleRouteListener	= new ModuleRouteListener();
     	$moduleRouteListener->attach($eventManager);
     	 
     	// get the cache listener service
@@ -47,5 +50,9 @@ class Module implements AutoloaderProviderInterface, ConfigProviderInterface
     	 
     	// attach the listeners to the event manager
     	$cacheListener->attach($eventManager);
+    	
+    	// The following line instantiates the SessionManager and automatically
+    	// makes the SessionManager the 'default' one.
+    	$sessionManager = $serviceManager->get(SessionManager::class);
     }
 }
