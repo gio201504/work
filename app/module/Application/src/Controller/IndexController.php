@@ -96,7 +96,8 @@ class IndexController extends AbstractActionController
     			//Contenu de l'emplacement courant
     			$Empl = $this->sm->get('Emplacements');
     			$Empl->setCurrentEmpl($empl);
-	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, $log, $cache);
+    			$sessionContainer = $this->sm->get('MySessionContainer');
+	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, $log, $cache, $sessionContainer);
     		}
     		
     		//$t2 = $this->milliseconds();

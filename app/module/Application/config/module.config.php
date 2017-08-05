@@ -121,15 +121,19 @@ return [
     		]
     ],
     
-    'caches' => array(
-//     		'filecache' => array(
+    'caches' => [
+//     		'filecache' => [
 //     				'adapter' => 'filesystem',
 //     				'options' => [
 //     					'cache_dir' => 'data/cache/filecache'
 //     				]
-//     		),
-    		'apcucache' => array(
+//     		],
+    		'apcucache' => [
     				'adapter' => 'apcu',
-    		),
-    ),
+    		],
+    ],
+    
+    'session_containers' => [
+    	'MySessionContainer'
+    ],
 ];

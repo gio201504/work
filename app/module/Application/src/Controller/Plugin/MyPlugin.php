@@ -29,7 +29,7 @@ class MyPlugin extends AbstractPlugin {
 		}
 	}
 	
-	public function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache) {
+	public function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache, $session) {
 		$emplacement = $Empl->getCurrentEmpl ();
 		$top_dir = $emplacement ['top_dir'];
 		$isFtpFolder = $emplacement ['protocole'] === 'ftp';
