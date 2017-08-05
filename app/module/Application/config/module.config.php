@@ -66,6 +66,11 @@ return [
             }
         ],
     ],
+    'controller_plugins' => [
+    	'invokables' => [
+    		'MyPlugin' => 'Application\Controller\Plugin\MyPlugin',
+    	]
+    ],
     'view_manager' => [
         'display_not_found_reason' => true,
         'display_exceptions'       => true,

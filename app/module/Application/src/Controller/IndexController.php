@@ -75,181 +75,12 @@ class IndexController extends AbstractActionController
     		$top_dir = $request->getServer('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : null;
     		$forwardPlugin = $this->forward();
+    		$plugin = $this->MyPlugin();
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		
     		if (isset($data->clear))
     			$cache->removeItem($top_dir . $dir);
 
-    		// Convert file sizes from bytes to human readable units
-    		function bytesToSize($bytes) {
-    			$sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB');
-    			if ($bytes === 0) return '0 Bytes';
-    			$i = floor(log($bytes) / log(1024));
-    			return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
-    		}
-    		
-    		function countFiles($directory, $search = null, $log) {
-    			//$log->info("   countFiles " . $directory);
-    			if ($search === null)
-	    			$files = glob($directory . '/*');
-    			else
-    				$files = glob($directory . '/*' . $search . '*');
-	    		
-	    		if ($files !== false)
-	    		{
-	    			$filecount = count($files);
-	    			//$log->info("   countFiles " . $directory);
-	    			return $filecount;
-	    		}
-	    		else {
-	    			//$log->info("   countFiles " . $directory);
-	    			return 0;
-	    		}
-    		}
-
-    		function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache) {
-    			$emplacement = $Empl->getCurrentEmpl();
-    			$top_dir = $emplacement['top_dir'];
-    			$isFtpFolder = $emplacement['protocole'] === 'ftp';
-    			$empl = $emplacement['emplacement'];
-    			$fulldir = $top_dir . $dir;
-
-    			//Test existence cache    			
-    			if ($isFtpFolder || !$cache->hasItem($fulldir)) {
-		    		$files = array();
-		    		// Is there actually such a folder/file?
-					if($isFtpFolder || file_exists($fulldir)) {
-						if (!$isFtpFolder) {
-							$handle = opendir($fulldir);
-						} else {
-							$handle = opendir($fulldir . '/*');
-						}
-						
-						while(($f = readdir($handle)) !== false && isset($f)) {
-							//$log->info($f);
-							if(!$f || $f[0] == '.') {
-								continue; // Ignore hidden files
-							}
-							
-							if ($isFtpFolder) {
-								$f_utf8 = iconv("ISO-8859-1", "UTF-8", $f);
-							} else {
-								$f_utf8 = $f;
-							}
-							
-							if ($isFtpFolder) {
-								$t1 = round(microtime(true) * 1000);
-								$conn_id = $Empl->getConnection($empl);
-								$is_dir = @ftp_chdir($conn_id, $dir . '/' . $f);
-								$t2 = round(microtime(true) * 1000);
-							} else {
-								$t1 = round(microtime(true) * 1000);
-								$is_dir = is_dir($fulldir . '/' . $f);
-								$t2 = round(microtime(true) * 1000);
-							}
-							$log->info("is_dir(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
-							
-							if ($search !== null
-									&& strpos($f, $search) === false
-		    						&& !$is_dir)
-								continue;
-							
-							if($is_dir) {
-								// The path is a folder
-								$files[] = array(
-									"name" => $f_utf8,
-									"type" => "folder",
-									"emplacement" => $empl,
-									"path" => $dir . '/' . $f_utf8,
-									"items" => countFiles($top_dir . $dir . '/' . $f, $search, $log),
-								);
-							} else {
-								// It is a file
-								if ($isFtpFolder) {
-									$t1 = round(microtime(true) * 1000);
-									$conn_id = $Empl->getConnection($empl);
-									$filesize = ftp_size($conn_id, $dir . '/' . $f);
-									$t2 = round(microtime(true) * 1000);
-								} else {
-									$filesize = @filesize($fulldir . '/' . $f);
-								}
-								if (!$filesize) {
-									$filesize = 0;
-								}
-								$log->info("filesize(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
-								
-								$array = array(
-									"name" => $f_utf8,
-									"type" => "file",
-									"emplacement" => $empl,
-									"path" => $dir . '/' . $f_utf8,
-									"size" => bytesToSize($filesize),
-									//"fullname" => $fulldir . '/' . $f_utf8,
-								);
-								
-								//Si vidéo générer thumbnail
-								$filename = $fulldir . '/' . $f;
-								
-								//Renvoyer le type MIME
-								if (!$isFtpFolder) {
-									$mime = mime_content_type($fulldir . '/' . $f);
-								} else { 									
-									$mime_data = $Empl->ftp_get_contents($empl, $dir . '/' . $f, 48);
-									
-									$finfo = finfo_open();
-									$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE);
-									finfo_close($finfo);
-								}
-								
-								if (strstr($mime, "video/")) {
-									//Durée de la vidéo
-									$data = (object) array(
-											'top_dir' => $top_dir,
-											'file' => $dir . '/' . $f,
-											'empl' => $empl,
-									);
-									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-											array(
-												'action'	=> 'getVideoDuration',
-												'data'		=> $data,
-											)
-									);
-									$time = gmdate("H:i:s", $result->duration / 2);
-	
-									//Génération thumbnail
-									$file = $dir . '/' . $f;
-									$data = (object) array(
-											'top_dir' => $top_dir,
-											'file' => $file,
-											'time' => $time,
-											'empl' => $empl,
-									);
-									$result = $forwardPlugin->dispatch('Application\Controller\IndexController',
-											array(
-													'action'	=> 'getThumbAjax',
-													'data'		=> $data,
-											)
-									);
-									$thumb = array('thumb' => $result->file);
-									$array = array_merge($array, $thumb);								
-								}
-								
-								$files[] = $array;
-							}
-						}
-						closedir($handle);
-					}
-					
-					//Sauvegarde dans le cache
-					if (!$isFtpFolder) {
-						$cache->addItem($fulldir, $files);
-					}
-    			} else
-    				$files = $cache->getItem($fulldir);
-				
-				return $files;
-    		}
-    		
     		//Scan des emplacements
     		$folder = $folderFTP = array();
 
@@ -265,7 +96,7 @@ class IndexController extends AbstractActionController
     			//Contenu de l'emplacement courant
     			$Empl = $this->sm->get('Emplacements');
     			$Empl->setCurrentEmpl($empl);
-	    		$items = scan($Empl, $dir, $search, $forwardPlugin, $log, $cache);
+	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, $log, $cache);
     		}
     		
     		//$t2 = $this->milliseconds();
