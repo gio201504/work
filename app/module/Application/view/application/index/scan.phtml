@@ -104,6 +104,9 @@ $(function(){
 		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir, empl: empl});
 		window.location = url;
 		currentPath = nextDir;
+
+		//TODO : Tâche permettant de scruter l'avancement du scan de dossier
+		
 	});
 
 	// Clicking on breadcrumbs
