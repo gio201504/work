@@ -81,9 +81,6 @@ class IndexController extends AbstractActionController
     		if (isset($data->clear))
     			$cache->removeItem($top_dir . $dir);
 
-    		//Scan des emplacements
-    		$folder = $folderFTP = array();
-
     		if ($empl === 0) {
     			//Liste des emplacements
     			$config = $this->sm->get('Config');
@@ -96,15 +93,15 @@ class IndexController extends AbstractActionController
     			//Contenu de l'emplacement courant
     			$Empl = $this->sm->get('Emplacements');
     			$Empl->setCurrentEmpl($empl);
-    			$sessionContainer = $this->sm->get('MySessionContainer');
-	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, $log, $cache, $sessionContainer);
+    			//$sessionContainer = $this->sm->get('MySessionContainer');
+	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, $log, $cache);
     		}
     		
     		//$t2 = $this->milliseconds();
     		//$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
 
     		$viewmodel = new ViewModel();
-    		$viewmodel->setTerminal(false);
+    		$viewmodel->setTerminal($request->isXmlHttpRequest());
     		
     		$data = array(
     				"name" => $dir,
@@ -412,6 +409,21 @@ class IndexController extends AbstractActionController
 
     			return new JsonModel();
     		}
+    	}
+    }
+    
+    public function getScannedFileIndexAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$cache = $this->sm->get('apcucache');
+    		
+    		if ($cache->hasItem('sScannedFile'))
+    			$file = $cache->getItem('sScannedFile');
+    		else
+    			$file = false;
+    		
+    		return new JsonModel(array('file' => $file));
     	}
     }
 }

@@ -144,5 +144,35 @@
 		
 		return promise;
 	};
+	
+	var getScannedFileIndexAjax = function() {
+		$.ajax({
+	        type: "GET",
+	        url: "getScannedFileIndex",
+	        dataType: "json",
+	        success: function(data) {
+	        	if (data.file !== false) {
+	        		$("#scanningDiv").html(data.file);
+	        	}
+	        }
+	    });
+	};
+	
+	win.scanFolderAjax = function(dir, empl) {
+		$("#scanningDiv").show();
+		var intervalId = setInterval(getScannedFileIndexAjax, 100);
+		
+		$.ajax({
+	        type: "GET",
+	        url: "scan",
+	        dataType: "html",
+	        data: { dir: dir, empl: empl },
+	        success: function(data) {
+	        	$("div.filemanager").parent(".container").html(data);
+	        	clearInterval(intervalId);
+	        	$("#scanningDiv").hide();
+	        },
+	    });
+	};
 
 }(window));

@@ -29,7 +29,7 @@ class MyPlugin extends AbstractPlugin {
 		}
 	}
 	
-	public function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache, $session) {
+	public function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache) {
 		$emplacement = $Empl->getCurrentEmpl ();
 		$top_dir = $emplacement ['top_dir'];
 		$isFtpFolder = $emplacement ['protocole'] === 'ftp';
@@ -52,6 +52,9 @@ class MyPlugin extends AbstractPlugin {
 					if (!$f || $f[0] == '.') {
 						continue; // Ignore hidden files
 					}
+					
+					//Stockage fichier scanné dans le cache APCu
+					$cache->setItem('sScannedFile', $f);
 					
 					if ($isFtpFolder) {
 						$f_utf8 = iconv("ISO-8859-1", "UTF-8", $f);

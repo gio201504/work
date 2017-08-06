@@ -88,10 +88,10 @@ div#scanningDiv  {
 	position: fixed;
 	top: 50%;
 	left: 50%;
-	width: 30em;
-	height: 1em;
-	margin-top: -0.5em; /*set to a negative number 1/2 of your height*/
-    margin-left: -15em; /*set to a negative number 1/2 of your width*/
+	width: 40em;
+	height: 3em;
+	margin-top: -1.5em; /*set to a negative number 1/2 of your height*/
+    margin-left: -20em; /*set to a negative number 1/2 of your width*/
 	border: 1px solid #ccc;
 	background-color: #f3f3f3;
 	z-index: 2;
