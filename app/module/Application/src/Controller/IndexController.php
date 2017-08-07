@@ -418,12 +418,19 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$cache = $this->sm->get('apcucache');
     		
+    		$iFileCount = $cache->getItem('iFileCount');
+    		$iFileIndex = $cache->getItem('iFileIndex');
+    		
     		if ($cache->hasItem('sScannedFile'))
     			$file = $cache->getItem('sScannedFile');
     		else
     			$file = false;
     		
-    		return new JsonModel(array('file' => $file));
+    		return new JsonModel(array(
+    				'file' => $file,
+    				'fileCount' => $iFileCount,
+    				'fileIndex' => $iFileIndex,
+    		));
     	}
     }
 }

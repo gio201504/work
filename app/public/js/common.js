@@ -152,7 +152,8 @@
 	        dataType: "json",
 	        success: function(data) {
 	        	if (data.file !== false) {
-	        		$("#scanningDiv").html(data.file);
+	        		var str = "(" + data.fileIndex + "/" + data.fileCount + ") " + data.file;
+	        		$("#scanningDiv").html(str);
 	        	}
 	        }
 	    });
