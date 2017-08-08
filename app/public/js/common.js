@@ -13,7 +13,7 @@
 	        type: "GET",
 	        url: "getThumbAjax",
 	        dataType: "json",
-	        data: { file: file, time: time },
+	        data: { empl: win.emplacement, file: file, time: time },
 	        success: function(data) {
 	    		if (typeof callback === 'function') {
 	        		callback(video_id, data);
@@ -44,7 +44,7 @@
 	        type: "GET",
 	        url: "transcodeVideo",
 	        dataType: "json",
-	        data: { file: file, time: time_seconds, clean: clean },
+	        data: { empl: win.emplacement, file: file, time: time_seconds, clean: clean },
 	    });
 	};
 	
@@ -57,7 +57,7 @@
 	        type: "GET",
 	        url: "getVideoDuration",
 	        dataType: "json",
-	        data: { file: file },
+	        data: { empl: win.emplacement, file: file },
 	        success: function(data) {
 	    		if (typeof callback === 'function') {
 	        		callback(data);
@@ -143,6 +143,37 @@
 		dfd.resolve();
 		
 		return promise;
+	};
+	
+	var getScannedFileIndexAjax = function() {
+		$.ajax({
+	        type: "GET",
+	        url: "getScannedFileIndex",
+	        dataType: "json",
+	        success: function(data) {
+	        	if (data.file !== false) {
+	        		var str = "(" + data.fileIndex + "/" + data.fileCount + ") " + data.file;
+	        		$("#scanningDiv").html(str);
+	        	}
+	        }
+	    });
+	};
+	
+	win.scanFolderAjax = function(dir, empl) {
+		$("#scanningDiv").show();
+		var intervalId = setInterval(getScannedFileIndexAjax, 100);
+		
+		$.ajax({
+	        type: "GET",
+	        url: "scan",
+	        dataType: "html",
+	        data: { dir: dir, empl: empl },
+	        success: function(data) {
+	        	$("div.filemanager").parent(".container").html(data);
+	        	clearInterval(intervalId);
+	        	$("#scanningDiv").hide();
+	        },
+	    });
 	};
 
 }(window));

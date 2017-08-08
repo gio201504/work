@@ -66,6 +66,11 @@ return [
             }
         ],
     ],
+    'controller_plugins' => [
+    	'invokables' => [
+    		'MyPlugin' => 'Application\Controller\Plugin\MyPlugin',
+    	]
+    ],
     'view_manager' => [
         'display_not_found_reason' => true,
         'display_exceptions'       => true,
@@ -96,7 +101,8 @@ return [
     					$writer = new Stream(getcwd() . '/log/' . $filename);
     					$log->addWriter($writer);
     					return $log;
-    				}
+    				},
+    				'Emplacements' => Service\Factory\EmplacementsFactory::class,
     		],
     		'abstract_factories' => [
     				'Zend\Cache\Service\StorageCacheAbstractServiceFactory',
@@ -115,15 +121,19 @@ return [
     		]
     ],
     
-    'caches' => array(
-//     		'filecache' => array(
+    'caches' => [
+//     		'filecache' => [
 //     				'adapter' => 'filesystem',
 //     				'options' => [
 //     					'cache_dir' => 'data/cache/filecache'
 //     				]
-//     		),
-    		'apcucache' => array(
+//     		],
+    		'apcucache' => [
     				'adapter' => 'apcu',
-    		),
-    ),
+    		],
+    ],
+    
+    'session_containers' => [
+    	'MySessionContainer'
+    ],
 ];

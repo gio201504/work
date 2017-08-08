@@ -5,6 +5,7 @@
 
 <script>
 var	breadcrumbsUrls;
+var emplacement = "<?= $this->escapeHtml($data['emplacement']) ?>";
 
 $(function(){
 	"use strict";
@@ -17,6 +18,16 @@ $(function(){
 
 	var folders = [],
 		files = [];
+
+	//div de progression
+//	var loading = $('#loadingDiv').hide();
+// 	$(document)
+// 		.ajaxStart(function() {
+// 	    	loading.show();
+// 	  	})
+// 	  	.ajaxStop(function() {
+// 	    	loading.hide();
+// 	  	});
 
 	// This event listener monitors changes on the URL. We use it to
 	// capture back/forward navigation in the browser.
@@ -75,7 +86,9 @@ $(function(){
 	fileList.on('click', 'li.folders', function(e){
 		e.preventDefault();
 
-		var nextDir = $(this).find('a.folders').attr('href');
+		var folder = $(this).find('a.folders');
+		var nextDir = folder.attr('href');
+		var empl = folder.data('empl');
 		if(filemanager.hasClass('searching')) {
 			// Building the breadcrumbs
 			breadcrumbsUrls = generateBreadcrumbs(nextDir);
@@ -87,10 +100,14 @@ $(function(){
 			breadcrumbsUrls.push(nextDir);
 		}
 
-		//window.location.hash = encodeURIComponent(nextDir);
-		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
-		window.location = url;
-		currentPath = nextDir;
+		//Scan dossier en ajax
+		scanFolderAjax(nextDir, empl);
+
+		/*
+		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir, empl: empl});
+ 		window.location = url;
+ 		currentPath = nextDir;
+ 		*/
 	});
 
 	// Clicking on breadcrumbs
@@ -102,15 +119,22 @@ $(function(){
 
 		breadcrumbsUrls.length = Number(index);
 		//window.location.hash = encodeURIComponent(nextDir);
-		var url = "<?php echo $this->basePath('application/scan?'); ?>" + $.param({dir: nextDir});
+		var url = "<?php echo $this->basePath('application/scan'); ?>";
+
+		if (index > 0) {
+			nextDir = nextDir.split('/').slice(1).join('/');
+			url += '?' + $.param({dir: nextDir, empl: emplacement});
+		}
+		
 		window.location = url;
 	});
 	
 	// Splits a file path and turns it into clickable breadcrumbs
-	function generateBreadcrumbs(nextDir){
+	function generateBreadcrumbs(nextDir) {
+		nextDir = '[Empl0]/' + nextDir;
 		var path = nextDir.split('/').slice(0);
-		for(var i=1;i<path.length;i++){
-			path[i] = path[i-1]+ '/' +path[i];
+		for(var i = 1; i < path.length; i++) {
+			path[i] = path[i-1] + '/' + path[i];
 		}
 		return path;
 	}
@@ -385,8 +409,8 @@ var initPlayers = function() {
 
 				startVideoTranscode(path, time, true)
 					.then(function() {
-						var params = '?path=' + encodeURIComponent(path) + '&time=' + time;
-						var url = 'showPlayer' + params;
+						var params = $.param({empl: emplacement, path: path, time: time});
+						var url = 'showPlayer?' + params;
 						window.open(url);
 					});
 			});
@@ -418,6 +442,7 @@ var initPlayers = function() {
 				$thumb = isset($file['thumb']) ? $this->escapeHtml($file['thumb']) : null;
 				$pos = strrpos($name, '.');
 				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
+				$empl = $this->escapeHtml($file['emplacement']);
 		?>
 			<?php
 				if ($file['type'] === 'folder'):
@@ -431,7 +456,7 @@ var initPlayers = function() {
 					}
 			?>
 				<li class="folders">
-					<a href="<?= $path ?>" title="<?= $path ?>" class="folders">
+					<a href="<?= $path ?>" title="<?= $path ?>" data-empl="<?= $empl ?>" class="folders">
 						<span class="icon folder full"></span>
 						<span class="name"><?= $name ?></span>
 						<span class="details"><?= $items ?></span>
@@ -447,11 +472,11 @@ var initPlayers = function() {
 						<span class="details vid"><?= $size ?></span>
 						<img id="video<?= $idx++ ?>"
 							src="<?= $thumb ?>" data-type="<?= $fileType ?>"
-							data-src="<?= '/' . $path ?>">
+							data-src="<?= $path ?>">
 					</li>
 				<?php else: ?>
 					<li class="files">
-						<a href="<?= '/' . $path ?>" title="<?= $path ?>" class="files">
+						<a href="<?= $path ?>" title="<?= $path ?>" class="files">
 							<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
 							<span class="name"><?= $name ?></span>
 							<span class="details"><?= $size ?></span>
