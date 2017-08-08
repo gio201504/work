@@ -70,7 +70,7 @@ class IndexController extends AbstractActionController
     		$dir = $data->dir;
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
-    		$cache = $this->sm->get('apcucache');
+    		$cache = $this->sm->get('memcache');
 
     		$top_dir = $request->getServer('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : null;
@@ -128,7 +128,7 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
-    		$cache = $this->sm->get('apcucache');
+    		$cache = $this->sm->get('memcache');
     		$log = $this->sm->get('log');
     		
     		$file = $data->file;
@@ -207,7 +207,7 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
     		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
-    		$cache = $this->sm->get('apcucache');
+    		$cache = $this->sm->get('memcache');
     		$log = $this->sm->get('log');
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
@@ -416,7 +416,7 @@ class IndexController extends AbstractActionController
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
-    		$cache = $this->sm->get('apcucache');
+    		$cache = $this->sm->get('memcache');
     		
     		$iFileCount = $cache->getItem('iFileCount');
     		$iFileIndex = $cache->getItem('iFileIndex');

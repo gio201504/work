@@ -131,6 +131,18 @@ return [
     		'apcucache' => [
     				'adapter' => 'apcu',
     		],
+    		'memcache' => [
+    			//'adapter' => 'memcache',
+    			'adapter' => array(
+    					'name' => 'memcache',
+    					'options' => array(
+    							'namespace' => 'zfcache',
+    							'servers' => array(
+    									array('localhost', 11211)
+    							)
+    					),
+    			),
+    		],
     ],
     
     'session_containers' => [
