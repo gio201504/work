@@ -161,7 +161,7 @@
 	
 	win.scanFolderAjax = function(dir, empl) {
 		$("#scanningDiv").show();
-		var intervalId = setInterval(getScannedFileIndexAjax, 100);
+		var intervalId = setInterval(getScannedFileIndexAjax, 1000);
 		
 		$.ajax({
 	        type: "GET",
