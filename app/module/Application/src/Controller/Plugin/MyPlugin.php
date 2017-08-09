@@ -5,7 +5,7 @@ use Zend\Mvc\Controller\Plugin\AbstractPlugin;
 
 class MyPlugin extends AbstractPlugin {
 
-	// Convert file sizes from bytes to human readable units
+	//Convert file sizes from bytes to human readable units
     public function bytesToSize($bytes) {
     	$sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB');
     	if ($bytes === 0) return '0 Bytes';
@@ -21,10 +21,10 @@ class MyPlugin extends AbstractPlugin {
     		$files = glob($directory . '/*' . $search . '*');
 		if ($files !== false) {
 			$filecount = count($files);
-			// $log->info(" countFiles " . $directory);
+			//$log->info(" countFiles " . $directory);
 			return $filecount;
 		} else {
-			// $log->info(" countFiles " . $directory);
+			//$log->info(" countFiles " . $directory);
 			return 0;
 		}
 	}
@@ -40,10 +40,10 @@ class MyPlugin extends AbstractPlugin {
 		$iFileCount = $this->countFiles($fulldir, $search, $log);
 		$cache->setItem('iFileCount', $iFileCount);
 		
-		// Test existence cache
+		//Test existence cache
 		if ($isFtpFolder || !$cache->hasItem($fulldir)) {
 			$files = array();
-			// Is there actually such a folder/file?
+			//Is there actually such a folder/file?
 			if ($isFtpFolder || file_exists($fulldir)) {
 				if (!$isFtpFolder) {
 					$handle = opendir($fulldir);
@@ -53,9 +53,9 @@ class MyPlugin extends AbstractPlugin {
 				
 				$iFileIndex = 1;
 				while (($f = readdir($handle)) !== false && isset($f)) {
-					// $log->info($f);
+					//$log->info($f);
 					if (!$f || $f[0] == '.') {
-						continue; // Ignore hidden files
+						continue; //Ignore hidden files
 					}
 					
 					//Stockage fichier scanné dans le cache APCu
@@ -84,7 +84,7 @@ class MyPlugin extends AbstractPlugin {
 						continue;
 					
 					if ($is_dir) {
-						// The path is a folder
+						//The path is a folder
 						$files[] = array(
 								"name" => $f_utf8,
 								"type" => "folder",
@@ -93,7 +93,7 @@ class MyPlugin extends AbstractPlugin {
 								"items" => $this->countFiles($top_dir . $dir . '/' . $f, $search, $log) 
 						);
 					} else {
-						// It is a file
+						//It is a file
 						if ($isFtpFolder) {
 							$t1 = round(microtime(true) * 1000);
 							$conn_id = $Empl->getConnection($empl);
@@ -113,13 +113,13 @@ class MyPlugin extends AbstractPlugin {
 								"emplacement" => $empl,
 								"path" => $dir . '/' . $f_utf8,
 								"size" => $this->bytesToSize($filesize)
-						// "fullname" => $fulldir . '/' . $f_utf8,
+						//"fullname" => $fulldir . '/' . $f_utf8,
 												);
 						
-						// Si vidéo générer thumbnail
+						//Si vidéo générer thumbnail
 						$filename = $fulldir . '/' . $f;
 						
-						// Renvoyer le type MIME
+						//Renvoyer le type MIME
 						if (!$isFtpFolder) {
 							$mime = mime_content_type($fulldir . '/' . $f);
 						} else {
@@ -131,7 +131,7 @@ class MyPlugin extends AbstractPlugin {
 						}
 						
 						if (strstr($mime, "video/")) {
-							// Durée de la vidéo
+							//Durée de la vidéo
 							$data = (object) array(
 									'top_dir' => $top_dir,
 									'file' => $dir . '/' . $f,
@@ -143,7 +143,7 @@ class MyPlugin extends AbstractPlugin {
 							));
 							$time = gmdate("H:i:s", $result->duration / 2);
 							
-							// Génération thumbnail
+							//Génération thumbnail
 							$file = $dir . '/' . $f;
 							$data = (object) array(
 									'top_dir' => $top_dir,
@@ -169,7 +169,7 @@ class MyPlugin extends AbstractPlugin {
 				closedir($handle);
 			}
 			
-			// Sauvegarde dans le cache
+			//Sauvegarde dans le cache
 			if (!$isFtpFolder) {
 				$cache->addItem($fulldir, $files);
 			}
