@@ -30,10 +30,10 @@ class MyPlugin extends AbstractPlugin {
 	}
 	
 	public function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache) {
-		$emplacement = $Empl->getCurrentEmpl ();
-		$top_dir = $emplacement ['top_dir'];
-		$isFtpFolder = $emplacement ['protocole'] === 'ftp';
-		$empl = $emplacement ['emplacement'];
+		$emplacement = $Empl->getCurrentEmpl();
+		$top_dir = $emplacement['top_dir'];
+		$isFtpFolder = $emplacement['protocole'] === 'ftp';
+		$empl = $emplacement['emplacement'];
 		$fulldir = $top_dir . $dir;
 		
 		//Stockage du nombre de fichiers du dossier scanné dans le cache APCu
@@ -41,8 +41,8 @@ class MyPlugin extends AbstractPlugin {
 		$cache->setItem('iFileCount', $iFileCount);
 		
 		// Test existence cache
-		if ($isFtpFolder || ! $cache->hasItem($fulldir)) {
-			$files = array ();
+		if ($isFtpFolder || !$cache->hasItem($fulldir)) {
+			$files = array();
 			// Is there actually such a folder/file?
 			if ($isFtpFolder || file_exists($fulldir)) {
 				if (!$isFtpFolder) {
@@ -80,12 +80,12 @@ class MyPlugin extends AbstractPlugin {
 					}
 					$log->info("is_dir(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 					
-					if ($search !== null && strpos($f, $search) === false && ! $is_dir)
+					if ($search !== null && strpos($f, $search) === false && !$is_dir)
 						continue;
 					
 					if ($is_dir) {
 						// The path is a folder
-						$files [] = array (
+						$files[] = array(
 								"name" => $f_utf8,
 								"type" => "folder",
 								"emplacement" => $empl,
@@ -102,12 +102,12 @@ class MyPlugin extends AbstractPlugin {
 						} else {
 							$filesize = @filesize($fulldir . '/' . $f);
 						}
-						if (! $filesize) {
+						if (!$filesize) {
 							$filesize = 0;
 						}
 						$log->info("filesize(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 						
-						$array = array (
+						$array = array(
 								"name" => $f_utf8,
 								"type" => "file",
 								"emplacement" => $empl,
@@ -120,24 +120,24 @@ class MyPlugin extends AbstractPlugin {
 						$filename = $fulldir . '/' . $f;
 						
 						// Renvoyer le type MIME
-						if (! $isFtpFolder) {
+						if (!$isFtpFolder) {
 							$mime = mime_content_type($fulldir . '/' . $f);
 						} else {
 							$mime_data = $Empl->ftp_get_contents($empl, $dir . '/' . $f, 48);
 							
-							$finfo = finfo_open ();
+							$finfo = finfo_open();
 							$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE);
 							finfo_close($finfo);
 						}
 						
 						if (strstr($mime, "video/")) {
 							// Durée de la vidéo
-							$data = (object) array (
+							$data = (object) array(
 									'top_dir' => $top_dir,
 									'file' => $dir . '/' . $f,
 									'empl' => $empl 
 							);
-							$result = $forwardPlugin->dispatch('Application\Controller\IndexController', array (
+							$result = $forwardPlugin->dispatch('Application\Controller\IndexController', array(
 									'action' => 'getVideoDuration',
 									'data' => $data 
 							));
@@ -145,23 +145,23 @@ class MyPlugin extends AbstractPlugin {
 							
 							// Génération thumbnail
 							$file = $dir . '/' . $f;
-							$data = (object) array (
+							$data = (object) array(
 									'top_dir' => $top_dir,
 									'file' => $file,
 									'time' => $time,
 									'empl' => $empl 
 							);
-							$result = $forwardPlugin->dispatch('Application\Controller\IndexController', array (
+							$result = $forwardPlugin->dispatch('Application\Controller\IndexController', array(
 									'action' => 'getThumbAjax',
 									'data' => $data 
 							));
-							$thumb = array (
+							$thumb = array(
 									'thumb' => $result->file 
 							);
 							$array = array_merge($array, $thumb);
 						}
 						
-						$files [] = $array;
+						$files[] = $array;
 					}
 					
 					$iFileIndex++;
@@ -170,7 +170,7 @@ class MyPlugin extends AbstractPlugin {
 			}
 			
 			// Sauvegarde dans le cache
-			if (! $isFtpFolder) {
+			if (!$isFtpFolder) {
 				$cache->addItem($fulldir, $files);
 			}
 		} else
