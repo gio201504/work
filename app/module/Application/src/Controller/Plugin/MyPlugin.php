@@ -29,7 +29,7 @@ class MyPlugin extends AbstractPlugin {
 		}
 	}
 	
-	public function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache) {
+	public function scan($Empl, $dir, $search = null, $forwardPlugin, $log, $cache, $tempCache) {
 		$emplacement = $Empl->getCurrentEmpl();
 		$top_dir = $emplacement['top_dir'];
 		$isFtpFolder = $emplacement['protocole'] === 'ftp';
@@ -38,12 +38,12 @@ class MyPlugin extends AbstractPlugin {
 		
 		//Stockage du nombre de fichiers du dossier scanné dans le cache APCu
 		$iFileCount = $this->countFiles($fulldir, $search, $log);
-		$cache->setItem('iFileCount', $iFileCount);
+		$cache->setItem($fulldir . '[iFileCount]', $iFileCount);
 		
 		//Tester si un scan du dossier est déjà en cours d'exécution
-		if (!$cache->hasItem($fulldir . '[scanning]')) {
+		if (!$tempCache->hasItem($fulldir . '[scanning]')) {
 			//Verrou
-			$cache->setItem($fulldir . '[scanning]', true);
+			$tempCache->setItem($fulldir . '[scanning]', true);
 			
 			//Test existence cache
 			if (/*$isFtpFolder ||*/ !$cache->hasItem($fulldir)) {
@@ -64,8 +64,8 @@ class MyPlugin extends AbstractPlugin {
 						}
 												
 						//Stockage fichier scanné dans le cache APCu
-						$cache->setItem('sScannedFile', $f);
-						$cache->setItem('iFileIndex', $iFileIndex);
+						$cache->setItem($fulldir . '[sScannedFile]', $f);
+						$cache->setItem($fulldir . '[iFileIndex]', $iFileIndex);
 						
 						if ($isFtpFolder) {
 							$f_utf8 = iconv("ISO-8859-1", "UTF-8", $f);
@@ -182,11 +182,15 @@ class MyPlugin extends AbstractPlugin {
 				$files = $cache->getItem($fulldir);
 			
 			//Suppression verrou
-			$cache->removeItem($fulldir . '[scanning]');
+			$tempCache->removeItem($fulldir . '[scanning]');
 		} else {
 			//Si un scan du dossier est en cours attendre la fin du scan
-			while ($cache->hasItem($fulldir . '[scanning]')) {
+			$start_time = time();
+			while ($tempCache->hasItem($fulldir . '[scanning]')) {
 				sleep(1);
+				if (time() - $start_time > 10) {
+					return false;
+				}
 			}
 			
 			$files = $cache->getItem($fulldir);

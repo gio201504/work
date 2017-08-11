@@ -71,6 +71,7 @@ class IndexController extends AbstractActionController
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
     		$cache = $this->sm->get('memcache');
+    		$tempCache = $this->sm->get('memcache_tmp');
 
     		$top_dir = $request->getServer('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : null;
@@ -94,7 +95,7 @@ class IndexController extends AbstractActionController
     			$Empl = $this->sm->get('Emplacements');
     			$Empl->setCurrentEmpl($empl);
     			//$sessionContainer = $this->sm->get('MySessionContainer');
-	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, $log, $cache);
+	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, $log, $cache, $tempCache);
     		}
     		
     		//$t2 = $this->milliseconds();

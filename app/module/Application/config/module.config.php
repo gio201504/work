@@ -132,7 +132,6 @@ return [
     				'adapter' => 'apcu',
     		],
     		'memcache' => [
-    			//'adapter' => 'memcache',
     			'adapter' => array(
     					'name' => 'memcache',
     					'options' => array(
@@ -142,6 +141,18 @@ return [
     							)
     					),
     			),
+    		],
+    		'memcache_tmp' => [
+	    		'adapter' => array(
+	    				'name' => 'memcache',
+	    				'options' => array(
+	    						'namespace' => 'tmp_memc',
+	    						'servers' => array(
+	    								array('localhost', 11211)
+	    						),
+	    						'ttl' => 300,
+	    				),
+	    		),
     		],
     ],
     
