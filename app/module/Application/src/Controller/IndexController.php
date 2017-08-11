@@ -79,8 +79,10 @@ class IndexController extends AbstractActionController
     		$plugin = $this->MyPlugin();
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		
-    		if (isset($data->clear))
-    			$cache->removeItem($top_dir . $dir);
+    		if (isset($data->clear)) {
+    			//$cache->removeItem($top_dir . $dir);
+    			$cache->flush();
+    		}
 
     		if ($empl === 0) {
     			//Liste des emplacements
@@ -417,13 +419,17 @@ class IndexController extends AbstractActionController
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$dir = $data->dir;
     		$cache = $this->sm->get('memcache');
+    		$top_dir = $request->getServer('top_dir') . '/';
+    		$fulldir = $top_dir . $dir;
     		
-    		$iFileCount = $cache->getItem('iFileCount');
-    		$iFileIndex = $cache->getItem('iFileIndex');
+    		$iFileCount = $cache->getItem($fulldir . '[iFileCount]');
+    		$iFileIndex = $cache->getItem($fulldir . '[iFileIndex]');
     		
-    		if ($cache->hasItem('sScannedFile'))
-    			$file = $cache->getItem('sScannedFile');
+    		if ($cache->hasItem($fulldir . '[sScannedFile]'))
+    			$file = $cache->getItem($fulldir . '[sScannedFile]');
     		else
     			$file = false;
     		
