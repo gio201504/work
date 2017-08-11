@@ -150,7 +150,7 @@ return [
 	    						'servers' => array(
 	    								array('localhost', 11211)
 	    						),
-	    						'ttl' => 300,
+	    						'ttl' => 60,
 	    				),
 	    		),
     		],

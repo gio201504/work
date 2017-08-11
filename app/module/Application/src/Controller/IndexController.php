@@ -82,6 +82,7 @@ class IndexController extends AbstractActionController
     		if (isset($data->clear)) {
     			//$cache->removeItem($top_dir . $dir);
     			$cache->flush();
+    			$tempCache->flush();
     		}
 
     		if ($empl === 0) {
@@ -428,7 +429,7 @@ class IndexController extends AbstractActionController
     		$iFileCount = $cache->getItem($fulldir . '[iFileCount]');
     		$iFileIndex = $cache->getItem($fulldir . '[iFileIndex]');
     		
-    		if ($cache->hasItem($fulldir . '[sScannedFile]'))
+    		if ($cache->hasItem($fulldir . '[sScannedFile]') && $iFileCount !== null)
     			$file = $cache->getItem($fulldir . '[sScannedFile]');
     		else
     			$file = false;

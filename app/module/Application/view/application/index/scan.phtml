@@ -436,55 +436,57 @@ var initPlayers = function() {
 	<ul class="data">
 		<?php
 			$idx = 0;
-			foreach ($this->data['items'] as $file):
-				$path = $this->escapeHtml($file['path']);
-				$name = $this->escapeHtml($file['name']);
-				$thumb = isset($file['thumb']) ? $this->escapeHtml($file['thumb']) : null;
-				$pos = strrpos($name, '.');
-				$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
-				$empl = $this->escapeHtml($file['emplacement']);
-		?>
-			<?php
-				if ($file['type'] === 'folder'):
-					$items = $this->escapeHtml($file['items']);
-					if ($items === 1) {
-						$items .= ' item';
-					} else if($items > 1) {
-						$items .= ' items';
-					} else {
-						$items = 'Empty';
-					}
-			?>
-				<li class="folders">
-					<a href="<?= $path ?>" title="<?= $path ?>" data-empl="<?= $empl ?>" class="folders">
-						<span class="icon folder full"></span>
-						<span class="name"><?= $name ?></span>
-						<span class="details"><?= $items ?></span>
-					</a>
-				</li>
-			<?php
-				else:
-				$size = $this->escapeHtml($file['size']);
-			?>
-				<?php if ($thumb !== null): ?>
-					<li class="files">
-						<span class="name vid"><?= $name ?></span>
-						<span class="details vid"><?= $size ?></span>
-						<img id="video<?= $idx++ ?>"
-							src="<?= $thumb ?>" data-type="<?= $fileType ?>"
-							data-src="<?= $path ?>">
-					</li>
-				<?php else: ?>
-					<li class="files">
-						<a href="<?= $path ?>" title="<?= $path ?>" class="files">
-							<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
+			if ($this->data['items'] !== false) {
+				foreach ($this->data['items'] as $file):
+					$path = $this->escapeHtml($file['path']);
+					$name = $this->escapeHtml($file['name']);
+					$thumb = isset($file['thumb']) ? $this->escapeHtml($file['thumb']) : null;
+					$pos = strrpos($name, '.');
+					$fileType = ($pos !== false) ? substr($name, $pos + 1) : "";
+					$empl = $this->escapeHtml($file['emplacement']);
+	
+					if ($file['type'] === 'folder'):
+						$items = $this->escapeHtml($file['items']);
+						if ($items === 1) {
+							$items .= ' item';
+						} else if($items > 1) {
+							$items .= ' items';
+						} else {
+							$items = 'Empty';
+						}
+				?>
+					<li class="folders">
+						<a href="<?= $path ?>" title="<?= $path ?>" data-empl="<?= $empl ?>" class="folders">
+							<span class="icon folder full"></span>
 							<span class="name"><?= $name ?></span>
-							<span class="details"><?= $size ?></span>
+							<span class="details"><?= $items ?></span>
 						</a>
 					</li>
+				<?php
+					else:
+					$size = $this->escapeHtml($file['size']);
+				 
+					if ($thumb !== null): ?>
+						<li class="files">
+							<span class="name vid"><?= $name ?></span>
+							<span class="details vid"><?= $size ?></span>
+							<img id="video<?= $idx++ ?>"
+								src="<?= $thumb ?>" data-type="<?= $fileType ?>"
+								data-src="<?= $path ?>">
+						</li>
+					<?php else: ?>
+						<li class="files">
+							<a href="<?= $path ?>" title="<?= $path ?>" class="files">
+								<span class='icon file f-<?= $fileType ?>'><?= $fileType ?></span>
+								<span class="name"><?= $name ?></span>
+								<span class="details"><?= $size ?></span>
+							</a>
+						</li>
+					<?php endif; ?>
 				<?php endif; ?>
-			<?php endif; ?>
-		<?php endforeach; ?>
+			<?php endforeach;
+			}
+			?>
 	</ul>
 
 	<div class="nothingfound">

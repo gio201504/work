@@ -185,13 +185,13 @@ class MyPlugin extends AbstractPlugin {
 			$tempCache->removeItem($fulldir . '[scanning]');
 		} else {
 			//Si un scan du dossier est en cours attendre la fin du scan
-			$start_time = time();
-			while ($tempCache->hasItem($fulldir . '[scanning]')) {
-				sleep(1);
-				if (time() - $start_time > 10) {
+			//$start_time = time();
+			//while ($tempCache->hasItem($fulldir . '[scanning]')) {
+			//	sleep(1);
+			//	if (time() - $start_time > 10) {
 					return false;
-				}
-			}
+			//	}
+			//}
 			
 			$files = $cache->getItem($fulldir);
 		}

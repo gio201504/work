@@ -152,17 +152,21 @@
 	        dataType: "json",
 	        data: { dir: dir },
 	        success: function(data) {
+	        	var str;
 	        	if (data.file !== false) {
-	        		var str = "(" + data.fileIndex + "/" + data.fileCount + ") " + data.file;
-	        		$("#scanningDiv").html(str);
+	        		str = "(" + data.fileIndex + "/" + data.fileCount + ") " + data.file;
+	        	} else {
+	        		str = "no result";
 	        	}
+	        	
+	        	$("#scanningDiv").show();
+	        	$("#scanningDiv").html(str);
 	        }
 	    });
 	};
 	
 	win.scanFolderAjax = function(dir, empl) {
-		$("#scanningDiv").show();
-		var intervalId = setInterval(getScannedFileIndexAjax(dir), 1000);
+		var intervalId = setInterval(function() { getScannedFileIndexAjax(dir); }, 1000);
 		
 		$.ajax({
 	        type: "GET",
