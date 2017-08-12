@@ -167,16 +167,20 @@
 	
 	win.scanFolderAjax = function(dir, empl) {
 		var intervalId = setInterval(function() { getScannedFileIndexAjax(dir); }, 1000);
+		debugger;
 		
 		$.ajax({
 	        type: "GET",
 	        url: "scan",
-	        dataType: "html",
+	        //dataType: "html",
 	        data: { dir: dir, empl: empl },
 	        success: function(data) {
-	        	$("div.filemanager").parent(".container").html(data);
-	        	clearInterval(intervalId);
-	        	$("#scanningDiv").hide();
+	        	debugger;
+	        	if (data.items !== false) {
+	        		clearInterval(intervalId);
+		        	$("div.filemanager").parent(".container").html(data);
+		        	$("#scanningDiv").hide();
+	        	}
 	        },
 	    });
 	};

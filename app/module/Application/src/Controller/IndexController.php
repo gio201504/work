@@ -104,23 +104,28 @@ class IndexController extends AbstractActionController
     		//$t2 = $this->milliseconds();
     		//$log->info("scandir(" . $top_dir . $dir . ") " . ($t2 - $t1));
 
-    		$viewmodel = new ViewModel();
-    		$viewmodel->setTerminal($request->isXmlHttpRequest());
-    		
-    		$data = array(
-    				"name" => $dir,
-    				"type" => "folder",
-    				"path" => $dir,
-    				"emplacement" => $empl,
-    				"items" => $items,
-    		);
-
-    		$viewmodel->setVariables(array(
-    				//"data" => json_encode($data),
-    				"data" => $data,
-    		));
-    
-    		return $viewmodel;
+    		if ($items !== false) {
+	    		$viewmodel = new ViewModel();
+	    		$viewmodel->setTerminal($request->isXmlHttpRequest());
+	    		
+	    		$data = array(
+	    				"name" => $dir,
+	    				"type" => "folder",
+	    				"path" => $dir,
+	    				"emplacement" => $empl,
+	    				"items" => $items,
+	    		);
+	
+	    		$viewmodel->setVariables(array(
+	    				//"data" => json_encode($data),
+	    				"data" => $data,
+	    		));
+	    
+	    		return $viewmodel;
+    		} else {
+    			$jsonmodel = new JsonModel(array('items' => false));
+    			return $jsonmodel;
+    		}
     	}
     }
     
