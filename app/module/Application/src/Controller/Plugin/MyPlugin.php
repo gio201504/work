@@ -62,6 +62,8 @@ class MyPlugin extends AbstractPlugin {
 						if (!$f || $f[0] == '.') {
 							continue; //Ignore hidden files
 						}
+						
+						//sleep(1);
 												
 						//Stockage fichier scanné dans le cache APCu
 						$cache->setItem($fulldir . '[sScannedFile]', $f);

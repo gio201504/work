@@ -167,7 +167,6 @@
 	
 	win.scanFolderAjax = function(dir, empl) {
 		var intervalId = setInterval(function() { getScannedFileIndexAjax(dir); }, 1000);
-		debugger;
 		
 		$.ajax({
 	        type: "GET",
@@ -175,7 +174,6 @@
 	        //dataType: "html",
 	        data: { dir: dir, empl: empl },
 	        success: function(data) {
-	        	debugger;
 	        	if (!data.isScanning) {
 	        		clearInterval(intervalId);
 		        	$("div.filemanager").parent(".container").html(data);
