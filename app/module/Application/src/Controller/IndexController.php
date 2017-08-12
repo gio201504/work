@@ -123,7 +123,7 @@ class IndexController extends AbstractActionController
 	    
 	    		return $viewmodel;
     		} else {
-    			$jsonmodel = new JsonModel(array('items' => false));
+    			$jsonmodel = new JsonModel(array('isScanning' => true));
     			return $jsonmodel;
     		}
     	}

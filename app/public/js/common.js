@@ -176,7 +176,7 @@
 	        data: { dir: dir, empl: empl },
 	        success: function(data) {
 	        	debugger;
-	        	if (data.items !== false) {
+	        	if (!data.isScanning) {
 	        		clearInterval(intervalId);
 		        	$("div.filemanager").parent(".container").html(data);
 		        	$("#scanningDiv").hide();
