@@ -178,10 +178,12 @@ class MyPlugin extends AbstractPlugin {
 				
 				//Sauvegarde dans le cache
 				//if (!$isFtpFolder) {
-					$cache->addItem($fulldir, $files);
+					$cache->addItem($fulldir, json_encode($files));
 				//}
-			} else
+			} else {
 				$files = $cache->getItem($fulldir);
+				$files = json_decode($files, true);
+			}
 			
 			//Suppression verrou
 			$tempCache->removeItem($fulldir . '[scanning]');

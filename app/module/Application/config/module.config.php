@@ -132,27 +132,27 @@ return [
     				'adapter' => 'apcu',
     		],
     		'memcache' => [
-    			'adapter' => array(
-    					'name' => 'memcache',
-    					'options' => array(
-    							'namespace' => 'zfcache',
-    							'servers' => array(
-    									array('localhost', 11211)
-    							)
-    					),
-    			),
+    			'adapter' => array (
+                    'name' => 'redis',
+                    'options' => array (
+                            'server' => [
+                                    'host' => '127.0.0.1',
+                                    'port' => 6379,
+                            ]
+                    )
+            	),
     		],
     		'memcache_tmp' => [
-	    		'adapter' => array(
-	    				'name' => 'memcache',
-	    				'options' => array(
-	    						'namespace' => 'tmp_memc',
-	    						'servers' => array(
-	    								array('localhost', 11211)
-	    						),
-	    						'ttl' => 60,
-	    				),
-	    		),
+	    		'adapter' => array (
+                    'name' => 'redis',
+                    'options' => array (
+                            'server' => [
+                                    'host' => '127.0.0.1',
+                                    'port' => 6379,
+                            ],
+                    		'ttl'	=> 60,
+                    )
+            	),
     		],
     ],
     
