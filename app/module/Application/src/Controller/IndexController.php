@@ -35,7 +35,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		
-    		$dir = $request->getServer('top_dir') . "/tmp";
+    		//$dir = $request->getServer('top_dir') . "/tmp";
     		
     		// Open a directory, and read its contents
     		$fileList = array();
@@ -73,7 +73,6 @@ class IndexController extends AbstractActionController
     		$cache = $this->sm->get('memcache');
     		$tempCache = $this->sm->get('memcache_tmp');
 
-    		$top_dir = $request->getServer('top_dir') . '/';
     		$dir = (isset($dir) && !empty($dir)) ? $dir : null;
     		$forwardPlugin = $this->forward();
     		$plugin = $this->MyPlugin();
@@ -142,7 +141,7 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
+    		$top_dir = $data->top_dir;
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
@@ -215,7 +214,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
-    		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
+    		$top_dir = $data->top_dir;
     		$cache = $this->sm->get('memcache');
     		//$log = $this->sm->get('log');
     		
@@ -270,7 +269,7 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$duration = $data->duration;
-    		$top_dir = $request->getServer('top_dir');
+    		//$top_dir = $request->getServer('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
     
@@ -301,7 +300,7 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
 
     		$file = $data->file;
-    		$top_dir = $request->getServer('top_dir');
+    		//$top_dir = $request->getServer('top_dir');
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[preview].mp4';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[preview].mp4';
 
@@ -346,7 +345,7 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = $request->getServer('top_dir');
+    		//$top_dir = $request->getServer('top_dir');
     		if (isset($file) && isset($time)) {
     			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
@@ -428,7 +427,11 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		$cache = $this->sm->get('memcache');
-    		$top_dir = $request->getServer('top_dir') . '/';
+    		$empl = $data->empl;
+    		$Empl = $this->sm->get('Emplacements');
+    		$Empl->setCurrentEmpl($empl);
+    		$emplacement = $Empl->getCurrentEmpl();
+    		$top_dir = $emplacement['top_dir'];
     		$fulldir = $top_dir . $dir;
     		
     		$iFileCount = $cache->getItem($fulldir . '[iFileCount]');

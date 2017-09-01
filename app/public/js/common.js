@@ -145,12 +145,12 @@
 		return promise;
 	};
 	
-	var getScannedFileIndexAjax = function(dir) {
+	var getScannedFileIndexAjax = function(dir, empl) {
 		$.ajax({
 	        type: "GET",
 	        url: "getScannedFileIndex",
 	        dataType: "json",
-	        data: { dir: dir },
+	        data: { dir: dir, empl: empl},
 	        success: function(data) {
 	        	var str;
 	        	if (data.file !== false) {
@@ -166,7 +166,7 @@
 	};
 	
 	win.scanFolderAjax = function(dir, empl) {
-		var intervalId = setInterval(function() { getScannedFileIndexAjax(dir); }, 1000);
+		var intervalId = setInterval(function() { getScannedFileIndexAjax(dir, empl); }, 1000);
 		
 		$.ajax({
 	        type: "GET",
