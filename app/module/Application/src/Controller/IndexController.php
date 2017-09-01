@@ -65,7 +65,7 @@ class IndexController extends AbstractActionController
     	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
-    		$log = $this->sm->get('log');
+    		//$log = $this->sm->get('log');
     		$data = $request->getQuery();
     		$dir = $data->dir;
     		$search = $data->search;
@@ -98,7 +98,7 @@ class IndexController extends AbstractActionController
     			$Empl = $this->sm->get('Emplacements');
     			$Empl->setCurrentEmpl($empl);
     			//$sessionContainer = $this->sm->get('MySessionContainer');
-	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, $log, $cache, $tempCache);
+	    		$items = $plugin->scan($Empl, $dir, $search, $forwardPlugin, null, $cache, $tempCache);
     		}
     		
     		//$t2 = $this->milliseconds();
@@ -138,7 +138,7 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$cache = $this->sm->get('memcache');
-    		$log = $this->sm->get('log');
+    		//$log = $this->sm->get('log');
     		
     		$file = $data->file;
     		$time = $data->time;
@@ -217,7 +217,7 @@ class IndexController extends AbstractActionController
     		$file = $data->file;
     		$top_dir = isset($data->top_dir) ? $data->top_dir : $request->getServer('top_dir') . '/';
     		$cache = $this->sm->get('memcache');
-    		$log = $this->sm->get('log');
+    		//$log = $this->sm->get('log');
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
