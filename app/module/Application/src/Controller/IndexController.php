@@ -380,7 +380,7 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$time_seconds = $data->time;
-			$temp_dir = 'D:/NewsBin64/download/tmp/';
+			$temp_dir = getcwd() . '/public/tmp/';
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
