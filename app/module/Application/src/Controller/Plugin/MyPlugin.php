@@ -85,7 +85,7 @@ class MyPlugin extends AbstractPlugin {
 							$is_dir = is_dir($fulldir . '/' . $f);
 							$t2 = round(microtime(true) * 1000);
 						}
-						$log->info("is_dir(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
+						//$log->info("is_dir(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 						
 						if ($search !== null && strpos($f, $search) === false && !$is_dir)
 							continue;
@@ -112,7 +112,7 @@ class MyPlugin extends AbstractPlugin {
 							if (!$filesize || $filesize < 0) {
 								$filesize = 0;
 							}
-							$log->info("filesize(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
+							//$log->info("filesize(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 							
 							$array = array(
 									"name" => $f_utf8,

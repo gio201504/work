@@ -131,7 +131,7 @@ class IndexController extends AbstractActionController
     
     public function getThumbAjaxAction()
     {
-    	$t1 = $this->milliseconds();
+    	//$t1 = $this->milliseconds();
     	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
@@ -178,8 +178,8 @@ class IndexController extends AbstractActionController
     				$data_uri = $cache->getItem($thumbname);
     			}
     			
-    			$t2 = $this->milliseconds();
-    			$log->info("getThumbAjax " . $thumbname . " " . ($t2 - $t1));
+    			//$t2 = $this->milliseconds();
+    			//$log->info("getThumbAjax " . $thumbname . " " . ($t2 - $t1));
     			
     			return new JsonModel(array(
     					'time' => $time_seconds,
@@ -208,7 +208,7 @@ class IndexController extends AbstractActionController
     
     public function getVideoDurationAction()
     {
-    	$t1 = $this->milliseconds();
+    	//$t1 = $this->milliseconds();
     	
     	$request = $this->getRequest();
     	if ($request->isGet()) {
@@ -253,8 +253,8 @@ class IndexController extends AbstractActionController
     		} else
     			$duration = $cache->getItem($file_duration);
     		
-    		$t2 = $this->milliseconds();
-    		$log->info("getVideoDuration " . $file_duration . " " . ($t2 - $t1));
+    		//$t2 = $this->milliseconds();
+    		//$log->info("getVideoDuration " . $file_duration . " " . ($t2 - $t1));
     		
     		return new JsonModel(array(
     				'duration' => $duration,
