@@ -342,6 +342,8 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
+    		$config = $this->sm->get('Config');
+    		$ffmpeg_codec = $config['ffmpeg']['codec'];
     
     		$file = $data->file;
     		$time = $data->time;
@@ -351,7 +353,7 @@ class IndexController extends AbstractActionController
     			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     
     			$gmdate = gmdate('H:i:s', $time_seconds);
-    			$cmd = sprintf('ffmpeg.exe -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
+    			$cmd = sprintf('ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file, $ffmpeg_codec);
     			shell_exec(utf8_decode($cmd));
     			    			 
     			return new JsonModel();
@@ -376,6 +378,8 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
+    		$config = $this->sm->get('Config');
+    		$ffmpeg_codec = $config['ffmpeg']['codec'];
     
     		$file = $data->file;
     		$time_seconds = $data->time;
@@ -383,7 +387,6 @@ class IndexController extends AbstractActionController
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
-    			$config = $this->sm->get('Config');
     			$emplacements = $config['emplacements'];
     			$top_dir = $emplacements[$empl]['top_dir'];
     		}
@@ -405,8 +408,8 @@ class IndexController extends AbstractActionController
     			//$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
     
     			$gmdate = gmdate('H:i:s', $time_seconds);
-    			//$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file);
-    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v h264_nvenc -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $temp_dir);
+    			//$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file, $ffmpeg_codec);
+    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $ffmpeg_codec, $temp_dir);
     			//shell_exec(utf8_decode($cmd));
     			pclose(popen(utf8_decode($cmd), "r"));
     			

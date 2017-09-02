@@ -36,4 +36,8 @@ return [
 	],
 
     // ...
+	'ffmpeg' => [
+		//'codec' => 'libx264',
+		'codec' => 'h264_nvenc',
+	],
 ];
