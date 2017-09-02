@@ -70,8 +70,8 @@ class IndexController extends AbstractActionController
     		$dir = $data->dir;
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
-    		$cache = $this->sm->get('memcache');
-    		$tempCache = $this->sm->get('memcache_tmp');
+    		$cache = $this->sm->get('redis');
+    		$tempCache = $this->sm->get('redis_tmp');
 
     		$dir = (isset($dir) && !empty($dir)) ? $dir : null;
     		$forwardPlugin = $this->forward();
@@ -136,7 +136,7 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
-    		$cache = $this->sm->get('memcache');
+    		$cache = $this->sm->get('redis');
     		//$log = $this->sm->get('log');
     		
     		$file = $data->file;
@@ -215,7 +215,7 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
     		$top_dir = $data->top_dir;
-    		$cache = $this->sm->get('memcache');
+    		$cache = $this->sm->get('redis');
     		//$log = $this->sm->get('log');
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
@@ -426,7 +426,7 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$dir = $data->dir;
-    		$cache = $this->sm->get('memcache');
+    		$cache = $this->sm->get('redis');
     		$empl = $data->empl;
     		$Empl = $this->sm->get('Emplacements');
     		$Empl->setCurrentEmpl($empl);

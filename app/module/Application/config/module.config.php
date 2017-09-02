@@ -131,7 +131,7 @@ return [
     		'apcucache' => [
     				'adapter' => 'apcu',
     		],
-    		'memcache' => [
+    		'redis' => [
     			'adapter' => array (
                     'name' => 'redis',
                     'options' => array (
@@ -142,7 +142,7 @@ return [
                     )
             	),
     		],
-    		'memcache_tmp' => [
+    		'redis_tmp' => [
 	    		'adapter' => array (
                     'name' => 'redis',
                     'options' => array (
