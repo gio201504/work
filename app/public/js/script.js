@@ -86,6 +86,11 @@ window.onload = function() {
 	seekBar.addEventListener("mousedown", function() {
 		video.pause();
 	});
+	
+	//Faire disparaître les thumbnails
+	seekBar.addEventListener("mouseleave", function() {
+		$('#thumbs').hide();
+	});
 
 	// Play the video when the seek handle is dropped
 	seekBar.addEventListener("mouseup", function(event) {
@@ -149,6 +154,9 @@ window.onload = function() {
 };
 
 var initDisplayThumb = function(event, video) {
+	//Faire apparaître les thumbnails
+	$('#thumbs').show();
+	
 	clearTimeout(timer);
 	getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
 	
