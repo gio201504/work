@@ -371,7 +371,7 @@ var initPlayers = function() {
 			var player = $(elt);
 
 			//Affichage des séquences d'images lors du déplacement de la souris sur la vidéo
-			player.on('mousemove', function(event) {
+			player.on('mousemove touchmove', function(event) {
 				getThumbAtMouse(player, player, event, addPoster);
 			});
 	

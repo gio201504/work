@@ -96,6 +96,10 @@
 		var rect = $(clientRect).get(0).getBoundingClientRect();
 		//Position absolue souris
 		var x = event.pageX;
+		//Evénement touch
+		if (event.type === 'touchmove') {
+			x = event.originalEvent !== undefined ? event.originalEvent.touches[0].pageX : event.touches[0].pageX; 
+		}
 		//Position absolue vidéo
 		var left = rect.left;
 		var right = rect.right;

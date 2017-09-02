@@ -135,12 +135,10 @@ window.onload = function() {
 	
 	//Génération thumbnails de la barre de progression
 	seekBar.addEventListener('mousemove', function(event) {
-		clearTimeout(timer);
-		getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
-		
-		timer = setTimeout(function() {
-			getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb, true);
-		}, 300);
+		initDisplayThumb(event, video);
+	});
+	seekBar.addEventListener('touchmove', function(event) {
+		initDisplayThumb(event, video);
 	});
 
 	// Event listener for the volume bar
@@ -148,6 +146,15 @@ window.onload = function() {
 		// Update the video volume
 		video.volume = volumeBar.value;
 	});
+};
+
+var initDisplayThumb = function(event, video) {
+	clearTimeout(timer);
+	getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
+	
+	timer = setTimeout(function() {
+		getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb, true);
+	}, 300);
 };
 
 var displayThumb = function(video_id, data) {
