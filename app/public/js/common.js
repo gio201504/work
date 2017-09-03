@@ -156,15 +156,13 @@
 	        dataType: "json",
 	        data: { dir: dir, empl: empl},
 	        success: function(data) {
+	        	debugger;
 	        	var str;
 	        	if (data.file !== false) {
 	        		str = "(" + data.fileIndex + "/" + data.fileCount + ") " + data.file;
-	        	} else {
-	        		str = "no result";
+	        		$("#scanningDiv").show();
+		        	$("#scanningDiv").html(str);
 	        	}
-	        	
-	        	$("#scanningDiv").show();
-	        	$("#scanningDiv").html(str);
 	        }
 	    });
 	};

@@ -180,6 +180,11 @@ class MyPlugin extends AbstractPlugin {
 				//if (!$isFtpFolder) {
 					$cache->addItem($fulldir, json_encode($files));
 				//}
+				
+				//Nettoyage
+				$cache->removeItem($fulldir . '[sScannedFile]');
+				$cache->removeItem($fulldir . '[iFileIndex]');
+				$cache->removeItem($fulldir . '[iFileCount]');
 			} else {
 				$files = $cache->getItem($fulldir);
 				$files = json_decode($files, true);
