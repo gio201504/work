@@ -43,10 +43,15 @@ div.container a.navbar-brand > img {
 }
 
 div.filemanager li.files img {
-    display: inline;
-    list-style: outside none none;
-    width: 329px;
-    height: 185px;
+    list-style: outside none none;    
+    position: absolute;
+  	left: 50%;
+  	top: 11%;
+  	height: 89%;
+  	width: auto;
+  	-webkit-transform: translate(-50%,0);
+    	-ms-transform: translate(-50%,0);
+    		transform: translate(-50%,0);
 }
 
 div.container {

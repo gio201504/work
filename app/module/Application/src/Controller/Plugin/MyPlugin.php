@@ -10,7 +10,7 @@ class MyPlugin extends AbstractPlugin {
     	$sizes = array('Bytes', 'KB', 'MB', 'GB', 'TB');
     	if ($bytes === 0) return '0 Bytes';
     	$i = floor(log($bytes) / log(1024));
-    	return round($bytes / pow(1024, $i), 2) . ' ' . $sizes[$i];
+    	return round($bytes / pow(1024, $i), 2) . $sizes[$i];
     }
     		
     public function countFiles($directory, $search = null, $log) {
