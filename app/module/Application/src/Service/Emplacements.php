@@ -2,7 +2,7 @@
 namespace Application\Service;
 
 class Emplacements {
-	private $connections = array();
+	private $connection = null;
 	
 	private $emplacements = array();
 	
@@ -39,8 +39,8 @@ class Emplacements {
 		// Login
 		if (ftp_login($conn, $match[1], $match[2]))
 		{
-			// Change the dir
-			ftp_chdir($conn, dirname($match[4]));
+			//Save connexion
+			$this->connection = $conn;
 	
 			// Return the resource
 			return $conn;
@@ -48,6 +48,11 @@ class Emplacements {
 	
 		// Or retun null
 		return null;
+	}
+	
+	public function changeDir($dir) {
+		ftp_chdir($this->connection, $dir);
+		return $this->connection;
 	}
 	
 	public function getConnection($empl) {
