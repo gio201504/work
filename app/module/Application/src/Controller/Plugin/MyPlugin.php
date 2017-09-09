@@ -78,7 +78,7 @@ class MyPlugin extends AbstractPlugin {
 						if ($isFtpFolder) {
 							$t1 = round(microtime(true) * 1000);
 							$conn_id = $Empl->getConnection($empl);
-							$is_dir = @ftp_chdir($conn_id, $dir . '/' . $f);
+							$is_dir = @ftp_chdir($conn_id, '/' . $dir . '/' . $f);
 							$t2 = round(microtime(true) * 1000);
 						} else {
 							$t1 = round(microtime(true) * 1000);
