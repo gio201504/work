@@ -48,6 +48,7 @@ class MyPlugin extends AbstractPlugin {
 			//Test existence cache
 			if (/*$isFtpFolder ||*/ !$cache->hasItem($fulldir)) {
 				$files = array();
+				$folders = array();
 				//Is there actually such a folder/file?
 				if ($isFtpFolder || file_exists($fulldir)) {
 					if (!$isFtpFolder) {
@@ -92,7 +93,7 @@ class MyPlugin extends AbstractPlugin {
 						
 						if ($is_dir) {
 							//The path is a folder
-							$files[] = array(
+							$folders[] = array(
 									"name" => $f_utf8,
 									"type" => "folder",
 									"emplacement" => $empl,
@@ -175,6 +176,9 @@ class MyPlugin extends AbstractPlugin {
 					}
 					closedir($handle);
 				}
+				
+				//Tri des dossiers en premier lieu puis les fichiers
+				$files = array_merge($folders, $files);
 				
 				//Sauvegarde dans le cache
 				//if (!$isFtpFolder) {
