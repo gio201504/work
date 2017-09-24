@@ -107,12 +107,17 @@ class IndexController extends AbstractActionController
 	    		$viewmodel = new ViewModel();
 	    		$viewmodel->setTerminal($request->isXmlHttpRequest());
 	    		
+	    		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
+	    		$aServer = $cache_ffmpeg->getOptions()->getServer();
+	    		$playerUrl = 'http://' . $aServer['host'] . '/videojs/app/public/application/showPlayer';
+	    		
 	    		$data = array(
 	    				"name" => $dir,
 	    				"type" => "folder",
 	    				"path" => $dir,
 	    				"emplacement" => $empl,
 	    				"items" => $items,
+	    				"playerUrl"	=> $playerUrl,
 	    		);
 	
 	    		$viewmodel->setVariables(array(
@@ -461,7 +466,7 @@ class IndexController extends AbstractActionController
     	$request = $this->getRequest();
     	if ($request->isGet()) {
     		$data = $request->getQuery();
-    		$cache = $this->sm->get('redis');
+    		$cache = $this->sm->get('redis_ffmpeg');
     		$options = $cache->getOptions();
     		$resource = $options->getResourceManager();
     		$resourceId = $options->getResourceId();

@@ -142,6 +142,19 @@ return [
                     )
             	),
     		],
+    		//Instance redis pointant sur la machine utilsée
+    		//pour les transcodages ffmpeg
+    		'redis_ffmpeg' => [
+	    		'adapter' => array (
+	    				'name' => 'redis',
+	    				'options' => array (
+	    						'server' => [
+	    						'host' => '127.0.0.1',
+	    						'port' => 6379,
+	    						]
+	    				)
+	    		),
+    		],
     		'redis_tmp' => [
 	    		'adapter' => array (
                     'name' => 'redis',
