@@ -380,6 +380,12 @@ class IndexController extends AbstractActionController
     		$data = isset($data->file) ? $data : $this->params('data');
     		$config = $this->sm->get('Config');
     		$ffmpeg_codec = $config['ffmpeg']['codec'];
+    		
+    		$cache = $this->sm->get('redis');
+    		$options = $cache->getOptions();
+    		$resource = $options->getResourceManager();
+    		$resourceId = $options->getResourceId();
+    		$redis = $resource->getResource($resourceId);
     
     		$file = $data->file;
     		$time_seconds = $data->time;
@@ -406,11 +412,13 @@ class IndexController extends AbstractActionController
     		if (isset($file) && isset($time_seconds)) {    
     			$gmdate = gmdate('H:i:s', $time_seconds);
     			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $ffmpeg_codec, $temp_dir);
-    			pclose(popen(utf8_decode($cmd), "r"));
+    			//pclose(popen(utf8_decode($cmd), "r"));
+    			$rc = $redis->rPush('mylist', utf8_decode($cmd));
     			
     			do {
     				clearstatcache();
     				$file_exists = file_exists($temp_dir . 'index.m3u8');
+    				sleep(1);
     			} while (!$file_exists);
 
     			return new JsonModel();
@@ -445,6 +453,29 @@ class IndexController extends AbstractActionController
     				'fileCount' => $iFileCount,
     				'fileIndex' => $iFileIndex,
     		));
+    	}
+    }
+    
+    public function waitAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$cache = $this->sm->get('redis');
+    		$options = $cache->getOptions();
+    		$resource = $options->getResourceManager();
+    		$resourceId = $options->getResourceId();
+    		$redis = $resource->getResource($resourceId);
+    		
+    		while(true) {
+	    		$cmd = $redis->blPop('mylist', 1);
+	    		
+	    		if (!empty($cmd)) {
+	    			//pclose(popen(utf8_decode($cmd[1]), "r"));
+	    			//shell_exec(utf8_decode($cmd[1]));
+	    			shell_exec($cmd[1]);
+	    		}
+    		}
     	}
     }
 }
