@@ -403,14 +403,9 @@ class IndexController extends AbstractActionController
 	    		}
     		}
     		
-    		if (isset($file) && isset($time_seconds)) {
-    			//sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
-    			//$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
-    
+    		if (isset($file) && isset($time_seconds)) {    
     			$gmdate = gmdate('H:i:s', $time_seconds);
-    			//$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file, $ffmpeg_codec);
     			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $ffmpeg_codec, $temp_dir);
-    			//shell_exec(utf8_decode($cmd));
     			pclose(popen(utf8_decode($cmd), "r"));
     			
     			do {
