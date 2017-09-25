@@ -416,6 +416,7 @@ class IndexController extends AbstractActionController
     			do {
     				clearstatcache();
     				$file_exists = file_exists($temp_dir . 'index.m3u8');
+    				sleep(1);
     			} while (!$file_exists);
 
     			return new JsonModel();
