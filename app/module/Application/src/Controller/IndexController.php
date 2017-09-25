@@ -71,6 +71,7 @@ class IndexController extends AbstractActionController
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
     		$cache = $this->sm->get('redis');
+    		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
     		$tempCache = $this->sm->get('redis_tmp');
 
     		$dir = (isset($dir) && !empty($dir)) ? $dir : null;
@@ -81,6 +82,7 @@ class IndexController extends AbstractActionController
     		if (isset($data->clear)) {
     			//$cache->removeItem($top_dir . $dir);
     			$cache->flush();
+    			$cache_ffmpeg->flush();
     			$tempCache->flush();
     		}
 
