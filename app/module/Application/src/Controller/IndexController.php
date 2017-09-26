@@ -330,7 +330,47 @@ class IndexController extends AbstractActionController
 //     		$host = $uri->getHost();
 //     		$base = sprintf('%s://%s', $scheme, $host);
 //     		$path = $base . $data->path;
+
+    		$config = $this->sm->get('Config');
+    		$ffmpeg_codec = $config['ffmpeg']['codec'];
+    		$temp_dir = getcwd() . '/public/tmp/';
     		
+    		$cache_ffmpeg = $this->sm->get('redis');
+    		$options = $cache_ffmpeg->getOptions();
+    		$resource = $options->getResourceManager();
+    		$resourceId = $options->getResourceId();
+    		$redis = $resource->getResource($resourceId);
+    		
+    		//Nettoyage index.m3u8
+    		@unlink($temp_dir . 'index.m3u8');
+    		
+    		//Nettoyage dossier de travail
+    		if ($data->clean === 'true') {
+    			$files = glob($temp_dir . '*');
+    			foreach ($files as $filename) {
+    				if(is_file($filename))
+    					unlink($filename);
+    				}
+    		}
+    		
+    		$sender = $redis->blPop('mylist', 300);
+    			 
+    		if (!empty($sender)) {
+    			$aData = json_decode($sender[1]);
+    			$gmdate = $aData[0];
+    			$file = $aData[1];
+    			$senderUrl = $aData[2];
+    			$publishUrl = 'http://' . $senderUrl . '/videojs/app/public/tmp/' . $file;
+    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
+    			pclose(popen(utf8_decode($cmd), "r"));
+    		}
+
+    		do {
+    			clearstatcache();
+    			$file_exists = file_exists($temp_dir . 'index.m3u8');
+    			sleep(1);
+    		} while (!$file_exists);
+
     		$viewmodel = new ViewModel();
     		
     		$viewmodel->setVariables(array(
@@ -487,7 +527,7 @@ class IndexController extends AbstractActionController
     		$redis = $resource->getResource($resourceId);
     		
     		while(true) {
-	    		$sender = $redis->blPop('mylist', 1);
+	    		$sender = $redis->blPop('mylist', 300);
 	    		
 	    		if (!empty($sender)) {
 	    			$aData = json_decode($sender[1]);

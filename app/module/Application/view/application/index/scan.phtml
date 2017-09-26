@@ -408,12 +408,12 @@ var initPlayers = function() {
 				var time = $(player).data('time');
 				var playerUrl = '<?php echo $this->data['playerUrl']; ?>';
 
-				startVideoTranscode(path, time, true);
-// 					.then(function() {
-// 						var params = $.param({empl: emplacement, path: path, time: time});
-// 						var url = playerUrl + '?' + params;
-// 						window.open(url);
-// 					});
+				startVideoTranscode(path, time, true)
+					.then(function() {
+						var params = $.param({empl: emplacement, path: path, time: time});
+						var url = playerUrl + '?' + params;
+						window.open(url);
+					});
 			});
 
 		}
