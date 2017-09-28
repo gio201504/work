@@ -360,7 +360,8 @@ class IndexController extends AbstractActionController
     			$gmdate = $aData[0];
     			$file = $aData[1];
     			$senderUrl = $aData[2];
-    			$publishUrl = 'http://' . $senderUrl . '/videojs/app/public/tmp/' . $file;
+    			//$publishUrl = 'http://' . $senderUrl . '/videojs/app/public/tmp/' . $file;
+    			$publishUrl = 'http://' . $senderUrl . '/videojs/app/public/video';
     			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
     			pclose(popen(utf8_decode($cmd), "r"));
     		}
@@ -443,7 +444,14 @@ class IndexController extends AbstractActionController
     			$top_dir = $emplacements[$empl]['top_dir'];
     		}
     		
-    		if (isset($file) && isset($time_seconds)) {    
+    		if (isset($file) && isset($time_seconds)) {
+    			//Lien symbolique pointant vers la vidéo
+    			$link = getcwd() . '/public/video';
+    			if (is_file($link)) {
+    				unlink($link);
+    			}
+    			symlink($top_dir . $file, $link);
+
     			$gmdate = gmdate('H:i:s', $time_seconds);
     			$aServer = $cache_ffmpeg->getOptions()->getServer();
     			$senderUrl = $aServer['host'];
