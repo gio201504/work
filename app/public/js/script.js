@@ -134,11 +134,13 @@ window.onload = function() {
 				    newurl += search + Math.trunc(time).toString();
 				    window.history.pushState({ path: newurl }, '', newurl);
 				    
+				    window.location.reload();
+				    
 				    //Update the video time
-				    hls.attachMedia(video);
-				    hls.startLoad();
-					video.currentTime = 0;
-					video.play();
+				    //hls.attachMedia(video);
+				    //hls.startLoad();
+					//video.currentTime = 0;
+					//video.play();
 				}
 			});
 	});
