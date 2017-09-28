@@ -344,6 +344,14 @@ class IndexController extends AbstractActionController
     		//Nettoyage index.m3u8
     		@unlink($temp_dir . 'index.m3u8');
     		
+    		//Nettoyage fichiers .ts
+    		$files = glob($temp_dir . '*.ts');
+    		foreach ($files as $filename) {
+    			if(is_file($filename)) {
+    				unlink($filename);
+    			}
+    		}
+
     		//Nettoyage dossier de travail
     		if ($data->clean === 'true') {
     			$files = glob($temp_dir . '*');
