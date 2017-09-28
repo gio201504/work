@@ -426,7 +426,6 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$config = $this->sm->get('Config');
-    		//$ffmpeg_codec = $config['ffmpeg']['codec'];
     		
     		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
     		$options = $cache_ffmpeg->getOptions();
@@ -436,7 +435,7 @@ class IndexController extends AbstractActionController
     
     		$file = $data->file;
     		$time_seconds = $data->time;
-			//$temp_dir = getcwd() . '/public/tmp/';
+			$temp_dir = getcwd() . '/public/tmp/';
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
@@ -444,36 +443,13 @@ class IndexController extends AbstractActionController
     			$top_dir = $emplacements[$empl]['top_dir'];
     		}
     		
-    		//Nettoyage index.m3u8
-    		//@unlink($temp_dir . 'index.m3u8');
-    		
-    		//Nettoyage dossier de travail
-//     		if ($data->clean === 'true') {
-// 	    		$files = glob($temp_dir . '*');
-// 	    		foreach ($files as $filename) {
-// 	    			if(is_file($filename))
-// 	    				unlink($filename);
-// 	    		}
-//     		}
-    		
     		if (isset($file) && isset($time_seconds)) {    
     			$gmdate = gmdate('H:i:s', $time_seconds);
-    			//$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $ffmpeg_codec, $temp_dir);
-    			//pclose(popen(utf8_decode($cmd), "r"));
     			$aServer = $cache_ffmpeg->getOptions()->getServer();
-    			//$senderUrl = 'udp://' . $aServer['host'] . ':1234';
     			$senderUrl = $aServer['host'];
     			$file = str_replace(" ", "%20", basename($file));
-    			//$cmd = sprintf('ffmpeg.exe -ss %s -re -i "%s" -c copy -f mpegts %s', $gmdate, $top_dir . $file, $publishUrl);
     			$aData = array($gmdate, $file, $senderUrl);
     			$rc = $redis->rPush('mylist', json_encode($aData));
-    			//pclose(popen($cmd, "r"));
-    			
-//     			do {
-//     				clearstatcache();
-//     				$file_exists = file_exists($temp_dir . 'index.m3u8');
-//     				sleep(1);
-//     			} while (!$file_exists);
 
     			return new JsonModel();
     		}
