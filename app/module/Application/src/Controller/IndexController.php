@@ -187,6 +187,9 @@ class IndexController extends AbstractActionController
     			//$t2 = $this->milliseconds();
     			//$log->info("getThumbAjax " . $thumbname . " " . ($t2 - $t1));
     			
+    			header('Access-Control-Allow-Origin: *');
+    			//header('XDomainRequestAllowed: 1');
+    			
     			return new JsonModel(array(
     					'time' => $time_seconds,
     					'file' => $data_uri)
@@ -261,6 +264,9 @@ class IndexController extends AbstractActionController
     		
     		//$t2 = $this->milliseconds();
     		//$log->info("getVideoDuration " . $file_duration . " " . ($t2 - $t1));
+    		
+    		header('Access-Control-Allow-Origin: *');
+    		//header('XDomainRequestAllowed: 1');
     		
     		return new JsonModel(array(
     				'duration' => $duration,
