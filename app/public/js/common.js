@@ -1,7 +1,7 @@
 (function(win) {
 	"use strict";
 	
-	var getThumbAjax = function(video_id, file, time, callback, senderUrl) {
+	var getThumbAjax = function(video_id, file, time, callback) {
 	// 	if ($(video_id).data('requestRunning')) {
 	//         return;
 	//     } else
@@ -119,7 +119,7 @@
 	    $(player).attr('src', data.file);
 	};
 	
-	win.getThumbAtMouse = function(player, clientRect, event, callback, forced, senderUrl) {
+	win.getThumbAtMouse = function(player, clientRect, event, callback, forced) {
 		if (typeof forced === "undefined") {
 			forced = false;
 		}
@@ -189,7 +189,7 @@
 	};
 	
 	var getPlayerPath = function() {
-		if (senderUrl.length > 0) {
+		if (typeof senderUrl !== 'undefined' && senderUrl.length > 0) {
 			var path = "http://" + senderUrl + "/videojs/app/public/application/";
 			return path;
 		} else {

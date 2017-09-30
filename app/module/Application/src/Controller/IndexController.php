@@ -324,12 +324,6 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->path) ? $data : $this->params('data');
-    		
-//     		$uri = $this->getRequest()->getUri();
-//     		$scheme = $uri->getScheme();
-//     		$host = $uri->getHost();
-//     		$base = sprintf('%s://%s', $scheme, $host);
-//     		$path = $base . $data->path;
 
     		$config = $this->sm->get('Config');
     		$ffmpeg_codec = $config['ffmpeg']['codec'];
@@ -364,12 +358,15 @@ class IndexController extends AbstractActionController
     		$sender = $redis->blPop('mylist', 300);
     			 
     		if (!empty($sender)) {
+    			$uri = $this->getRequest()->getUri();
+    			$scheme = $uri->getScheme();
+    			$host = $uri->getHost();
+    			$publishUrl = sprintf('%s://%s', $scheme, $host);
+    			
     			$aData = json_decode($sender[1]);
     			$gmdate = $aData[0];
     			$file = $aData[1];
-    			$senderUrl = $aData[2];
-    			//$publishUrl = 'http://' . $senderUrl . '/videojs/app/public/tmp/' . $file;
-    			$publishUrl = 'http://' . $senderUrl . '/videojs/app/public/video';
+    			$publishUrl = $publishUrl . '/videojs/app/public/video';
     			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
     			pclose(popen(utf8_decode($cmd), "r"));
     		}
@@ -460,10 +457,12 @@ class IndexController extends AbstractActionController
     				unlink($link);
     			}
     			symlink($top_dir . $file, $link);
-
+    			
+    			//Adresse du serveur courant
+    			$uri = $this->getRequest()->getUri();
+    			$senderUrl = $uri->getHost();
+    			
     			$gmdate = gmdate('H:i:s', $time_seconds);
-    			$aServer = $cache_ffmpeg->getOptions()->getServer();
-    			$senderUrl = $aServer['host'];
     			$file = str_replace(" ", "%20", basename($file));
     			$aData = array($gmdate, $file, $senderUrl);
     			$rc = $redis->rPush('mylist', json_encode($aData));
