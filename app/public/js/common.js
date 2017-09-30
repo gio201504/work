@@ -190,7 +190,7 @@
 	
 	var getPlayerPath = function() {
 		if (senderUrl.length > 0) {
-			var path = "http://" + senderUrl + "/videojs/app/public/application";
+			var path = "http://" + senderUrl + "/videojs/app/public/application/";
 			return path;
 		} else {
 			return "";
