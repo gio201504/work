@@ -1,7 +1,7 @@
 (function(win) {
 	"use strict";
 	
-	var getThumbAjax = function(video_id, file, time, callback) {
+	var getThumbAjax = function(video_id, file, time, callback, senderUrl) {
 	// 	if ($(video_id).data('requestRunning')) {
 	//         return;
 	//     } else
@@ -9,9 +9,11 @@
 		
 		//console.log(player.id() + ' getThumbAjax');
 		file = file.replace(/^.*\/\/[^\/]+/, '');
+		var url = getPlayerPath() + "getThumbAjax";
+
 		return $.ajax({
 	        type: "GET",
-	        url: "getThumbAjax",
+	        url: url,
 	        dataType: "json",
 	        data: { empl: win.emplacement, file: file, time: time },
 	        success: function(data) {
@@ -53,9 +55,11 @@
 		var video_id = '#' + player.attr('id');
 		var file = $(video_id).attr('data-src');
 	
+		var url = getPlayerPath() + "getVideoDuration";
+
 		return $.ajax({
 	        type: "GET",
-	        url: "getVideoDuration",
+	        url: url,
 	        dataType: "json",
 	        data: { empl: win.emplacement, file: file },
 	        success: function(data) {
@@ -115,7 +119,7 @@
 	    $(player).attr('src', data.file);
 	};
 	
-	win.getThumbAtMouse = function(player, clientRect, event, callback, forced) {
+	win.getThumbAtMouse = function(player, clientRect, event, callback, forced, senderUrl) {
 		if (typeof forced === "undefined") {
 			forced = false;
 		}
@@ -182,6 +186,15 @@
 	        	}
 	        },
 	    });
+	};
+	
+	var getPlayerPath = function() {
+		if (senderUrl.length > 0) {
+			var path = "http://" + senderUrl + "/videojs/app/public/application";
+			return path;
+		} else {
+			return "";
+		}
 	};
 
 }(window));
