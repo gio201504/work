@@ -148,7 +148,7 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = $data->top_dir;
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : "";
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
@@ -221,9 +221,9 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
-    		$top_dir = $data->top_dir;
     		$cache = $this->sm->get('redis');
     		//$log = $this->sm->get('log');
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : "";
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
