@@ -336,10 +336,10 @@ class IndexController extends AbstractActionController
     		$temp_dir = getcwd() . '/public/tmp/';
     		
     		$cache_ffmpeg = $this->sm->get('redis');
-    		$options = $cache_ffmpeg->getOptions();
-    		$resource = $options->getResourceManager();
-    		$resourceId = $options->getResourceId();
-    		$redis = $resource->getResource($resourceId);
+    		//$options = $cache_ffmpeg->getOptions();
+    		//$resource = $options->getResourceManager();
+    		//$resourceId = $options->getResourceId();
+    		//$redis = $resource->getResource($resourceId);
     		
     		//Nettoyage index.m3u8
     		@unlink($temp_dir . 'index.m3u8');
@@ -361,38 +361,43 @@ class IndexController extends AbstractActionController
     				}
     		}
     		
-    		$sender = $redis->blPop('mylist', 300);
-    			 
-    		if (!empty($sender)) {
-    			$uri = $this->getRequest()->getUri();
-    			$scheme = $uri->getScheme();
-    			$host = $uri->getHost();
-    			$publishUrl = sprintf('%s://%s', $scheme, $host);
+    		//$sender = $redis->blPop('mylist', 300);
+    		if ($cache_ffmpeg->hasItem('sender')) {
+    			$sender = $cache_ffmpeg->getItem('sender');
     			
-    			$aData = json_decode($sender[1]);
-    			$gmdate = $aData[0];
-    			$file = $aData[1];
-    			$publishUrl = $publishUrl . '/videojs/app/public/video';
-    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
-    			pclose(popen(utf8_decode($cmd), "r"));
+	    		if (!empty($sender)) {
+	    			$uri = $this->getRequest()->getUri();
+	    			$scheme = $uri->getScheme();
+	    			$host = $uri->getHost();
+	    			$publishUrl = sprintf('%s://%s', $scheme, $host);
+	    			
+	    			$aData = json_decode($sender);
+	    			$gmdate = $aData[0];
+	    			$file = $aData[1];
+	    			$publishUrl = $publishUrl . '/videojs/app/public/video';
+	    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
+	    			pclose(popen(utf8_decode($cmd), "r"));
+	    		}
+	
+	    		do {
+	    			clearstatcache();
+	    			$file_exists = file_exists($temp_dir . 'index.m3u8');
+	    			sleep(1);
+	    		} while (!$file_exists);
+	
+	    		$viewmodel = new ViewModel();
+	    		
+	    		$viewmodel->setVariables(array(
+	    			"path" => $data->path,
+	    			"time" => $data->time,
+	    			"emplacement" => $data->empl,
+	    			"senderUrl"	=> $aData[2],
+	    		));
+	    		
+	    		return $viewmodel;
+    		} else {
+    			return false;
     		}
-
-    		do {
-    			clearstatcache();
-    			$file_exists = file_exists($temp_dir . 'index.m3u8');
-    			sleep(1);
-    		} while (!$file_exists);
-
-    		$viewmodel = new ViewModel();
-    		
-    		$viewmodel->setVariables(array(
-    			"path" => $data->path,
-    			"time" => $data->time,
-    			"emplacement" => $data->empl,
-    			"senderUrl"	=> $aData[2],
-    		));
-    		
-    		return $viewmodel;
     	}
     }
     
@@ -441,10 +446,10 @@ class IndexController extends AbstractActionController
     		$config = $this->sm->get('Config');
     		
     		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
-    		$options = $cache_ffmpeg->getOptions();
-    		$resource = $options->getResourceManager();
-    		$resourceId = $options->getResourceId();
-    		$redis = $resource->getResource($resourceId);
+    		//$options = $cache_ffmpeg->getOptions();
+    		//$resource = $options->getResourceManager();
+    		//$resourceId = $options->getResourceId();
+    		//$redis = $resource->getResource($resourceId);
     
     		$file = $data->file;
     		$time_seconds = $data->time;
@@ -471,7 +476,8 @@ class IndexController extends AbstractActionController
     			$gmdate = gmdate('H:i:s', $time_seconds);
     			$file = str_replace(" ", "%20", basename($file));
     			$aData = array($gmdate, $file, $senderUrl);
-    			$rc = $redis->rPush('mylist', json_encode($aData));
+    			//$rc = $redis->rPush('mylist', json_encode($aData));
+    			$cache_ffmpeg->setItem('sender', json_encode($aData));
 
     			return new JsonModel();
     		}
