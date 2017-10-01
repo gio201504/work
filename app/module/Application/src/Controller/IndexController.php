@@ -478,6 +478,9 @@ class IndexController extends AbstractActionController
     			$aData = array($gmdate, $file, $senderUrl);
     			//$rc = $redis->rPush('mylist', json_encode($aData));
     			$cache_ffmpeg->setItem('sender', json_encode($aData));
+    			
+    			header('Access-Control-Allow-Origin: *');
+    			//header('XDomainRequestAllowed: 1');
 
     			return new JsonModel();
     		}
