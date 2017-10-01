@@ -366,12 +366,10 @@ class IndexController extends AbstractActionController
     			$sender = $cache_ffmpeg->getItem('sender');
     			
 	    		if (!empty($sender)) {
-	    			$uri = $this->getRequest()->getUri();
-	    			$scheme = $uri->getScheme();
-	    			$host = $uri->getHost();
-	    			$publishUrl = sprintf('%s://%s', $scheme, $host);
-	    			
 	    			$aData = json_decode($sender);
+
+	    			$senderUrl = $aData[2];
+	    			$publishUrl = sprintf('%s://%s', 'http', $senderUrl);
 	    			$gmdate = $aData[0];
 	    			$file = $aData[1];
 	    			$publishUrl = $publishUrl . '/videojs/app/public/video';
@@ -391,7 +389,7 @@ class IndexController extends AbstractActionController
 	    			"path" => $data->path,
 	    			"time" => $data->time,
 	    			"emplacement" => $data->empl,
-	    			"senderUrl"	=> $aData[2],
+	    			"senderUrl"	=> $senderUrl,
 	    		));
 	    		
 	    		return $viewmodel;
