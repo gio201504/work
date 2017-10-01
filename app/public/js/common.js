@@ -9,7 +9,7 @@
 		
 		//console.log(player.id() + ' getThumbAjax');
 		file = file.replace(/^.*\/\/[^\/]+/, '');
-		var url = getPlayerPath() + "getThumbAjax";
+		var url = getSenderPath() + "getThumbAjax";
 
 		return $.ajax({
 	        type: "GET",
@@ -41,10 +41,12 @@
 	    //var time_seconds = "00:00:" + Math.trunc(time);
 		file = file.replace(/^.*\/\/[^\/]+/, '');
 		clean = (typeof clean === 'undefined') ? false : clean;
+		
+		var url = getSenderPath() + "transcodeVideo";
 	
 		return $.ajax({
 	        type: "GET",
-	        url: "transcodeVideo",
+	        url: url,
 	        dataType: "json",
 	        data: { empl: win.emplacement, file: file, time: time_seconds, clean: clean },
 	    });
@@ -55,7 +57,7 @@
 		var video_id = '#' + player.attr('id');
 		var file = $(video_id).attr('data-src');
 	
-		var url = getPlayerPath() + "getVideoDuration";
+		var url = getSenderPath() + "getVideoDuration";
 
 		return $.ajax({
 	        type: "GET",
@@ -188,7 +190,7 @@
 	    });
 	};
 	
-	var getPlayerPath = function() {
+	var getSenderPath = function() {
 		if (typeof senderUrl !== 'undefined' && senderUrl.length > 0) {
 			var path = "http://" + senderUrl + "/videojs/app/public/application/";
 			return path;
