@@ -77,14 +77,14 @@ class MyPlugin extends AbstractPlugin {
 						}
 						
 						if ($isFtpFolder) {
-							$t1 = round(microtime(true) * 1000);
+							//$t1 = round(microtime(true) * 1000);
 							$conn_id = $Empl->getConnection($empl);
 							$is_dir = @ftp_chdir($conn_id, '/' . $dir . '/' . $f);
-							$t2 = round(microtime(true) * 1000);
+							//$t2 = round(microtime(true) * 1000);
 						} else {
-							$t1 = round(microtime(true) * 1000);
+							//$t1 = round(microtime(true) * 1000);
 							$is_dir = is_dir($fulldir . '/' . $f);
-							$t2 = round(microtime(true) * 1000);
+							//$t2 = round(microtime(true) * 1000);
 						}
 						//$log->info("is_dir(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 						
@@ -103,10 +103,10 @@ class MyPlugin extends AbstractPlugin {
 						} else {
 							//It is a file
 							if ($isFtpFolder) {
-								$t1 = round(microtime(true) * 1000);
+								//$t1 = round(microtime(true) * 1000);
 								$conn_id = $Empl->getConnection($empl);
 								$filesize = ftp_size($conn_id, $dir . '/' . $f);
-								$t2 = round(microtime(true) * 1000);
+								//$t2 = round(microtime(true) * 1000);
 							} else {
 								$filesize = @filesize($fulldir . '/' . $f);
 							}
