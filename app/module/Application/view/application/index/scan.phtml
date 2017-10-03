@@ -411,7 +411,7 @@ var initPlayers = function() {
 
 				startVideoTranscode(path, time, true)
 					.then(function() {
-						var params = $.param({empl: emplacement, path: path, time: time, duration: duration});
+						var params = $.param({empl: emplacement, path: path, duration: duration, time: time});
 						var url = playerUrl + '?' + params;
 						window.open(url);
 					});
