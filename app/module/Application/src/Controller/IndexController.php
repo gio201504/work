@@ -388,6 +388,7 @@ class IndexController extends AbstractActionController
 	    		$viewmodel->setVariables(array(
 	    			"path" => $data->path,
 	    			"time" => $data->time,
+	    			"duration" => $data->duration,
 	    			"emplacement" => $data->empl,
 	    			"senderUrl"	=> $senderUrl,
 	    		));

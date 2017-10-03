@@ -132,12 +132,15 @@
 			else
 				$(player).data('requestRunning', true);
 		}
+		
+		var duration = $(player).data('duration');
 	
 		var dfd = $.Deferred();
 		var promise = dfd
-			.then(function(){ return getVideoDuration(player); })
+			//.then(function(){ return getVideoDuration(player); })
 			.then(function(data){
-				var time = getMouseTime(clientRect, event, data.duration);
+				//var time = getMouseTime(clientRect, event, data.duration);
+				var time = getMouseTime(clientRect, event, duration);
 				//Pas de 10 pour les preview
 				//time = Math.round((time / data.duration).toFixed(1) * data.duration);
 				var time_seconds = "00:00:" + time;

@@ -406,11 +406,12 @@ var initPlayers = function() {
 			player.on('click', function(evt) {
 				var path = $(player).attr('data-src');
 				var time = $(player).data('time');
+				var duration = $(player).data('duration');
 				var playerUrl = '<?php echo $this->data['playerUrl']; ?>';
 
 				startVideoTranscode(path, time, true)
 					.then(function() {
-						var params = $.param({empl: emplacement, path: path, time: time});
+						var params = $.param({empl: emplacement, path: path, time: time, duration: duration});
 						var url = playerUrl + '?' + params;
 						window.open(url);
 					});
@@ -473,7 +474,8 @@ var initPlayers = function() {
 							<span class="details vid"><?= $size ?></span>
 							<img id="video<?= $idx++ ?>"
 								src="<?= $thumb ?>" data-type="<?= $fileType ?>"
-								data-src="<?= $path ?>">
+								data-src="<?= $path ?>"
+								data-duration="<?= $file['duration'] ?>">
 						</li>
 					<?php else: ?>
 						<li class="files">

@@ -149,7 +149,8 @@ class MyPlugin extends AbstractPlugin {
 										'action' => 'getVideoDuration',
 										'data' => $data 
 								));
-								$time = gmdate("H:i:s", $result->duration / 2);
+								$duration = $result->duration;
+								$time = gmdate("H:i:s", $duration / 2);
 								
 								//Génération thumbnail
 								$file = $dir . '/' . $f;
@@ -164,7 +165,8 @@ class MyPlugin extends AbstractPlugin {
 										'data' => $data 
 								));
 								$thumb = array(
-										'thumb' => $result->file 
+										'duration' => $duration,
+										'thumb' => $result->file,
 								);
 								$array = array_merge($array, $thumb);
 							}
