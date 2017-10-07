@@ -373,7 +373,7 @@ class IndexController extends AbstractActionController
 	    			$gmdate = $aData[0];
 	    			$file = $aData[1];
 	    			$publishUrl = $publishUrl . '/videojs/app/public/video';
-	    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
+	    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
 	    			pclose(popen(utf8_decode($cmd), "r"));
 	    		}
 	
