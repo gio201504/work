@@ -548,7 +548,7 @@ class IndexController extends AbstractActionController
     	}
     }
     
-    public function generateVideoThumbsAction()
+    public function getVideoThumbsAction()
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
@@ -557,6 +557,7 @@ class IndexController extends AbstractActionController
     		$file = $data->file;
     		$duration = $data->duration;
     		$top_dir = isset($data->top_dir) ? $data->top_dir : "";
+    		
     		$temp_dir = getcwd() . '/public/tmp/';
     		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[thumbs].png';
     		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[thumbs].png';
