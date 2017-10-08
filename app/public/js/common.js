@@ -203,13 +203,13 @@
 	};
 	
 	win.getVideoThumbs = function(player, clientRect, event, callback) {
+		var duration = $(player).data('duration');
 		var time = getMouseTime(clientRect, event, duration);
 		var video_id = '#' + player.attr('id');
 		
 		var thumbs = $(player).data('thumbs');
 		
 		if (typeof thumbs === 'undefined') {
-			var duration = $(player).data('duration');
 			var file = $(video_id).attr('data-src');
 			
 			var url = getSenderPath() + "getVideoThumbs";
