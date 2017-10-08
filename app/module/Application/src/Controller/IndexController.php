@@ -179,7 +179,7 @@ class IndexController extends AbstractActionController
 		    		
 		    		//Sauvegarde dans le cache
 		    		$data_uri = $this->data_uri($thumb_path);
-		    		$cache->addItem($thumbname, $data_uri);
+		    		$cache->setItem($thumbname, $data_uri);
     			} else {
     				$data_uri = $cache->getItem($thumbname);
     			}
@@ -560,6 +560,14 @@ class IndexController extends AbstractActionController
     		$file = $data->file;
     		$duration = $data->duration;
     		$top_dir = isset($data->top_dir) ? $data->top_dir : "";
+    		
+    		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
+    		if ($empl !== 0) {
+    			$config = $this->sm->get('Config');
+    			$emplacements = $config['emplacements'];
+    			$top_dir = $emplacements[$empl]['top_dir'];
+    			$protocole = $emplacements[$empl]['protocole'];
+    		}
     
     		if (isset($file) && isset($duration)) {
     			$thumbname = basename($file) . '[thumbs].jpg';
@@ -588,7 +596,7 @@ class IndexController extends AbstractActionController
     				
     				//Sauvegarde dans le cache
     				$data_uri = $this->data_uri($thumb_path);
-    				$cache->addItem($thumbname, $data_uri);
+    				$cache->setItem($thumbname, $data_uri);
     			} else {
     				$data_uri = $cache->getItem($thumbname);
     				$return_value = 0;

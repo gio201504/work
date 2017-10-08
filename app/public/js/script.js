@@ -94,7 +94,7 @@ window.onload = function() {
 	
 	//Faire disparaître les thumbnails
 	seekBar.addEventListener("mouseleave", function() {
-		$('#thumbs').hide();
+		//$('#thumbs').hide();
 	});
 
 	// Play the video when the seek handle is dropped
@@ -160,13 +160,19 @@ window.onload = function() {
 	});
 };
 
+//Gérérer un thumbnail au niveau du pointeur de souris
+//var initDisplayThumb = function(event, video) {
+//	clearTimeout(timer);
+//	getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
+//	
+//	timer = setTimeout(function() {
+//		getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb, true);
+//	}, 300);
+//};
+
+//Afficher le thumbnail au niveau du pointeur de souris
 var initDisplayThumb = function(event, video) {
-	clearTimeout(timer);
-	getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb);
-	
-	timer = setTimeout(function() {
-		getThumbAtMouse($(video), $('#seek-bar'), event, displayThumb, true);
-	}, 300);
+	getVideoThumbs($(video), $('#seek-bar'), event, displayThumbMulti);
 };
 
 var displayThumb = function(video_id, data) {
@@ -192,4 +198,38 @@ var displayThumb = function(video_id, data) {
 	$(thumbs).css('left', xpos + "px");
 	var height = $(thumbs).height();
 	$(thumbs).css('top', -height + "px");
+};
+
+var displayThumbMulti = function(video_id, data, time) {
+	var player = $(video_id);
+	var duration = player.get(0).finalDuration;
+	var thumbs = $('#thumbs');
+	var img = $(thumbs).find('> img');
+	$(img).attr('src', data.file);
+	
+	//Player
+	var rectp = player.get(0).getBoundingClientRect();
+	var leftp = rectp.left;
+	
+	//Progress bar
+	var rect = $('#seek-bar').get(0).getBoundingClientRect();
+	var left = rect.left;
+	var right = rect.right;
+	
+	//Positionnement thumbs
+	var percent = time / duration;
+	var xpos = left - leftp + percent * (right - left);
+	$(thumbs).css('left', xpos + "px");
+	var height = $(thumbs).height();
+	$(thumbs).css('top', -height + "px");
+	
+	//Sélection thumbnail à afficher parmi les 10
+	var img_width = $(img).width();
+	var thumb_width = img_width / 10;
+	var thumb_num = (percent * 10).toFixed();
+	var lcrop = thumb_num * thumb_width;
+	var rcrop = img_width - lcrop - thumb_width;
+	var inset = 'inset(0px ' + rcrop + 'px 0px ' + lcrop + 'px)';
+	//crop image: inset(top right bottom left)
+	$(img).css('clip-path', inset);
 };
