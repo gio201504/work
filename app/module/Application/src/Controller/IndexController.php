@@ -565,6 +565,7 @@ class IndexController extends AbstractActionController
     			$thumbname = basename($file) . '[thumbs].jpg';
     			
     			if (!$cache->hasItem($thumbname)) {
+    				$return_value = 0;
     				$thumb_path = getcwd() . '/public/thumb/' . $thumbname;
     				
     				if (!file_exists($thumb_path)) {
