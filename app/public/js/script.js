@@ -232,6 +232,5 @@ var displayThumbMulti = function(video_id, file, time) {
 	var inset = 'inset(0px ' + rcrop + 'px 0px ' + lcrop + 'px)';
 	//crop image: inset(top right bottom left)
 	$(img).css('clip-path', inset);
-	xpos = xpos - lcrop;
-	$(thumbs).css('left', xpos + "px");
+	$(img).css('margin-left', -lcrop + "px");
 };
