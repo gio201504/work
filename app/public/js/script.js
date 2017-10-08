@@ -94,7 +94,7 @@ window.onload = function() {
 	
 	//Faire disparaître les thumbnails
 	seekBar.addEventListener("mouseleave", function() {
-		//$('#thumbs').hide();
+		$('#thumbs').hide();
 	});
 
 	// Play the video when the seek handle is dropped
@@ -223,10 +223,10 @@ var displayThumbMulti = function(video_id, file, time) {
 	var height = $(thumbs).height();
 	$(thumbs).css('top', -height + "px");
 	
-	//Sélection thumbnail à afficher parmi les 10
+	//Sélection du thumbnail à afficher parmi les 20
 	var img_width = $(img).width();
-	var thumb_width = img_width / 10;
-	var thumb_num = (percent * 10).toFixed();
+	var thumb_width = img_width / 20;
+	var thumb_num = (percent * 20).toFixed();
 	var lcrop = thumb_num * thumb_width;
 	var rcrop = img_width - lcrop - thumb_width;
 	var inset = 'inset(0px ' + rcrop + 'px 0px ' + lcrop + 'px)';

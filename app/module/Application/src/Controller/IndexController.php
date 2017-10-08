@@ -577,7 +577,8 @@ class IndexController extends AbstractActionController
     				$thumb_path = getcwd() . '/public/thumb/' . $thumbname;
     				
     				if (!file_exists($thumb_path)) {
-    					$nb_thumbs = 10;
+    					$nb_thumbs = 20;
+    					$wscale = $nb_thumbs * 250;
     					$inputs = "";
     					$outputs = "";
 		    			$cmd_s = sprintf('ffmpeg.exe -i "%s%s" -filter_complex "[0:v]split=%s', $top_dir, $file, $nb_thumbs);
@@ -590,7 +591,7 @@ class IndexController extends AbstractActionController
 		    				$outputs .= sprintf('[o%s]', $i);
 		    			}
 		    			$cmd = $cmd_s . $inputs . $cmd_m;
-		    			$cmd .= sprintf(',%shstack=inputs=%s[on],[on]scale=w=2500:h=-1[out]" -map "[out]" -vframes 1 "%s"', $outputs, $nb_thumbs, $thumb_path);
+		    			$cmd .= sprintf(',%shstack=inputs=%s[on],[on]scale=w=%s:h=-1[out]" -map "[out]" -vframes 1 "%s"', $outputs, $nb_thumbs, $wscale, $thumb_path);
 		    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
     				}
     				
