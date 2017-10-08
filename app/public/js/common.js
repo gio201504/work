@@ -203,24 +203,32 @@
 	};
 	
 	win.getVideoThumbs = function(player, clientRect, event, callback) {
-		var duration = $(player).data('duration');
 		var time = getMouseTime(clientRect, event, duration);
 		var video_id = '#' + player.attr('id');
-		var file = $(video_id).attr('data-src');
 		
-		var url = getSenderPath() + "getVideoThumbs";
-
-		return $.ajax({
-	        type: "GET",
-	        url: url,
-	        dataType: "json",
-	        data: { empl: win.emplacement, file: file, duration: duration },
-	        success: function(data) {
-	    		if (typeof callback === 'function') {
-	        		callback(video_id, data, time);
-	    		}
-	        },
-	    });
+		var thumbs = $(player).data('thumbs');
+		
+		if (typeof thumbs === 'undefined') {
+			var duration = $(player).data('duration');
+			var file = $(video_id).attr('data-src');
+			
+			var url = getSenderPath() + "getVideoThumbs";
+			return $.ajax({
+		        type: "GET",
+		        url: url,
+		        dataType: "json",
+		        data: { empl: win.emplacement, file: file, duration: duration },
+		        success: function(data) {
+		        	$(player).data('thumbs', data.file);
+		        	
+		    		if (typeof callback === 'function') {
+		        		callback(video_id, data.file, time);
+		    		}
+		        },
+		    });
+		} else {
+			callback(video_id, thumbs, time);
+		}
 	};
 
 }(window));

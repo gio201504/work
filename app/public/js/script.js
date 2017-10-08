@@ -200,12 +200,12 @@ var displayThumb = function(video_id, data) {
 	$(thumbs).css('top', -height + "px");
 };
 
-var displayThumbMulti = function(video_id, data, time) {
+var displayThumbMulti = function(video_id, file, time) {
 	var player = $(video_id);
 	var duration = player.get(0).finalDuration;
 	var thumbs = $('#thumbs');
 	var img = $(thumbs).find('> img');
-	$(img).attr('src', data.file);
+	$(img).attr('src', file);
 	
 	//Player
 	var rectp = player.get(0).getBoundingClientRect();
