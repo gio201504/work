@@ -110,9 +110,11 @@ class MyPlugin extends AbstractPlugin {
 							} else {
 								$filesize = @filesize($fulldir . '/' . $f);
 							}
+							
 							if (!$filesize || $filesize < 0) {
 								$filesize = 0;
 							}
+							
 							//$log->info("filesize(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 							
 							$array = array(
@@ -121,8 +123,8 @@ class MyPlugin extends AbstractPlugin {
 									"emplacement" => $empl,
 									"path" => $dir . '/' . $f_utf8,
 									"size" => $this->bytesToSize($filesize)
-							//"fullname" => $fulldir . '/' . $f_utf8,
-													);
+									//"fullname" => $fulldir . '/' . $f_utf8,
+							);
 							
 							//Si vidéo générer thumbnail
 							$filename = $fulldir . '/' . $f;
@@ -169,6 +171,22 @@ class MyPlugin extends AbstractPlugin {
 										'thumb' => $result->file,
 								);
 								$array = array_merge($array, $thumb);
+								
+								//Génération thumbnails multiples de la vidéo
+								$file = $dir . '/' . $f;
+								$data = (object) array(
+										'top_dir' => $top_dir,
+										'file' => $file,
+										'duration' => $duration,
+								);
+								$result = $forwardPlugin->dispatch('Application\Controller\IndexController', array(
+										'action' => 'getVideoThumbs',
+										'data' => $data
+								));
+								$thumbnails = array(
+										'thumbnails' => $result->file,
+								);
+								$array = array_merge($array, $thumbnails);
 							}
 							
 							$files[] = $array;

@@ -551,55 +551,53 @@ class IndexController extends AbstractActionController
     public function getVideoThumbsAction()
     {
     	$request = $this->getRequest();
+    	
     	if ($request->isGet()) {
     		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
+    		$cache = $this->sm->get('redis');
 
     		$file = $data->file;
     		$duration = $data->duration;
     		$top_dir = isset($data->top_dir) ? $data->top_dir : "";
-    		
-    		$temp_dir = getcwd() . '/public/tmp/';
-    		$out_file = getcwd() . '/public/thumb/' . basename($file) . '[thumbs].png';
-    		$preview_file = '/videojs/app/public/thumb/' . basename($file) . '[thumbs].png';
-    		
-    		//Emplacement
-    		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
-    		if ($empl !== 0) {
-    			$config = $this->sm->get('Config');
-    			$emplacements = $config['emplacements'];
-    			$top_dir = $emplacements[$empl]['top_dir'];
-    			$protocole = $emplacements[$empl]['protocole'];
-    		}
-    		
-    		//Durée de la vidéo
-    		$data = (object) array(
-    				'top_dir' => $top_dir,
-    				'file' => $top_dir . '/' . $f,
-    				'empl' => $empl
-    		);
-    		
-    		$result = $forwardPlugin->dispatch('Application\Controller\IndexController', array(
-    				'action' => 'getVideoDuration',
-    				'data' => $data
-    		));
-    		
-    		$duration = $result->duration;
     
-    		if (isset($file) && isset($duration) && !file_exists($out_file)) {
-    			$cmd = sprintf('ffmpeg.exe -i %s%s -filter_complex "[0:v]scale=w=300:h=-1[s];[s]split=10[c0][c1][c2][c3][c4][c4][c5][c6][c7][c8][c9]', $top_dir, $file);
-    			for ($i = 0; $i < 10; $i++) {
-    				$start = intval(($i + 1) * $duration / 11);
-    				$end = $start + 1;
-    				$cmd .= sprintf(',[c%s]trim=%s:%s,setpts=PTS-STARTPTS[p%s]', $i, $start, $end, $i);
+    		if (isset($file) && isset($duration)) {
+    			$thumbname = basename($file) . '[thumbs].jpg';
+    			
+    			if (!$cache->hasItem($thumbname)) {
+    				$thumb_path = getcwd() . '/public/thumb/' . $thumbname;
+    				
+    				if (!file_exists($thumb_path)) {
+    					$nb_thumbs = 10;
+    					$inputs = "";
+    					$outputs = "";
+		    			$cmd_s = sprintf('ffmpeg.exe -i "%s%s" -filter_complex "[0:v]split=%s', $top_dir, $file, $nb_thumbs);
+		    			$cmd_m = "";
+		    			for ($i = 0; $i < $nb_thumbs; $i++) {
+		    				$start = intval(($i + 1) * $duration / ($nb_thumbs + 1));
+		    				$end = $start + 1;
+		    				$cmd_m .= sprintf(',[c%s]trim=%s:%s,setpts=PTS-STARTPTS[o%s]', $i, $start, $end, $i);
+		    				$inputs .= sprintf('[c%s]', $i);
+		    				$outputs .= sprintf('[o%s]', $i);
+		    			}
+		    			$cmd = $cmd_s . $inputs . $cmd_m;
+		    			$cmd .= sprintf(',%shstack=inputs=%s[on],[on]scale=w=2500:h=-1[out]" -map "[out]" -vframes 1 "%s"', $outputs, $nb_thumbs, $thumb_path);
+		    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+    				}
+    				
+    				//Sauvegarde dans le cache
+    				$data_uri = $this->data_uri($thumb_path);
+    				$cache->addItem($thumbname, $data_uri);
+    			} else {
+    				$data_uri = $cache->getItem($thumbname);
+    				$return_value = 0;
     			}
-    			$cmd .= sprintf(',[p0][p1][p2][p3][p4][p5][p6][p7][p8][p9]hstack=inputs=10[out]" -map "[out]" -vframes 1 "%s"', $out_file);
-    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
     		} else
-    			$return_value = 0;
+    			$return_value = -1;
     
     		return new JsonModel(array(
     				'return_value' => $return_value,
-    				'file' => $preview_file)
+    				'file' => $data_uri)
     		);
     	}
     }
