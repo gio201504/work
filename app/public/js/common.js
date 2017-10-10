@@ -203,6 +203,11 @@
 	};
 	
 	win.getVideoThumbs = function(player, clientRect, event, callback) {
+		if ($(player).data('requestRunning'))
+			return;
+		
+		$(player).data('requestRunning', true);
+		
 		var duration = $(player).data('duration');
 		var time = getMouseTime(clientRect, event, duration);
 		var video_id = '#' + player.attr('id');
@@ -225,9 +230,13 @@
 		        		callback(video_id, data.file, time);
 		    		}
 		        },
+		        complete: function() {
+		        	$(video_id).data('requestRunning', false);
+		        }
 		    });
 		} else {
 			callback(video_id, thumbs, time);
+	        $(video_id).data('requestRunning', false);
 		}
 	};
 
