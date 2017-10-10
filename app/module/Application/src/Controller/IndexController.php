@@ -579,18 +579,18 @@ class IndexController extends AbstractActionController
     				if (!file_exists($thumb_path)) {
     					$nb_thumbs = 20;
     					$wscale = $nb_thumbs * 250;
-    					$inputs = "";
     					$outputs = "";
-		    			$cmd_s = sprintf('ffmpeg.exe -i "%s%s" -filter_complex "[0:v]split=%s', $top_dir, $file, $nb_thumbs);
+		    			$cmd_s = 'ffmpeg.exe';
 		    			$cmd_m = "";
 		    			for ($i = 0; $i < $nb_thumbs; $i++) {
-		    				$start = intval(($i + 1) * $duration / ($nb_thumbs + 1));
-		    				$end = $start + 1;
-		    				$cmd_m .= sprintf(',[c%s]trim=%s:%s,setpts=PTS-STARTPTS[o%s]', $i, $start, $end, $i);
-		    				$inputs .= sprintf('[c%s]', $i);
+		    				$start_time_seconds = intval(($i + 1) * $duration / ($nb_thumbs + 1));
+		    				$gmdate = gmdate('H:i:s', $start_time_seconds);
+		    				$cmd_s .= sprintf(' -ss %s -i "%s%s"', $gmdate, $top_dir, $file);
+		    				$cmd_m .= $i > 0 ? ',' : '"';
+		    				$cmd_m .= sprintf('[%s:v]setpts=PTS-STARTPTS[o%s]', $i, $i);
 		    				$outputs .= sprintf('[o%s]', $i);
 		    			}
-		    			$cmd = $cmd_s . $inputs . $cmd_m;
+		    			$cmd = $cmd_s . ' -filter_complex ' . $cmd_m;
 		    			$cmd .= sprintf(',%shstack=inputs=%s[on],[on]scale=w=%s:h=-1[out]" -map "[out]" -vframes 1 "%s"', $outputs, $nb_thumbs, $wscale, $thumb_path);
 		    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
     				}
