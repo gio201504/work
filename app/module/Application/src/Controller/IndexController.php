@@ -604,6 +604,8 @@ class IndexController extends AbstractActionController
     			}
     		} else
     			$return_value = -1;
+    		
+    		header('Access-Control-Allow-Origin: *');
     
     		return new JsonModel(array(
     				'return_value' => $return_value,
