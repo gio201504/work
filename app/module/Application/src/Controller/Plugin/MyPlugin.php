@@ -131,7 +131,11 @@ class MyPlugin extends AbstractPlugin {
 							
 							//Renvoyer le type MIME
 							if (!$isFtpFolder) {
-								$mime = mime_content_type($fulldir . '/' . $f);
+								//$mime = mime_content_type($fulldir . '/' . $f);
+								$mime_data = file_get_contents($fulldir . '/' . $f, false, null, 0, 48);
+								$finfo = finfo_open();
+								$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE);
+								finfo_close($finfo);
 							} else {
 								$mime_data = $Empl->ftp_get_contents($empl, $dir . '/' . $f, 48);
 								
@@ -202,7 +206,7 @@ class MyPlugin extends AbstractPlugin {
 				
 				//Sauvegarde dans le cache
 				//if (!$isFtpFolder) {
-					$cache->addItem($fulldir, json_encode($files));
+					$cache->setItem($fulldir, serialize($files));
 				//}
 				
 				//Nettoyage
@@ -211,7 +215,7 @@ class MyPlugin extends AbstractPlugin {
 				$cache->removeItem($fulldir . '[iFileCount]');
 			} else {
 				$files = $cache->getItem($fulldir);
-				$files = json_decode($files, true);
+				$files = unserialize($files);
 			}
 			
 			//Suppression verrou
