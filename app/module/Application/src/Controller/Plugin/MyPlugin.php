@@ -187,10 +187,10 @@ class MyPlugin extends AbstractPlugin {
 										'action' => 'getVideoThumbs',
 										'data' => $data
 								));
-								$thumbnails = array(
-										'thumbnails' => $result->file,
-								);
-								$array = array_merge($array, $thumbnails);
+// 								$thumbnails = array(
+// 										'thumbnails' => $result->file,
+// 								);
+// 								$array = array_merge($array, $thumbnails);
 							}
 							
 							$files[] = $array;
