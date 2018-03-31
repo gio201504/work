@@ -11,8 +11,6 @@ $(function(){
 	var folders = [],
 		files = [];
 	
-	debugger;
-
 	// This event listener monitors changes on the URL. We use it to
 	// capture back/forward navigation in the browser.
 	$(window).on('hashchange', function(){

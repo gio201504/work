@@ -13,26 +13,22 @@
 
 	$(function() {
 		$("button#generate").on("click", function() {
-			debugger;
 			$.ajax({
        			url : 'application/getFiles', // La ressource ciblée
        			type : 'GET', // Le type de la requête HTTP.
        			data : { dir: "John" },
        			success: function(data) {
-           			debugger;
            			$("#fileList").html(data);
        			}
     		});
 		});
 
 		$("button#scan").on("click", function() {
-			debugger;
 			$.ajax({
        			url : 'application/scan', // La ressource ciblée
        			type : 'GET', // Le type de la requête HTTP.
        			data : { dir: "D:/NewsBin64/download/tmp" },
        			success: function(data) {
-           			debugger;
            			$("#fileList").html(data);
        			}
     		});

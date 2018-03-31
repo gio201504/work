@@ -38,7 +38,6 @@
 
     win.streamVideo = function(time) {
         var url = getSenderPath() + "streamVideo";
-        debugger;
         $.ajax({
             type: "GET",
             url: url,

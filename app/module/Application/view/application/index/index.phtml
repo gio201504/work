@@ -11,7 +11,6 @@
 
 	$(function() {
 		$("button#generate").on("click", function() {
-			debugger;
 // 			var template = $('#video_template').html();
 // 			$('#fileList').empty();
 			
@@ -32,20 +31,17 @@
        			type : 'GET', // Le type de la requête HTTP.
        			data : { dir: "John" },
        			success: function(data) {
-           			debugger;
            			$("#fileList").html(data);
        			}
     		});
 		});
 
 		$("button#scan").on("click", function() {
-			debugger;
 			$.ajax({
        			url : 'application/scan', // La ressource ciblée
        			type : 'GET', // Le type de la requête HTTP.
        			data : { dir: "D:/NewsBin64/download/tmp" },
        			success: function(data) {
-           			debugger;
            			$("#fileList").html(data);
        			}
     		});

@@ -44,12 +44,10 @@ $(function(){
 			    	//hls.loadSource('http://127.0.0.1/download/tmp/index.m3u8');
 			    	hls.loadSource('<?php echo $this->basePath("tmp/"); ?>index.m3u8');
 				    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-					    //debugger;
 					    $(video).data('hls', hls);
 					    video.play();
 				  	});
 				    hls.on(Hls.Events.FRAG_LOADED, function(event, data) {
-					    //debugger;
 				  	});
 			    });
 			});
@@ -116,7 +114,6 @@ $(function(){
             video.pause();
             var hls = $(video).data('hls');
             hls.stopLoad();
-            debugger;
 
             var time = video.currentTime;
             var time_seconds = "00:00:" + Math.trunc(time);
@@ -136,12 +133,10 @@ $(function(){
     });
 
 //     $(player).on('timeupdate', function() {
-//         debugger;
 //         playTranscodedVideo(player);
 //     });
 
 //     $(window).on('beforeunload', function() {
-//         debugger;
 //         return "Do you really want to close?";
 //     });
 
