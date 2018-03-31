@@ -335,7 +335,7 @@ class IndexController extends AbstractActionController
     		$ffmpeg_codec = $config['ffmpeg']['codec'];
     		$temp_dir = getcwd() . '/public/tmp/';
     		
-    		$cache_ffmpeg = $this->sm->get('redis');
+    		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
     		//$options = $cache_ffmpeg->getOptions();
     		//$resource = $options->getResourceManager();
     		//$resourceId = $options->getResourceId();
