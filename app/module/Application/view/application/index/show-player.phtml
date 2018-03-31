@@ -112,12 +112,25 @@ $(function(){
 
     $("#toggleButton").click(function() {
         if (!$(this).hasClass('active')) {
-            var time = player.currentTime();
+            //Stopper la lecture en cours
+            video.pause();
+            var hls = $(video).data('hls');
+            hls.stopLoad();
+            debugger;
+
+            var time = video.currentTime;
             var time_seconds = "00:00:" + Math.trunc(time);
-            var video_id = player.el();
-            var file = $(video_id).find('video source').attr('src');
+            var file = $(video).data('src');
     		file = file.replace(/^.*\/\/[^\/]+/, '');
-            streamVideo(file, time_seconds);
+
+            var dfd = $.Deferred();
+            var promise = dfd.promise();
+
+            promise
+                .then(function(){ return streamKill(); })
+                .then(function(){ streamVideo(time_seconds);; });
+
+            dfd.resolve();
         } else
             streamKill();
     });
@@ -144,15 +157,6 @@ $(function(){
     });
 
 });
-
-var streamVideo = function(file, time) {
-	$.ajax({
-        type: "GET",
-        url: "streamVideo",
-        dataType: "json",
-        data: { file: file, time: time },
-    });
-};
 
 </script>
 

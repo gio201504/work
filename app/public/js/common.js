@@ -28,12 +28,24 @@
 	};
 	
 	win.streamKill = function() {
+        var url = getSenderPath() + "streamKill";
 		return $.ajax({
 	        type: "GET",
-	        url: "streamKill",
+	        url: url,
 	        dataType: "json",
 	    });
 	};
+
+    win.streamVideo = function(time) {
+        var url = getSenderPath() + "streamVideo";
+        debugger;
+        $.ajax({
+            type: "GET",
+            url: url,
+            dataType: "json",
+            data: { time: time },
+        });
+    };
 	
 	var playTranscodedVideo = function(file, time_seconds, clean) {
 		//var time_seconds = <?php echo $this->time; ?>;

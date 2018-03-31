@@ -404,24 +404,38 @@ class IndexController extends AbstractActionController
     {
     	$request = $this->getRequest();
     	if ($request->isGet()) {
-    		$data = $request->getQuery();
-    		$data = isset($data->file) ? $data : $this->params('data');
-    		$config = $this->sm->get('Config');
-    		$ffmpeg_codec = $config['ffmpeg']['codec'];
-    
-    		$file = $data->file;
-    		$time = $data->time;
-    		//$top_dir = $request->getServer('top_dir');
-    		if (isset($file) && isset($time)) {
-    			sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
-    			$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
-    
-    			$gmdate = gmdate('H:i:s', $time_seconds);
-    			$cmd = sprintf('ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file, $ffmpeg_codec);
-    			shell_exec(utf8_decode($cmd));
-    			    			 
-    			return new JsonModel();
-    		}
+            $cache_ffmpeg = $this->sm->get('redis');
+
+            if ($cache_ffmpeg->hasItem('sender')) {
+                $sender = $cache_ffmpeg->getItem('sender');
+
+                if (!empty($sender)) {
+                    $aData = json_decode($sender);
+                    $senderUrl = $aData[2];
+                    $publishUrl = sprintf('%s://%s', 'http', $senderUrl);
+                    $publishUrl = $publishUrl . '/videojs/app/public/video';
+
+                    $data = $request->getQuery();
+                    $config = $this->sm->get('Config');
+                    $ffmpeg_codec = $config['ffmpeg']['codec'];
+
+                    $time = $data->time;
+                    //$top_dir = $request->getServer('top_dir');
+                    if (isset($time)) {
+                        sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
+                        $time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
+
+                        $gmdate = gmdate('H:i:s', $time_seconds);
+                        $cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $publishUrl, $ffmpeg_codec);
+                        //shell_exec(utf8_decode($cmd));
+                        pclose(popen(utf8_decode($cmd), "r"));
+
+                        return new JsonModel();
+                    }
+                }
+            } else {
+                return false;
+            }
     	}
     }
     
