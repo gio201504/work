@@ -81,3 +81,8 @@ button:hover {
 	width: 250px;
 	overflow: hidden;
 }
+
+#toggleButton.active {
+	background-color: red;
+	border-color: red;
+}
