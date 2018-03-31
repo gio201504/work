@@ -77,14 +77,14 @@ class MyPlugin extends AbstractPlugin {
 						}
 						
 						if ($isFtpFolder) {
-							$t1 = round(microtime(true) * 1000);
+							//$t1 = round(microtime(true) * 1000);
 							$conn_id = $Empl->getConnection($empl);
 							$is_dir = @ftp_chdir($conn_id, '/' . $dir . '/' . $f);
-							$t2 = round(microtime(true) * 1000);
+							//$t2 = round(microtime(true) * 1000);
 						} else {
-							$t1 = round(microtime(true) * 1000);
+							//$t1 = round(microtime(true) * 1000);
 							$is_dir = is_dir($fulldir . '/' . $f);
-							$t2 = round(microtime(true) * 1000);
+							//$t2 = round(microtime(true) * 1000);
 						}
 						//$log->info("is_dir(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 						
@@ -103,16 +103,18 @@ class MyPlugin extends AbstractPlugin {
 						} else {
 							//It is a file
 							if ($isFtpFolder) {
-								$t1 = round(microtime(true) * 1000);
+								//$t1 = round(microtime(true) * 1000);
 								$conn_id = $Empl->getConnection($empl);
 								$filesize = ftp_size($conn_id, $dir . '/' . $f);
-								$t2 = round(microtime(true) * 1000);
+								//$t2 = round(microtime(true) * 1000);
 							} else {
 								$filesize = @filesize($fulldir . '/' . $f);
 							}
+							
 							if (!$filesize || $filesize < 0) {
 								$filesize = 0;
 							}
+							
 							//$log->info("filesize(" . $fulldir . '/' . $f . ") " . ($t2 - $t1));
 							
 							$array = array(
@@ -121,15 +123,19 @@ class MyPlugin extends AbstractPlugin {
 									"emplacement" => $empl,
 									"path" => $dir . '/' . $f_utf8,
 									"size" => $this->bytesToSize($filesize)
-							//"fullname" => $fulldir . '/' . $f_utf8,
-													);
+									//"fullname" => $fulldir . '/' . $f_utf8,
+							);
 							
 							//Si vidéo générer thumbnail
 							$filename = $fulldir . '/' . $f;
 							
 							//Renvoyer le type MIME
 							if (!$isFtpFolder) {
-								$mime = mime_content_type($fulldir . '/' . $f);
+								//$mime = mime_content_type($fulldir . '/' . $f);
+								$mime_data = file_get_contents($fulldir . '/' . $f, false, null, 0, 48);
+								$finfo = finfo_open();
+								$mime = finfo_buffer($finfo, $mime_data, FILEINFO_MIME_TYPE);
+								finfo_close($finfo);
 							} else {
 								$mime_data = $Empl->ftp_get_contents($empl, $dir . '/' . $f, 48);
 								
@@ -149,7 +155,8 @@ class MyPlugin extends AbstractPlugin {
 										'action' => 'getVideoDuration',
 										'data' => $data 
 								));
-								$time = gmdate("H:i:s", $result->duration / 2);
+								$duration = $result->duration;
+								$time = gmdate("H:i:s", $duration / 2);
 								
 								//Génération thumbnail
 								$file = $dir . '/' . $f;
@@ -164,9 +171,26 @@ class MyPlugin extends AbstractPlugin {
 										'data' => $data 
 								));
 								$thumb = array(
-										'thumb' => $result->file 
+										'duration' => $duration,
+										'thumb' => $result->file,
 								);
 								$array = array_merge($array, $thumb);
+								
+								//Génération thumbnails multiples de la vidéo
+								$file = $dir . '/' . $f;
+								$data = (object) array(
+										'top_dir' => $top_dir,
+										'file' => $file,
+										'duration' => $duration,
+								);
+								$result = $forwardPlugin->dispatch('Application\Controller\IndexController', array(
+										'action' => 'getVideoThumbs',
+										'data' => $data
+								));
+// 								$thumbnails = array(
+// 										'thumbnails' => $result->file,
+// 								);
+// 								$array = array_merge($array, $thumbnails);
 							}
 							
 							$files[] = $array;
@@ -182,7 +206,7 @@ class MyPlugin extends AbstractPlugin {
 				
 				//Sauvegarde dans le cache
 				//if (!$isFtpFolder) {
-					$cache->addItem($fulldir, json_encode($files));
+					$cache->setItem($fulldir, serialize($files));
 				//}
 				
 				//Nettoyage
@@ -191,7 +215,7 @@ class MyPlugin extends AbstractPlugin {
 				$cache->removeItem($fulldir . '[iFileCount]');
 			} else {
 				$files = $cache->getItem($fulldir);
-				$files = json_decode($files, true);
+				$files = unserialize($files);
 			}
 			
 			//Suppression verrou

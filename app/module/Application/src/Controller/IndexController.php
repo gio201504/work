@@ -71,6 +71,7 @@ class IndexController extends AbstractActionController
     		$search = $data->search;
     		$search = empty($search) ? null : $search;
     		$cache = $this->sm->get('redis');
+    		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
     		$tempCache = $this->sm->get('redis_tmp');
 
     		$dir = (isset($dir) && !empty($dir)) ? $dir : null;
@@ -81,6 +82,7 @@ class IndexController extends AbstractActionController
     		if (isset($data->clear)) {
     			//$cache->removeItem($top_dir . $dir);
     			$cache->flush();
+    			$cache_ffmpeg->flush();
     			$tempCache->flush();
     		}
 
@@ -107,12 +109,17 @@ class IndexController extends AbstractActionController
 	    		$viewmodel = new ViewModel();
 	    		$viewmodel->setTerminal($request->isXmlHttpRequest());
 	    		
+	    		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
+	    		$aServer = $cache_ffmpeg->getOptions()->getServer();
+	    		$playerUrl = 'http://' . $aServer['host'] . '/videojs/app/public/application/showPlayer';
+	    		
 	    		$data = array(
 	    				"name" => $dir,
 	    				"type" => "folder",
 	    				"path" => $dir,
 	    				"emplacement" => $empl,
 	    				"items" => $items,
+	    				"playerUrl"	=> $playerUrl,
 	    		);
 	
 	    		$viewmodel->setVariables(array(
@@ -141,7 +148,7 @@ class IndexController extends AbstractActionController
     		
     		$file = $data->file;
     		$time = $data->time;
-    		$top_dir = $data->top_dir;
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : "";
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
@@ -172,13 +179,16 @@ class IndexController extends AbstractActionController
 		    		
 		    		//Sauvegarde dans le cache
 		    		$data_uri = $this->data_uri($thumb_path);
-		    		$cache->addItem($thumbname, $data_uri);
+		    		$cache->setItem($thumbname, $data_uri);
     			} else {
     				$data_uri = $cache->getItem($thumbname);
     			}
     			
     			//$t2 = $this->milliseconds();
     			//$log->info("getThumbAjax " . $thumbname . " " . ($t2 - $t1));
+    			
+    			header('Access-Control-Allow-Origin: *');
+    			//header('XDomainRequestAllowed: 1');
     			
     			return new JsonModel(array(
     					'time' => $time_seconds,
@@ -214,9 +224,9 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$file = $data->file;
-    		$top_dir = $data->top_dir;
     		$cache = $this->sm->get('redis');
     		//$log = $this->sm->get('log');
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : "";
     		
     		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
     		if ($empl !== 0) {
@@ -254,6 +264,9 @@ class IndexController extends AbstractActionController
     		
     		//$t2 = $this->milliseconds();
     		//$log->info("getVideoDuration " . $file_duration . " " . ($t2 - $t1));
+    		
+    		header('Access-Control-Allow-Origin: *');
+    		//header('XDomainRequestAllowed: 1');
     		
     		return new JsonModel(array(
     				'duration' => $duration,
@@ -317,22 +330,73 @@ class IndexController extends AbstractActionController
     	if ($request->isGet()) {
     		$data = $request->getQuery();
     		$data = isset($data->path) ? $data : $this->params('data');
+
+    		$config = $this->sm->get('Config');
+    		$ffmpeg_codec = $config['ffmpeg']['codec'];
+    		$temp_dir = getcwd() . '/public/tmp/';
     		
-//     		$uri = $this->getRequest()->getUri();
-//     		$scheme = $uri->getScheme();
-//     		$host = $uri->getHost();
-//     		$base = sprintf('%s://%s', $scheme, $host);
-//     		$path = $base . $data->path;
+    		$cache_ffmpeg = $this->sm->get('redis');
+    		//$options = $cache_ffmpeg->getOptions();
+    		//$resource = $options->getResourceManager();
+    		//$resourceId = $options->getResourceId();
+    		//$redis = $resource->getResource($resourceId);
     		
-    		$viewmodel = new ViewModel();
+    		//Nettoyage index.m3u8
+    		@unlink($temp_dir . 'index.m3u8');
     		
-    		$viewmodel->setVariables(array(
-    			"path" => $data->path,
-    			"time" => $data->time,
-    			"emplacement" => $data->empl,
-    		));
+    		//Nettoyage fichiers .ts
+    		$files = glob($temp_dir . '*.ts');
+    		foreach ($files as $filename) {
+    			if(is_file($filename)) {
+    				unlink($filename);
+    			}
+    		}
+
+    		//Nettoyage dossier de travail
+    		if ($data->clean === 'true') {
+    			$files = glob($temp_dir . '*');
+    			foreach ($files as $filename) {
+    				if(is_file($filename))
+    					unlink($filename);
+    				}
+    		}
     		
-    		return $viewmodel;
+    		//$sender = $redis->blPop('mylist', 300);
+    		if ($cache_ffmpeg->hasItem('sender')) {
+    			$sender = $cache_ffmpeg->getItem('sender');
+    			
+	    		if (!empty($sender)) {
+	    			$aData = json_decode($sender);
+
+	    			$senderUrl = $aData[2];
+	    			$publishUrl = sprintf('%s://%s', 'http', $senderUrl);
+	    			$gmdate = $aData[0];
+	    			$file = $aData[1];
+	    			$publishUrl = $publishUrl . '/videojs/app/public/video';
+	    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
+	    			pclose(popen(utf8_decode($cmd), "r"));
+	    		}
+	
+	    		do {
+	    			clearstatcache();
+	    			$file_exists = file_exists($temp_dir . 'index.m3u8');
+	    			sleep(1);
+	    		} while (!$file_exists);
+	
+	    		$viewmodel = new ViewModel();
+	    		
+	    		$viewmodel->setVariables(array(
+	    			"path" => $data->path,
+	    			"time" => $data->time,
+	    			"duration" => $data->duration,
+	    			"emplacement" => $data->empl,
+	    			"senderUrl"	=> $senderUrl,
+	    		));
+	    		
+	    		return $viewmodel;
+    		} else {
+    			return false;
+    		}
     	}
     }
     
@@ -379,7 +443,12 @@ class IndexController extends AbstractActionController
     		$data = $request->getQuery();
     		$data = isset($data->file) ? $data : $this->params('data');
     		$config = $this->sm->get('Config');
-    		$ffmpeg_codec = $config['ffmpeg']['codec'];
+    		
+    		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
+    		//$options = $cache_ffmpeg->getOptions();
+    		//$resource = $options->getResourceManager();
+    		//$resourceId = $options->getResourceId();
+    		//$redis = $resource->getResource($resourceId);
     
     		$file = $data->file;
     		$time_seconds = $data->time;
@@ -391,32 +460,26 @@ class IndexController extends AbstractActionController
     			$top_dir = $emplacements[$empl]['top_dir'];
     		}
     		
-    		//Nettoyage index.m3u8
-    		@unlink($temp_dir . 'index.m3u8');
-    		
-    		//Nettoyage dossier de travail
-    		if ($data->clean === 'true') {
-	    		$files = glob($temp_dir . '*');
-	    		foreach ($files as $filename) {
-	    			if(is_file($filename))
-	    				unlink($filename);
-	    		}
-    		}
-    		
     		if (isset($file) && isset($time_seconds)) {
-    			//sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
-    			//$time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
-    
-    			$gmdate = gmdate('H:i:s', $time_seconds);
-    			//$cmd = sprintf('ffmpeg -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $top_dir . $file, $ffmpeg_codec);
-    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $top_dir . $file, $ffmpeg_codec, $temp_dir);
-    			//shell_exec(utf8_decode($cmd));
-    			pclose(popen(utf8_decode($cmd), "r"));
+    			//Lien symbolique pointant vers la vidéo
+    			$link = getcwd() . '/public/video';
+    			if (is_file($link)) {
+    				unlink($link);
+    			}
+    			symlink($top_dir . $file, $link);
     			
-    			do {
-    				clearstatcache();
-    				$file_exists = file_exists($temp_dir . 'index.m3u8');
-    			} while (!$file_exists);
+    			//Adresse du serveur courant
+    			$uri = $this->getRequest()->getUri();
+    			$senderUrl = $uri->getHost();
+    			
+    			$gmdate = gmdate('H:i:s', $time_seconds);
+    			$file = str_replace(" ", "%20", basename($file));
+    			$aData = array($gmdate, $file, $senderUrl);
+    			//$rc = $redis->rPush('mylist', json_encode($aData));
+    			$cache_ffmpeg->setItem('sender', json_encode($aData));
+    			
+    			header('Access-Control-Allow-Origin: *');
+    			//header('XDomainRequestAllowed: 1');
 
     			return new JsonModel();
     		}
@@ -450,6 +513,104 @@ class IndexController extends AbstractActionController
     				'fileCount' => $iFileCount,
     				'fileIndex' => $iFileIndex,
     		));
+    	}
+    }
+    
+    public function waitAction()
+    {
+    	$request = $this->getRequest();
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		
+    		$config = $this->sm->get('Config');
+    		$ffmpeg_codec = $config['ffmpeg']['codec'];
+    		$temp_dir = getcwd() . '/public/tmp/';
+    		
+    		$cache_ffmpeg = $this->sm->get('redis');
+    		$options = $cache_ffmpeg->getOptions();
+    		$resource = $options->getResourceManager();
+    		$resourceId = $options->getResourceId();
+    		$redis = $resource->getResource($resourceId);
+    		
+    		while(true) {
+	    		$sender = $redis->blPop('mylist', 300);
+	    		
+	    		if (!empty($sender)) {
+	    			$aData = json_decode($sender[1]);
+	    			$gmdate = $aData[0];
+	    			$file = $aData[1];
+	    			$senderUrl = $aData[2];
+	    			$publishUrl = 'http://' . $senderUrl . '/videojs/app/public/tmp/' . $file;
+	    			$cmd = sprintf('ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
+	    			pclose(popen(utf8_decode($cmd), "r"));
+	    		}
+    		}
+    	}
+    }
+    
+    public function getVideoThumbsAction()
+    {
+    	$request = $this->getRequest();
+    	
+    	if ($request->isGet()) {
+    		$data = $request->getQuery();
+    		$data = isset($data->file) ? $data : $this->params('data');
+    		$cache = $this->sm->get('redis');
+
+    		$file = $data->file;
+    		$duration = $data->duration;
+    		$top_dir = isset($data->top_dir) ? $data->top_dir : "";
+    		
+    		$empl = (isset($data->empl) && !empty($data->empl)) ? $data->empl : 0;
+    		if ($empl !== 0) {
+    			$config = $this->sm->get('Config');
+    			$emplacements = $config['emplacements'];
+    			$top_dir = $emplacements[$empl]['top_dir'];
+    			$protocole = $emplacements[$empl]['protocole'];
+    		}
+    
+    		if (isset($file) && isset($duration)) {
+    			$thumbname = basename($file) . '[thumbs].jpg';
+    			
+    			if (!$cache->hasItem($thumbname)) {
+    				$return_value = 0;
+    				$thumb_path = getcwd() . '/public/thumb/' . $thumbname;
+    				
+    				if (!file_exists($thumb_path)) {
+    					$nb_thumbs = 20;
+    					$wscale = $nb_thumbs * 250;
+    					$outputs = "";
+		    			$cmd_s = 'ffmpeg.exe';
+		    			$cmd_m = "";
+		    			for ($i = 0; $i < $nb_thumbs; $i++) {
+		    				$start_time_seconds = intval(($i + 1) * $duration / ($nb_thumbs + 1));
+		    				$gmdate = gmdate('H:i:s', $start_time_seconds);
+		    				$cmd_s .= sprintf(' -ss %s -i "%s%s"', $gmdate, $top_dir, $file);
+		    				$cmd_m .= $i > 0 ? ',' : '"';
+		    				$cmd_m .= sprintf('[%s:v]setpts=PTS-STARTPTS[o%s]', $i, $i);
+		    				$outputs .= sprintf('[o%s]', $i);
+		    			}
+		    			$cmd = $cmd_s . ' -filter_complex ' . $cmd_m;
+		    			$cmd .= sprintf(',%shstack=inputs=%s[on],[on]scale=w=%s:h=-1[out]" -map "[out]" -vframes 1 "%s"', $outputs, $nb_thumbs, $wscale, $thumb_path);
+		    			exec(utf8_decode($cmd).' 2>&1', $outputAndErrors, $return_value);
+    				}
+    				
+    				//Sauvegarde dans le cache
+    				$data_uri = $this->data_uri($thumb_path);
+    				$cache->setItem($thumbname, $data_uri);
+    			} else {
+    				$data_uri = $cache->getItem($thumbname);
+    				$return_value = 0;
+    			}
+    		} else
+    			$return_value = -1;
+    		
+    		header('Access-Control-Allow-Origin: *');
+    
+    		return new JsonModel(array(
+    				'return_value' => $return_value,
+    				'file' => $data_uri)
+    		);
     	}
     }
 }

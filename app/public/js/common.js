@@ -9,9 +9,11 @@
 		
 		//console.log(player.id() + ' getThumbAjax');
 		file = file.replace(/^.*\/\/[^\/]+/, '');
+		var url = getSenderPath() + "getThumbAjax";
+
 		return $.ajax({
 	        type: "GET",
-	        url: "getThumbAjax",
+	        url: url,
 	        dataType: "json",
 	        data: { empl: win.emplacement, file: file, time: time },
 	        success: function(data) {
@@ -39,10 +41,12 @@
 	    //var time_seconds = "00:00:" + Math.trunc(time);
 		file = file.replace(/^.*\/\/[^\/]+/, '');
 		clean = (typeof clean === 'undefined') ? false : clean;
+		
+		var url = getSenderPath() + "transcodeVideo";
 	
 		return $.ajax({
 	        type: "GET",
-	        url: "transcodeVideo",
+	        url: url,
 	        dataType: "json",
 	        data: { empl: win.emplacement, file: file, time: time_seconds, clean: clean },
 	    });
@@ -53,9 +57,11 @@
 		var video_id = '#' + player.attr('id');
 		var file = $(video_id).attr('data-src');
 	
+		var url = getSenderPath() + "getVideoDuration";
+
 		return $.ajax({
 	        type: "GET",
-	        url: "getVideoDuration",
+	        url: url,
 	        dataType: "json",
 	        data: { empl: win.emplacement, file: file },
 	        success: function(data) {
@@ -126,12 +132,15 @@
 			else
 				$(player).data('requestRunning', true);
 		}
+		
+		var duration = $(player).data('duration');
 	
 		var dfd = $.Deferred();
 		var promise = dfd
-			.then(function(){ return getVideoDuration(player); })
+			//.then(function(){ return getVideoDuration(player); })
 			.then(function(data){
-				var time = getMouseTime(clientRect, event, data.duration);
+				//var time = getMouseTime(clientRect, event, data.duration);
+				var time = getMouseTime(clientRect, event, duration);
 				//Pas de 10 pour les preview
 				//time = Math.round((time / data.duration).toFixed(1) * data.duration);
 				var time_seconds = "00:00:" + time;
@@ -182,6 +191,53 @@
 	        	}
 	        },
 	    });
+	};
+	
+	var getSenderPath = function() {
+		if (typeof senderUrl !== 'undefined' && senderUrl.length > 0) {
+			var path = "http://" + senderUrl + "/videojs/app/public/application/";
+			return path;
+		} else {
+			return "";
+		}
+	};
+	
+	win.getVideoThumbs = function(player, clientRect, event, callback) {
+		if ($(player).data('requestRunning'))
+			return;
+		
+		$(player).data('requestRunning', true);
+		
+		var duration = $(player).data('duration');
+		var time = getMouseTime(clientRect, event, duration);
+		var video_id = '#' + player.attr('id');
+		
+		var thumbs = $(player).data('thumbs');
+		
+		if (typeof thumbs === 'undefined') {
+			var file = $(video_id).attr('data-src');
+			
+			var url = getSenderPath() + "getVideoThumbs";
+			return $.ajax({
+		        type: "GET",
+		        url: url,
+		        dataType: "json",
+		        data: { empl: win.emplacement, file: file, duration: duration },
+		        success: function(data) {
+		        	$(player).data('thumbs', data.file);
+		        	
+		    		if (typeof callback === 'function') {
+		        		callback(video_id, data.file, time);
+		    		}
+		        },
+		        complete: function() {
+		        	$(video_id).data('requestRunning', false);
+		        }
+		    });
+		} else {
+			callback(video_id, thumbs, time);
+	        $(video_id).data('requestRunning', false);
+		}
 	};
 
 }(window));

@@ -14,7 +14,8 @@
 
 <script>
 
-var emplacement = "<?= $this->escapeHtml($emplacement) ?>";
+var emplacement = "<?= $this->escapeHtml($this->emplacement) ?>";
+var senderUrl = "<?= $this->escapeHtml($this->senderUrl) ?>";
 
 $(function(){
 // 	var player = videojs('#player');
@@ -25,14 +26,16 @@ $(function(){
 		};
 		//Video
 		var video = document.getElementById('player');
+		var duration = $(video).data('duration');
 
 		var dfd = $.Deferred();
 		var promise = dfd.promise();
 		promise
-			.then(function(){ return getVideoDuration($(video)); })
-			.then(function(data) {
+			//.then(function(){ return getVideoDuration($(video)); })
+			.then(function(/*data*/) {
 			    var hls = new Hls(config);
-			    video.finalDuration = data.duration;
+			    //video.finalDuration = data.duration;
+			    video.finalDuration = duration;
 			    hls.attachMedia(video);
 			    hls.on(Hls.Events.MEDIA_ATTACHED, function() {
 			    	//hls.loadSource('http://www.streambox.fr/playlists/x36xhzz/x36xhzz.m3u8');
@@ -161,7 +164,7 @@ var streamVideo = function(file, time) {
 <div id="video-container">
   	<!-- Video -->
 	<video id='player' preload="none" class="video-js vjs-default-skin"
-		data-src="<?= $this->path ?>"
+		data-src="<?= $this->path ?>" data-duration="<?= $this->duration ?>"
 		poster="" data-type="">
 	</video>
 	<!-- Video Controls -->

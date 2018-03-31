@@ -33,7 +33,7 @@ return [
                 'options' => [
                     'route'    => '/application[/:action]',
                     'constraints' => array(
-                    	'action' => '(scan|generate|check|show|stream|transcode)[a-zA-Z0-9_-]*',
+                    	'action' => '(scan|generate|check|show|stream|transcode|wait)[a-zA-Z0-9_-]*',
                     ),
                     'defaults' => [
                         'controller' => Controller\IndexController::class,
@@ -141,6 +141,19 @@ return [
                             ]
                     )
             	),
+    		],
+    		//Instance redis pointant sur la machine utilsée
+    		//pour les transcodages ffmpeg
+    		'redis_ffmpeg' => [
+	    		'adapter' => array (
+	    				'name' => 'redis',
+	    				'options' => array (
+	    						'server' => [
+	    						'host' => '127.0.0.1',
+	    						'port' => 6379,
+	    						]
+	    				)
+	    		),
     		],
     		'redis_tmp' => [
 	    		'adapter' => array (
