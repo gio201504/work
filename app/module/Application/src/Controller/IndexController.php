@@ -366,14 +366,25 @@ class IndexController extends AbstractActionController
     			$sender = $cache_ffmpeg->getItem('sender');
     			
 	    		if (!empty($sender)) {
+	    		    //Données Redis
 	    			$aData = json_decode($sender);
-
 	    			$senderUrl = $aData[2];
-	    			$publishUrl = sprintf('%s://%s', 'http', $senderUrl);
+	    			//$publishUrl = sprintf('%s://%s', 'http', $senderUrl);
 	    			$gmdate = $aData[0];
-	    			$file = $aData[1];
-	    			$publishUrl = $publishUrl . '/videojs/app/public/video';
-	    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, $publishUrl, $ffmpeg_codec, $temp_dir);
+	    			//$file = $aData[1];
+	    			//$publishUrl = $publishUrl . '/videojs/app/public/video';
+
+	    			//Données de la requête
+                    $file_path = $data->path;
+                    $empl = $data->empl;
+                    if ($empl !== 0) {
+                        $emplacements = $config['emplacements'];
+                        $top_dir = $emplacements[$empl]['top_dir'];
+                    } else {
+                        $top_dir = "";
+                    }
+
+	    			$cmd = sprintf('start /min ffmpeg.exe -ss %s -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -hls_time 5 -hls_list_size 0 %sindex.m3u8', $gmdate, /*$publishUrl*/$top_dir . $file_path, $ffmpeg_codec, $temp_dir);
 	    			pclose(popen(utf8_decode($cmd), "r"));
 	    		}
 	
