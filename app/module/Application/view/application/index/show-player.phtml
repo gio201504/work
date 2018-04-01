@@ -125,7 +125,7 @@ $(function(){
 
             promise
                 .then(function(){ return streamKill(); })
-                .then(function(){ streamVideo(time_seconds);; });
+                .then(function(){ streamVideo(emplacement, file, time_seconds);; });
 
             dfd.resolve();
         } else

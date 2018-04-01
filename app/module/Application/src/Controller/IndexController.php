@@ -410,23 +410,35 @@ class IndexController extends AbstractActionController
                 $sender = $cache_ffmpeg->getItem('sender');
 
                 if (!empty($sender)) {
-                    $aData = json_decode($sender);
-                    $senderUrl = $aData[2];
-                    $publishUrl = sprintf('%s://%s', 'http', $senderUrl);
-                    $publishUrl = $publishUrl . '/videojs/app/public/video';
+                    //Données Redis
+                    //$aData = json_decode($sender);
+                    //$senderUrl = $aData[2];
+                    //$publishUrl = sprintf('%s://%s', 'http', $senderUrl);
+                    //$publishUrl = $publishUrl . '/videojs/app/public/video';
 
-                    $data = $request->getQuery();
+                    //Données de config
                     $config = $this->sm->get('Config');
                     $ffmpeg_codec = $config['ffmpeg']['codec'];
 
+                    //Données de la requête
+                    $data = $request->getQuery();
+                    $file = $data->file;
+                    $empl = $data->empl;
                     $time = $data->time;
+                    if ($empl !== 0) {
+                        $emplacements = $config['emplacements'];
+                        $top_dir = $emplacements[$empl]['top_dir'];
+                    } else {
+                        $top_dir = "";
+                    }
+
                     //$top_dir = $request->getServer('top_dir');
                     if (isset($time)) {
                         sscanf($time, "%d:%d:%d", $hours, $minutes, $seconds);
                         $time_seconds = isset($seconds) ? $hours * 3600 + $minutes * 60 + $seconds : $hours * 60 + $minutes;
 
                         $gmdate = gmdate('H:i:s', $time_seconds);
-                        $cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, $publishUrl, $ffmpeg_codec);
+                        $cmd = sprintf('start /min ffmpeg.exe -ss %s -re -i "%s" -c:v %s -b:v 8000k -maxrate 8000k -bufsize 1000k -c:a aac -b:a 128k -ar 44100 -f flv rtmp://localhost/small/mystream', $gmdate, /*$publishUrl*/$top_dir . $file, $ffmpeg_codec);
                         //shell_exec(utf8_decode($cmd));
                         pclose(popen(utf8_decode($cmd), "r"));
 

@@ -36,13 +36,13 @@
 	    });
 	};
 
-    win.streamVideo = function(time) {
+    win.streamVideo = function(empl, file, time) {
         var url = getSenderPath() + "streamVideo";
         $.ajax({
             type: "GET",
             url: url,
             dataType: "json",
-            data: { time: time },
+            data: { empl: empl, file: file, time: time },
         });
     };
 	
