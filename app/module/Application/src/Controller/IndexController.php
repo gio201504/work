@@ -109,9 +109,10 @@ class IndexController extends AbstractActionController
 	    		$viewmodel = new ViewModel();
 	    		$viewmodel->setTerminal($request->isXmlHttpRequest());
 	    		
-	    		$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
-	    		$aServer = $cache_ffmpeg->getOptions()->getServer();
-	    		$playerUrl = 'http://' . $aServer['host'] . '/videojs/app/public/application/showPlayer';
+	    		//$cache_ffmpeg = $this->sm->get('redis_ffmpeg');
+	    		//$aServer = $cache_ffmpeg->getOptions()->getServer();
+	    		//$playerUrl = 'http://' . $aServer['host'] . '/videojs/app/public/application/showPlayer';
+                $playerUrl = '/videojs/app/public/application/showPlayer';
 	    		
 	    		$data = array(
 	    				"name" => $dir,

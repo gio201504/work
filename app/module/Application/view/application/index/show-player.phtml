@@ -43,6 +43,7 @@ $(function(){
 				    //hls.loadSource('rtmp://192.168.0.1:8080/small/mystream');
 			    	//hls.loadSource('http://127.0.0.1/download/tmp/index.m3u8');
 			    	hls.loadSource('<?php echo $this->basePath("tmp/"); ?>index.m3u8');
+                    //hls.loadSource('/videojs/app/public/tmp/index.m3u8');
 				    hls.on(Hls.Events.MANIFEST_PARSED, function() {
 					    $(video).data('hls', hls);
 					    video.play();
@@ -125,7 +126,7 @@ $(function(){
 
             promise
                 .then(function(){ return streamKill(); })
-                .then(function(){ streamVideo(emplacement, file, time_seconds);; });
+                .then(function(){ streamVideo(emplacement, file, time_seconds); });
 
             dfd.resolve();
         } else
