@@ -27,6 +27,7 @@ $(function(){
 		//Video
 		var video = document.getElementById('player');
 		var duration = $(video).data('duration');
+        var seekBar = document.getElementById("seek-bar");
 
 		var dfd = $.Deferred();
 		var promise = dfd.promise();
@@ -116,7 +117,7 @@ $(function(){
             var hls = $(video).data('hls');
             hls.stopLoad();
 
-            var time = video.currentTime;
+            var time = video.finalDuration * (seekBar.value / 100);
             var time_seconds = "00:00:" + Math.trunc(time);
             var file = $(video).data('src');
     		file = file.replace(/^.*\/\/[^\/]+/, '');
